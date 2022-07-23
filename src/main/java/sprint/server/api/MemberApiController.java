@@ -16,7 +16,7 @@ public class MemberApiController {
     private final MemberService memberService;
 
     @PostMapping("/api/members") //요청을 온걸 리퀘스트 바디로 받아,.
-    public CreateMemberResponse saveMemberV2(@RequestBody @Valid CreateMemberRequest request){
+    public CreateMemberResponse saveMember(@RequestBody @Valid CreateMemberRequest request){
         //api 스팩이 안바뀜. 누가 username으로 변환해버리면,
         // 그냥 setName 을 setUserName으로 바꿔버리면 되기에 전혀 신경쓸필요 ㄴㄴ
         //즉 엔티티와 api 스펙을 분리해버릴 수 있음
@@ -38,7 +38,6 @@ public class MemberApiController {
 
     @Data
     static class CreateMemberRequest {
-        private long id;
         private String name;
         private String email;
         private float height;
