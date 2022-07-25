@@ -8,6 +8,8 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter @Setter
@@ -30,6 +32,7 @@ public class Running {
     private double energy;
 
     private float weight;
+
 
     private String rowData;
 
