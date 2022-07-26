@@ -21,43 +21,52 @@ public class RunningApiController {
     @PostMapping("/api/running/start")
     public CreateRunningResponse createRunning(@RequestBody @Valid CreateRunningRequest request) {
 
-        Long runningId = runningService.addRun(request.getMemberId());
+        Long runningId = runningService.addRun(request.getUserId());
         return new CreateRunningResponse(runningId);
 
     }
 
-    @PostMapping("/api/running/update")
-    public UpdateRunningResponse updateRunning(@RequestBody @Valid UpdateRunningRequest request) {
+    @PostMapping("/api/running/finish")
+    public FinishRunningResponse finishRunning(@RequestBody @Valid RunningApiController.FinishRunningRequest request) {
 
-        runningService.calculateRunningData(request.getRunningId(),request.getUserId(),request.getRunningData());
-
+        runningService.finishRunning(request.getRunningId(),request.getUserId(),request.getDuration(),request.getRunningData());
         Running running = runningService.findOne(request.getRunningId());
-        return  new UpdateRunningResponse(running.getId(),running.getDistance(),running.getDuration(),running.getEnergy());
+
+        return  new FinishRunningResponse(running.getId(),running.getDistance(),running.getDuration(),running.getEnergy());
     }
 
+    /**
+     * 러닝 생성후 반환할 응답
+     */
     @Data
     static class CreateRunningResponse {
 
-        private Long id;
+        private Long runningId;
 
-        public CreateRunningResponse(Long id) {
-            this.id = id;
+        public CreateRunningResponse(Long runningId) {
+            this.runningId = runningId;
         }
     }
 
+    /**
+     * 러닝 생성을 위해 받을 요청
+     */
     @Data
     static class CreateRunningRequest {
-        private Long memberId;
+        private Long userId;
     }
 
+    /**
+     * 러닝 종료 후 반환할 응답
+     */
     @Data
-    static class UpdateRunningResponse {
+    static class FinishRunningResponse {
         private long runningId;
         private double distance;
         private double duration;
         private double energy;
 
-        public UpdateRunningResponse(long runningId, double distance, double duration, double energy) {
+        public FinishRunningResponse(long runningId, double distance, double duration, double energy) {
             this.runningId = runningId;
             this.distance = distance;
             this.duration = duration;
@@ -65,10 +74,14 @@ public class RunningApiController {
         }
     }
 
+    /**
+     * 러닝 종료후 전달받은 요청 정보
+     */
     @Data
-    static class UpdateRunningRequest {
+    static class FinishRunningRequest {
         private Long userId;
         private Long runningId;
+        private int duration;
         private List<RunningRowData> runningData;
     }
 

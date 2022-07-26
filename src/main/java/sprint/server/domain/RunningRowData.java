@@ -20,4 +20,6 @@ public class RunningRowData {
     public String toString(){
         return "latitude="+ latitude + "longitude="+longitude + "elevation="+elevation + "time="+time;
     }
+
+
 }
