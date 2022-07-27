@@ -34,6 +34,7 @@ public class Running {
     private float weight;
 
 
+    @Column(length = 10000)
     private String rowData;
 
     public static Running createRunning(Member member){
