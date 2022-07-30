@@ -19,7 +19,7 @@ public class Running {
     @Column(name = "running_id")
     private Long id;
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
 
@@ -41,5 +41,6 @@ public class Running {
         running.setMember(member);
         return running;
     }
+
 
 }

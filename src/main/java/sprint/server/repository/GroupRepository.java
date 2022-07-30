@@ -1,21 +1,13 @@
 package sprint.server.repository;
 
-import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import sprint.server.domain.Groups;
 
-import javax.persistence.EntityManager;
 
 
 @Repository
-@RequiredArgsConstructor
-public class GroupRepository {
-    private final EntityManager em;
+public interface GroupRepository extends JpaRepository<Groups,Long> {
 
-    public void save(Groups groups){
-        em.persist(groups);
-    }
-    public Groups findOne(Long id){
-        return em.find(Groups.class, id);
-    }
 }

@@ -12,7 +12,7 @@ import javax.persistence.Id;
 public class Groups {
 
     @Id @GeneratedValue
-    private int groupId;
+    private int id;
 
     private long groupLeaderId;
     private String groupName;

@@ -33,4 +33,5 @@ public class Friends implements Serializable {
         friends.setEstablishState(FriendState.REQUEST);
         return friends;
     }
+
 }
