@@ -16,10 +16,4 @@ public class RunningRowData {
         //함부로 생성하는 걸 막는다는 의미
     }
 
-    @Override
-    public String toString(){
-        return "latitude="+ latitude + "longitude="+longitude + "elevation="+elevation + "time="+time;
-    }
-
-
 }

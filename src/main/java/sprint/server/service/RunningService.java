@@ -1,5 +1,7 @@
 package sprint.server.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.JSONPObject;
 import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.json.JSONParser;
@@ -39,20 +41,21 @@ public class RunningService {
 
 
     @Transactional
-    public void finishRunning(long runningId, long memberId, int duration, List<RunningRowData> rowData){
+    public void finishRunning(long runningId, long memberId, int duration, List<RunningRowData> rowData) throws JsonProcessingException {
 
         Running running = runningRepository.findOne(runningId);
         Member member = memberRepository.findOne(memberId);
 
         double distance = calculateTotalDistance(rowData);
         float weight = member.getWeight();
-        double energy = calculateEnergy(weight,duration,distance);
+        double energy = calculateEnergy(weight, duration, distance);
+        ObjectMapper mapper = new ObjectMapper();
 
         running.setEnergy(energy);
         running.setWeight(weight);
         running.setDuration(duration);
         running.setDistance(distance);
-//        running.setRowData(rowData.toString()); 로우 데이터 미저장
+        running.setRowData(mapper.writeValueAsString(rowData));
     }
 
     /**
