@@ -23,6 +23,9 @@ public class MemberApiController {
         Member member = new Member();
         member.setName(request.getName());
         member.setEmail(request.getEmail());
+        member.setHeight(request.getHeight());
+        member.setWeight(request.getWeight());
+        member.setPicture(request.getPicture());
         Long id = memberService.join(member);
         return new CreateMemberResponse(id);
     }
@@ -42,8 +45,6 @@ public class MemberApiController {
         private String email;
         private float height;
         private float weight;
-        private int mainGroupId;
-        private int tierId;
         private String picture;
     }
 }

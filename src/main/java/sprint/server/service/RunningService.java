@@ -38,20 +38,21 @@ public class RunningService {
 
 
     @Transactional
-    public void finishRunning(long runningId, long memberId, int duration, List<RunningRowData> rowData){
+    public void finishRunning(long runningId, long memberId, int duration, List<RunningRowData> rowData) throws JsonProcessingException {
 
         Running running = runningRepository.findById(runningId).get();
         Member member = memberRepository.findById(memberId).get();
 
         double distance = calculateTotalDistance(rowData);
         float weight = member.getWeight();
-        double energy = calculateEnergy(weight,duration,distance);
+        double energy = calculateEnergy(weight, duration, distance);
+        ObjectMapper mapper = new ObjectMapper();
 
         running.setEnergy(energy);
         running.setWeight(weight);
         running.setDuration(duration);
         running.setDistance(distance);
-//        running.setRowData(rowData.toString()); 로우 데이터 미저장
+        running.setRowData(mapper.writeValueAsString(rowData));
     }
 
     /**
