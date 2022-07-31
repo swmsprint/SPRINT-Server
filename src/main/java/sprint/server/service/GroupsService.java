@@ -16,6 +16,6 @@ public class GroupsService {
     @Transactional
     public int addGroup(Groups groups){
         groupRepository.save(groups);
-        return groups.getGroupId();
+        return groups.getId();
     }
 }

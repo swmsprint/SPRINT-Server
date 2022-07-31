@@ -1,22 +1,17 @@
 package sprint.server.repository;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
-import sprint.server.domain.Running;
-import sprint.server.domain.statistics.Statistics;
 
-import javax.persistence.EntityManager;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import sprint.server.domain.statistics.Statistics;
+import sprint.server.domain.statistics.StatisticsType;
+
+import java.util.List;
 
 @Repository
-@RequiredArgsConstructor
-public class StatisticsRepository {
-    private final EntityManager em;
+public interface StatisticsRepository extends JpaRepository<Statistics,Long> {
 
-    public void save(Statistics statistics){
-        em.persist(statistics);
-    }
-    public Statistics findOne(Long id){
-        return em.find(Statistics.class, id);
-    }
+    List<Statistics> findByStatisticsTypeAndMember_Id(StatisticsType statisticsType,long member_id);
+
 
 }

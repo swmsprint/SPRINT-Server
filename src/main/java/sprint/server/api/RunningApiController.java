@@ -33,10 +33,10 @@ public class RunningApiController {
     }
 
     @PostMapping("/api/running/finish")
-    public FinishRunningResponse finishRunning(@RequestBody @Valid RunningApiController.FinishRunningRequest request) throws JsonProcessingException {
+    public FinishRunningResponse finishRunning(@RequestBody @Valid FinishRunningRequest request) {
 
         runningService.finishRunning(request.getRunningId(),request.getUserId(),request.getDuration(),request.getRunningData());
-        Running running = runningService.findOne(request.getRunningId());
+        Running running = runningService.findOne(request.getRunningId()).get();
 
         return  new FinishRunningResponse(running.getId(),running.getDistance(),running.getDuration(),running.getEnergy());
     }

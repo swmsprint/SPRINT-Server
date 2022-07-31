@@ -1,10 +1,6 @@
 package sprint.server.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.util.json.JSONParser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sprint.server.domain.Member;
@@ -15,6 +11,7 @@ import sprint.server.repository.RunningRepository;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -24,12 +21,12 @@ public class RunningService {
     private final RunningRepository runningRepository;
 
 
-    public Running findOne(Long runningId){
-        return runningRepository.findOne(runningId);
+    public Optional<Running> findOne(Long runningId){
+        return runningRepository.findById(runningId);
     }
     @Transactional
     public Long addRun(Long memberId){
-        Member member = memberRepository.findOne(memberId);
+        Member member = memberRepository.findById(memberId).get();
 
         Running running = Running.createRunning(member);
         running.setStartTime(new Timestamp(System.currentTimeMillis()));
@@ -43,8 +40,8 @@ public class RunningService {
     @Transactional
     public void finishRunning(long runningId, long memberId, int duration, List<RunningRowData> rowData) throws JsonProcessingException {
 
-        Running running = runningRepository.findOne(runningId);
-        Member member = memberRepository.findOne(memberId);
+        Running running = runningRepository.findById(runningId).get();
+        Member member = memberRepository.findById(memberId).get();
 
         double distance = calculateTotalDistance(rowData);
         float weight = member.getWeight();
