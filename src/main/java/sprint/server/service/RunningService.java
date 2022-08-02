@@ -27,10 +27,9 @@ public class RunningService {
         return runningRepository.findById(runningId);
     }
     @Transactional
-    public Long addRun(Long memberId){
-        Member member = memberRepository.findById(memberId).get();
+    public Long addRun(Member member){
 
-        Running running = Running.createRunning(member);
+        Running running = createRunning(member);
         running.setStartTime(new Timestamp(System.currentTimeMillis()));
         runningRepository.save(running);
 
@@ -56,6 +55,14 @@ public class RunningService {
         running.setDistance(distance);
         running.setRowData(mapper.writeValueAsString(rowData));
     }
+
+    @Transactional
+    public Running createRunning(Member member){
+        Running running = new Running();
+        running.setMember(member);
+        return running;
+    }
+
 
     /**
      *

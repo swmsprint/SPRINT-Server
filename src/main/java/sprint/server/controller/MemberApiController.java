@@ -1,10 +1,12 @@
-package sprint.server.api;
+package sprint.server.controller;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import sprint.server.controller.datatransferobject.CreateMemberRequest;
+import sprint.server.controller.datatransferobject.CreateMemberResponse;
 import sprint.server.domain.Member;
 import sprint.server.service.MemberService;
 
@@ -14,6 +16,7 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 public class MemberApiController {
     private final MemberService memberService;
+
 
     @PostMapping("/api/members") //요청을 온걸 리퀘스트 바디로 받아,.
     public CreateMemberResponse saveMember(@RequestBody @Valid CreateMemberRequest request){
@@ -30,21 +33,5 @@ public class MemberApiController {
         return new CreateMemberResponse(id);
     }
 
-    @Data
-    static class CreateMemberResponse{
-        private Long id;
 
-        public CreateMemberResponse(Long id) {
-            this.id = id;
-        }
-    }
-
-    @Data
-    static class CreateMemberRequest {
-        private String name;
-        private String email;
-        private float height;
-        private float weight;
-        private String picture;
-    }
 }

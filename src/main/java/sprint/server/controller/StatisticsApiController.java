@@ -1,10 +1,9 @@
-package sprint.server.api;
+package sprint.server.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import sprint.server.domain.Member;
 import sprint.server.domain.statistics.Statistics;
 import sprint.server.domain.statistics.StatisticsType;
 import sprint.server.service.MemberService;
@@ -30,6 +29,7 @@ public class StatisticsApiController {
 
         return statisticsService.findByStatisticsTypeAndMember_Id(StatisticsType.Daily,memberID);
     }
+
 
 
 }

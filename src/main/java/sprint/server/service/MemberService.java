@@ -18,4 +18,9 @@ public class MemberService {
         return member.getId();
     }
 
+    @Transactional
+    public Member findById(Long id){
+        return memberRepository.findById(id).get();
+    }
+
 }

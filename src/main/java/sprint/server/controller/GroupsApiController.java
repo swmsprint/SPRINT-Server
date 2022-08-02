@@ -1,4 +1,4 @@
-package sprint.server.api;
+package sprint.server.controller;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

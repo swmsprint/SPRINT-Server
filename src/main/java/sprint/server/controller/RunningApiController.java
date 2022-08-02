@@ -1,19 +1,18 @@
-package sprint.server.api;
+package sprint.server.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import sprint.server.controller.datatransferobject.*;
+import sprint.server.domain.Member;
 import sprint.server.domain.Running;
 import sprint.server.domain.RunningRowData;
-import sprint.server.repository.RunningRepository;
+import sprint.server.service.MemberService;
 import sprint.server.service.RunningService;
 
-import javax.swing.text.View;
 import javax.validation.Valid;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,11 +22,13 @@ public class RunningApiController {
 
     private final RunningService runningService;
     private final ObjectMapper objectMapper;
+    private final MemberService memberService;
 
     @PostMapping("/api/running/start")
     public CreateRunningResponse createRunning(@RequestBody @Valid CreateRunningRequest request) {
 
-        Long runningId = runningService.addRun(request.getUserId());
+        Member member = memberService.findById(request.getUserId());
+        Long runningId = runningService.addRun(member);
         return new CreateRunningResponse(runningId);
 
     }
@@ -55,69 +56,4 @@ public class RunningApiController {
     }
 
 
-    /**
-     * 러닝 생성후 반환할 응답
-     */
-    @Data
-    static class CreateRunningResponse {
-
-        private Long runningId;
-
-        public CreateRunningResponse(Long runningId) {
-            this.runningId = runningId;
-        }
-    }
-
-    /**
-     * 러닝 생성을 위해 받을 요청
-     */
-    @Data
-    static class CreateRunningRequest {
-        private Long userId;
-    }
-
-    /**
-     * 러닝 종료 후 반환할 응답
-     */
-    @Data
-    static class FinishRunningResponse {
-        private long runningId;
-        private double distance;
-        private double duration;
-        private double energy;
-
-        public FinishRunningResponse(long runningId, double distance, double duration, double energy) {
-            this.runningId = runningId;
-            this.distance = distance;
-            this.duration = duration;
-            this.energy = energy;
-        }
-    }
-
-    /**
-     * 러닝 종료후 전달받은 요청 정보
-     */
-    @Data
-    static class FinishRunningRequest {
-        private long userId;
-        private long runningId;
-        private int duration;
-        private List<RunningRowData> runningData;
-    }
-    @Data
-    static class ViewRunningResponse {
-        private long runningId;
-        private double distance;
-        private double duration;
-        private double energy;
-        private List<RunningRowData> runningData;
-
-        public ViewRunningResponse(long runningId, double distance, double duration, double energy, List<RunningRowData> runningData) {
-            this.runningId = runningId;
-            this.distance = distance;
-            this.duration = duration;
-            this.energy = energy;
-            this.runningData = runningData;
-        }
-    }
 }
