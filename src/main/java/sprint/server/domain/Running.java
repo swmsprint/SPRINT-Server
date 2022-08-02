@@ -37,11 +37,5 @@ public class Running {
     @Column(length = 10000)
     private String rowData;
 
-    public static Running createRunning(Member member){
-        Running running = new Running();
-        running.setMember(member);
-        return running;
-    }
-
 
 }
