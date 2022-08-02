@@ -33,7 +33,7 @@ public class RunningApiController {
     }
 
     @PostMapping("/api/running/finish")
-    public FinishRunningResponse finishRunning(@RequestBody @Valid FinishRunningRequest request) {
+    public FinishRunningResponse finishRunning(@RequestBody @Valid FinishRunningRequest request) throws JsonProcessingException {
 
         runningService.finishRunning(request.getRunningId(),request.getUserId(),request.getDuration(),request.getRunningData());
         Running running = runningService.findOne(request.getRunningId()).get();
@@ -45,7 +45,7 @@ public class RunningApiController {
     public ViewRunningResponse viewRunningDetail(@PathVariable("id")Long runningId,
                                                  @RequestParam(value="memberId")Long memberId )throws JsonProcessingException{
 
-        Running running = runningService.findOne(runningId);
+        Running running = runningService.findOne(runningId).get();
         /**
          * 아직 러닝 정보 공개 정책이 없기때문에 전부 받아서 반환해줌 -> 추후 수정 필요
          */

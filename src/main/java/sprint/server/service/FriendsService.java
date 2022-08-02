@@ -12,11 +12,11 @@ import sprint.server.repository.FriendsRepository;
 public class FriendsService {
     private final FriendsRepository friendsRepository;
 
-    @Transactional //기본적으로 트렌젝션 안에서 되어야함
+/*    @Transactional //기본적으로 트렌젝션 안에서 되어야함
     public Friends addFriends(Member sourceMember, Member targetMember){
         Friends friends = Friends.createFriendsRelationship(sourceMember, targetMember);
         friendsRepository.save(friends);
         return friends;
-    }
+    }*/
 
 }

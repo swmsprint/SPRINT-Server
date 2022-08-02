@@ -9,7 +9,7 @@ import sprint.server.domain.friends.Friends;
 import javax.persistence.EntityManager;
 
 @Repository
-public interface FriendsRepository extends JpaRepository {
+public class  FriendsRepository {
 
 
 }
