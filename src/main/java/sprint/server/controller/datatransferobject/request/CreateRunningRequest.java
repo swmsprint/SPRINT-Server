@@ -1,4 +1,4 @@
-package sprint.server.controller.datatransferobject;
+package sprint.server.controller.datatransferobject.request;
 
 import lombok.Data;
 

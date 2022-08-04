@@ -2,10 +2,13 @@ package sprint.server.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import sprint.server.controller.datatransferobject.*;
+import sprint.server.controller.datatransferobject.request.CreateRunningRequest;
+import sprint.server.controller.datatransferobject.request.FinishRunningRequest;
+import sprint.server.controller.datatransferobject.response.CreateRunningResponse;
+import sprint.server.controller.datatransferobject.response.FinishRunningResponse;
+import sprint.server.controller.datatransferobject.response.ViewRunningResponse;
 import sprint.server.domain.Member;
 import sprint.server.domain.Running;
 import sprint.server.domain.RunningRowData;
@@ -14,7 +17,6 @@ import sprint.server.service.RunningService;
 
 import javax.validation.Valid;
 import java.util.Arrays;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor

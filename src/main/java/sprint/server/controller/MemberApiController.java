@@ -1,12 +1,11 @@
 package sprint.server.controller;
 
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import sprint.server.controller.datatransferobject.CreateMemberRequest;
-import sprint.server.controller.datatransferobject.CreateMemberResponse;
+import sprint.server.controller.datatransferobject.request.CreateMemberRequest;
+import sprint.server.controller.datatransferobject.response.CreateMemberResponse;
 import sprint.server.domain.Member;
 import sprint.server.service.MemberService;
 
