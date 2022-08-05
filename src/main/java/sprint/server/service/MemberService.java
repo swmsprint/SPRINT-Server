@@ -6,21 +6,30 @@ import org.springframework.transaction.annotation.Transactional;
 import sprint.server.domain.Member;
 import sprint.server.repository.MemberRepository;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class MemberService {
 
     private final MemberRepository memberRepository;
 
-    @Transactional //기본적으로 트렌젝션 안에서 되어야함
+    @Transactional // readOnly = false
     public Long join(Member member){
+        validateDuplicateMember(member);
         memberRepository.save(member);
         return member.getId();
     }
 
-    @Transactional
     public Member findById(Long id){
         return memberRepository.findById(id).get();
     }
 
+    private void validateDuplicateMember(Member member) {
+        List<Member> findMembers = memberRepository.findByName(member.getName());
+        if (!findMembers.isEmpty()) {
+            throw new IllegalStateException("이미 존재하는 회원 이름입니다.");
+        }
+    }
 }
