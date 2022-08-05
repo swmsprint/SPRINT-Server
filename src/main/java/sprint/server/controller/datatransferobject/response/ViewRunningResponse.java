@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class ViewRunningResponse {
-    private long runningId;
+    private Long runningId;
     private double distance;
     private double duration;
     private double energy;

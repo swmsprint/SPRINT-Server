@@ -10,8 +10,8 @@ import java.util.List;
  */
 @Data
 public class FinishRunningRequest {
-    private long userId;
-    private long runningId;
+    private Long userId;
+    private Long runningId;
     private int duration;
     private List<RunningRowData> runningData;
 }

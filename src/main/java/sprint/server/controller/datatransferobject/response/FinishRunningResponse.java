@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class FinishRunningResponse {
-    private long runningId;
+    private Long runningId;
     private double distance;
     private double duration;
     private double energy;
