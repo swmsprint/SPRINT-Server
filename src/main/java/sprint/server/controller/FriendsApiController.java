@@ -46,12 +46,12 @@ public class FriendsApiController {
 
 
     @GetMapping("/api/friends/list")
-    public List<LoadFriendsResponse> LoadFriends(@RequestBody @Valid LoadFriendsRequset request) {
+    public LoadFriendsResponse<LoadFriendsResponseDto> LoadFriends(@RequestBody @Valid LoadFriendsRequset request) {
         List<Member> members = friendsService.LoadFriends(request.getUserId());
 
-        List<LoadFriendsResponse> result = members.stream()
-                .map(member -> new LoadFriendsResponse(member))
+        List<LoadFriendsResponseDto> result = members.stream()
+                .map(member -> new LoadFriendsResponseDto(member))
                 .collect(Collectors.toList());
-        return result;
+        return new LoadFriendsResponse(result.size(), result);
     }
 }
