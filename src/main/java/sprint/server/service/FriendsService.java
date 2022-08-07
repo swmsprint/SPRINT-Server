@@ -42,7 +42,7 @@ public class FriendsService {
         if (!isExists) {
             throw new IllegalStateException("해당 친구 요청이 존재하지 않습니다.");
         }
-        Friends friends = friendsRepository.findBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, FriendState.REQUEST).get();
+        Friends friends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.REQUEST).get();
         friends.setEstablishState(FriendState.REJECT);
         if (friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, FriendState.REJECT)) {
             return true;
@@ -62,7 +62,7 @@ public class FriendsService {
         if (!isExists) {
             throw new IllegalStateException("해당 친구 요청이 존재하지 않습니다.");
         }
-        Friends friends = friendsRepository.findBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, FriendState.REQUEST).get();
+        Friends friends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.REQUEST).get();
         friends.setEstablishState(FriendState.ACCEPT);
         Friends newFriends = Friends.createFriendsRelationship(targetMemberId, sourceMemberId);
         newFriends.setEstablishState(FriendState.ACCEPT);
@@ -77,8 +77,8 @@ public class FriendsService {
 
     @Transactional
     public Boolean DeleteFriends(Long sourceMemberId, Long targetMemberId) {
-        Optional<Friends> sourceFriends = friendsRepository.findBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, FriendState.ACCEPT);
-        Optional<Friends> targetFriends = friendsRepository.findBySourceMemberIdAndTargetMemberIdAndEstablishState(targetMemberId, sourceMemberId, FriendState.ACCEPT);
+        Optional<Friends> sourceFriends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.ACCEPT);
+        Optional<Friends> targetFriends = findFriendsRequest(targetMemberId, sourceMemberId, FriendState.ACCEPT);
         if(!sourceFriends.isPresent() || !targetFriends.isPresent()) {
             throw new IllegalStateException("잘못된 요청입니다. : 친구가 아닙니다.");
         }
@@ -116,6 +116,10 @@ public class FriendsService {
     private boolean isFriendsRequestExist(Long sourceMemberId, Long targetMemberId, FriendState friendState) {
         Boolean isExists = friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, friendState);
         return isExists;
+    }
+
+    private Optional<Friends> findFriendsRequest(Long sourceMemberId, Long targetMemberId, FriendState friendState){
+        return friendsRepository.findBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, friendState);
     }
 
 }
