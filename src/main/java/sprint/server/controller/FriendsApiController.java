@@ -5,21 +5,24 @@ import org.springframework.web.bind.annotation.*;
 import sprint.server.controller.datatransferobject.request.CreateFriendsResultRequest;
 import sprint.server.controller.datatransferobject.request.CreateFriendsRequest;
 import sprint.server.controller.datatransferobject.request.DeleteFriendsRequest;
-import sprint.server.controller.datatransferobject.response.CreateFriendsResultResponse;
-import sprint.server.controller.datatransferobject.response.CreateFriendsResponse;
-import sprint.server.controller.datatransferobject.response.DeleteFriendsResponse;
+import sprint.server.controller.datatransferobject.request.LoadFriendsRequset;
+import sprint.server.controller.datatransferobject.response.*;
+import sprint.server.domain.Member;
 import sprint.server.domain.friends.Friends;
 import sprint.server.repository.FriendsRepository;
+import sprint.server.repository.MemberRepository;
 import sprint.server.service.FriendsService;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
 public class FriendsApiController {
     private final FriendsService friendsService;
     private final FriendsRepository friendsRepository;
-
+    private final MemberRepository memberRepository;
     @PostMapping("/api/friends")
     public CreateFriendsResponse createFriends(@RequestBody @Valid CreateFriendsRequest request) {
         Friends friends = friendsService.FriendsRequest(request.getSourceUserId(), request.getTargetUserId());
@@ -41,4 +44,14 @@ public class FriendsApiController {
         return new DeleteFriendsResponse(friendsService.DeleteFriends(request.getSourceUserId(), request.getTargetUserId()));
     }
 
+
+    @GetMapping("/api/friends/list")
+    public List<LoadFriendsResponse> LoadFriends(@RequestBody @Valid LoadFriendsRequset request) {
+        List<Member> members = friendsService.LoadFriends(request.getUserId());
+
+        List<LoadFriendsResponse> result = members.stream()
+                .map(member -> new LoadFriendsResponse(member))
+                .collect(Collectors.toList());
+        return result;
+    }
 }

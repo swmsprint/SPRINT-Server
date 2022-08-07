@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 import sprint.server.domain.friends.FriendState;
 import sprint.server.domain.friends.Friends;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -14,4 +15,6 @@ public interface FriendsRepository extends JpaRepository<Friends, Long>{
     Optional<Friends> findBySourceMemberIdAndTargetMemberIdAndEstablishState(Long sourceMemberId, Long targetMemberId, FriendState friendState);
 
     boolean existsBySourceMemberIdAndTargetMemberId(Long sourceMemberId, Long targetMemberId);
+
+    List<Friends> findBySourceMemberIdAndEstablishState(Long memberId, FriendState friendState);
 }

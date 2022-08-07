@@ -3,11 +3,14 @@ package sprint.server.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sprint.server.domain.Member;
 import sprint.server.domain.friends.FriendState;
 import sprint.server.domain.friends.Friends;
 import sprint.server.repository.FriendsRepository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -90,6 +93,12 @@ public class FriendsService {
         } else {
             return false;
         }
+    }
+
+    public List<Member> LoadFriends(Long memberId) {
+        List<Friends> friendsList = friendsRepository.findBySourceMemberIdAndEstablishState(memberId, FriendState.ACCEPT);
+        List<Member> result = friendsList.stream().map(friends -> memberService.findById(friends.getTargetMemberId())).collect(Collectors.toList());
+        return result;
     }
 
 
