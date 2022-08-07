@@ -1,7 +1,7 @@
 package sprint.server.controller.datatransferobject.request;
 
 import lombok.Data;
-import sprint.server.domain.RunningRowData;
+import sprint.server.domain.RunningRawData;
 
 import java.util.List;
 
@@ -13,5 +13,5 @@ public class FinishRunningRequest {
     private Long userId;
     private Long runningId;
     private int duration;
-    private List<RunningRowData> runningData;
+    private List<RunningRawData> runningData;
 }

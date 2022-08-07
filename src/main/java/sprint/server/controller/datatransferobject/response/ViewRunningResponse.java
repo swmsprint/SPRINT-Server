@@ -2,7 +2,7 @@ package sprint.server.controller.datatransferobject.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import sprint.server.domain.RunningRowData;
+import sprint.server.domain.RunningRawData;
 
 import java.util.List;
 
@@ -13,5 +13,5 @@ public class ViewRunningResponse {
     private double distance;
     private double duration;
     private double energy;
-    private List<RunningRowData> runningData;
+    private List<RunningRawData> runningData;
 }

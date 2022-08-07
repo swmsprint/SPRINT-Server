@@ -11,7 +11,7 @@ import sprint.server.controller.datatransferobject.response.FinishRunningRespons
 import sprint.server.controller.datatransferobject.response.ViewRunningResponse;
 import sprint.server.domain.Member;
 import sprint.server.domain.Running;
-import sprint.server.domain.RunningRowData;
+import sprint.server.domain.RunningRawData;
 import sprint.server.service.MemberService;
 import sprint.server.service.RunningService;
 
@@ -30,7 +30,7 @@ public class RunningApiController {
     public CreateRunningResponse createRunning(@RequestBody @Valid CreateRunningRequest request) {
 
         Member member = memberService.findById(request.getUserId());
-        Long runningId = runningService.addRun(member);
+        Long runningId = runningService.addRun(member,request.getStartTime());
         return new CreateRunningResponse(runningId);
 
     }
@@ -38,10 +38,10 @@ public class RunningApiController {
     @PostMapping("/api/running/finish")
     public FinishRunningResponse finishRunning(@RequestBody @Valid FinishRunningRequest request) throws JsonProcessingException {
 
-        runningService.finishRunning(request.getRunningId(),request.getUserId(),request.getDuration(),request.getRunningData());
+        runningService.finishRunning(request);
         Running running = runningService.findOne(request.getRunningId()).get();
 
-        return  new FinishRunningResponse(running.getId(),running.getDistance(),running.getDuration(),running.getEnergy());
+        return new FinishRunningResponse(running.getId(),running.getDistance(),running.getDuration(),running.getEnergy());
     }
 
     @GetMapping("/api/running/{id}")
@@ -54,7 +54,7 @@ public class RunningApiController {
          */
         return new ViewRunningResponse(running.getId(),running.getDistance(),
                 running.getDuration(),running.getEnergy(),
-                Arrays.asList(objectMapper.readValue(running.getRowData(),RunningRowData[].class)));
+                Arrays.asList(objectMapper.readValue(running.getRawData(), RunningRawData[].class)));
     }
 
 
