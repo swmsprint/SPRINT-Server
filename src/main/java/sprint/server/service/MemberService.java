@@ -23,4 +23,9 @@ public class MemberService {
         return memberRepository.findById(id).get();
     }
 
+    public void isMemberExistById(Long sourceMemberId, String message) {
+        if (!memberRepository.existsById(sourceMemberId)) {
+            throw new IllegalArgumentException(message);
+        }
+    }
 }
