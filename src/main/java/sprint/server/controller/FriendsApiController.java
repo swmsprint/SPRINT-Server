@@ -36,9 +36,9 @@ public class FriendsApiController {
         return new CreateFriendsResultResponse(friendsService.RejectFriendsRequest(request.getSourceUserId(), request.getTargetUserId()));
     }
 
-//    @PutMapping("/api/friends/delete")
-//    public DeleteFriendsResponse DeleteFriends(@RequestBody @Valid DeleteFriendsRequest request) {
-//
-//    }
+    @PutMapping("/api/friends/delete")
+    public DeleteFriendsResponse DeleteFriends(@RequestBody @Valid DeleteFriendsRequest request) {
+        return new DeleteFriendsResponse(friendsService.DeleteFriends(request.getSourceUserId(), request.getTargetUserId()));
+    }
 
 }
