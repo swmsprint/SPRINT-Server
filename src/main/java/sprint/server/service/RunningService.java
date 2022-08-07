@@ -73,10 +73,18 @@ public class RunningService {
     private double calculateTotalDistance(List<RunningRawData> rowData) {
         double distance = 0;
         for(int i = 0; i< rowData.size()-1; i++){
+            /**
+             * 시간 차이가 1500ms 이상이면 멈췄던 상태이므로 거리에 카운트 하지 않음
+             */
+            Timestamp t1 = Timestamp.valueOf(new StringTokenizer(rowData.get(i).getTimestamp(),"Z").nextToken());
+            Timestamp t2 = Timestamp.valueOf(new StringTokenizer(rowData.get(i+1).getTimestamp(),"Z").nextToken());
+            if(t2.getTime()-t1.getTime() > 1500){ continue; }
+
             distance += calculateDistance(rowData.get(i).getLongitude(),
                     rowData.get(i + 1).getLongitude(),
                     rowData.get(i).getLatitude(),
                     rowData.get(i + 1).getLatitude());
+
         }
         return distance;
     }

@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import sprint.server.domain.Running;
 
 import java.sql.Timestamp;
+import java.util.StringTokenizer;
 
 @SpringBootApplication
 public class ServerApplication {
