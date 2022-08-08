@@ -65,6 +65,10 @@ public class FriendsService {
         if (!isExists) {
             throw new IllegalStateException("해당 친구 요청이 존재하지 않습니다.");
         }
+        boolean isExists2 = isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.ACCEPT);
+        if (isExists2) {
+            throw new IllegalStateException("이미 친구입니다.");
+        }
         Friends friends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.REQUEST).get();
         friends.setEstablishState(FriendState.ACCEPT);
         Friends newFriends = Friends.createFriendsRelationship(targetMemberId, sourceMemberId);
