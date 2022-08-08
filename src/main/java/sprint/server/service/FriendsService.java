@@ -23,8 +23,8 @@ public class FriendsService {
 
     /**
      * 친구 요청
-     * @param sourceMemberId
-     * @param targetMemberId
+     * @param sourceMemberId -> 친구요청을 보내는 UserId
+     * @param targetMemberId -> 친구요청을 받는 UserId
      * @return friends
      */
     @Transactional
@@ -39,7 +39,8 @@ public class FriendsService {
 
     /**
      * 친구 요청 거절
-     * @param sourceMemberId, targetMemberId
+     * @param sourceMemberId -> 친구요청을 거절하는 UserId
+     * @param targetMemberId -> 친구요청을 보낸 UserId
      * @return 결과(true/false)
      */
     @Transactional
@@ -59,7 +60,8 @@ public class FriendsService {
 
     /**
      * 친구 요청 수락
-     * @param sourceMemberId, targetMemberId
+     * @param sourceMemberId -> 친구요청을 수락하는 UserId
+     * @param targetMemberId -> 친구요청을 요청한 UserId
      * @return 결과(true/false)
      */
     @Transactional
@@ -88,9 +90,9 @@ public class FriendsService {
 
     /**
      * 친구 제거
-     * @param sourceMemberId
-     * @param targetMemberId
-     * @return
+     * @param sourceMemberId -> 친구 제거를 요청한 UserId
+     * @param targetMemberId -> 친구 목록에서 삭제되길 기대되는 UserId
+     * @return 결과(true/false)
      */
     @Transactional
     public Boolean DeleteFriends(Long sourceMemberId, Long targetMemberId) {
@@ -113,8 +115,8 @@ public class FriendsService {
 
     /**
      * 친구 요청 취소
-     * @param sourceMemberId
-     * @param targetMemberId
+     * @param sourceMemberId -> 친구요청 취소를 요청한 UserId
+     * @param targetMemberId -> 친구요청 대상 UserId
      * @return
      */
     @Transactional
