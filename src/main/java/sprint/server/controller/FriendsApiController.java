@@ -10,7 +10,6 @@ import sprint.server.controller.datatransferobject.response.*;
 import sprint.server.domain.Member;
 import sprint.server.domain.friends.Friends;
 import sprint.server.repository.FriendsRepository;
-import sprint.server.repository.MemberRepository;
 import sprint.server.service.FriendsService;
 
 import javax.validation.Valid;
@@ -22,7 +21,6 @@ import java.util.stream.Collectors;
 public class FriendsApiController {
     private final FriendsService friendsService;
     private final FriendsRepository friendsRepository;
-    private final MemberRepository memberRepository;
     @PostMapping("/api/friends")
     public CreateFriendsResponse createFriends(@RequestBody @Valid CreateFriendsRequest request) {
         Friends friends = friendsService.FriendsRequest(request.getSourceUserId(), request.getTargetUserId());

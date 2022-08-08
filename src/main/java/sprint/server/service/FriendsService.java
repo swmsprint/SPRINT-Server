@@ -8,6 +8,8 @@ import sprint.server.domain.friends.FriendState;
 import sprint.server.domain.friends.Friends;
 import sprint.server.repository.FriendsRepository;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,6 +31,7 @@ public class FriendsService {
     public Friends FriendsRequest(Long sourceMemberId, Long targetMemberId) {
         validationFriendsRequest(sourceMemberId, targetMemberId);
         Friends friends = Friends.createFriendsRelationship(sourceMemberId, targetMemberId);
+        friends.setRegisteredDate(Timestamp.valueOf(LocalDateTime.now()));
         friendsRepository.save(friends);
         return friends;
     }
@@ -46,7 +49,7 @@ public class FriendsService {
             throw new IllegalStateException("해당 친구 요청이 존재하지 않습니다.");
         }
         Friends friends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.REQUEST).get();
-        friends.setEstablishState(FriendState.REJECT);
+        setFriendsStateAndTime(friends, FriendState.REJECT);
         if (friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, FriendState.REJECT)) {
             return true;
         } else {
@@ -70,9 +73,10 @@ public class FriendsService {
             throw new IllegalStateException("이미 친구입니다.");
         }
         Friends friends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.REQUEST).get();
-        friends.setEstablishState(FriendState.ACCEPT);
+        setFriendsStateAndTime(friends, FriendState.ACCEPT);
         Friends newFriends = Friends.createFriendsRelationship(targetMemberId, sourceMemberId);
-        newFriends.setEstablishState(FriendState.ACCEPT);
+        setFriendsStateAndTime(newFriends, FriendState.ACCEPT);
+
         friendsRepository.save(newFriends);
         if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.ACCEPT) &&
                 isFriendsRequestExist(targetMemberId, sourceMemberId, FriendState.ACCEPT)) {
@@ -82,6 +86,12 @@ public class FriendsService {
         }
     }
 
+    /**
+     * 친구 제거
+     * @param sourceMemberId
+     * @param targetMemberId
+     * @return
+     */
     @Transactional
     public Boolean DeleteFriends(Long sourceMemberId, Long targetMemberId) {
         Optional<Friends> sourceFriends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.ACCEPT);
@@ -89,8 +99,9 @@ public class FriendsService {
         if(!sourceFriends.isPresent() || !targetFriends.isPresent()) {
             throw new IllegalStateException("잘못된 요청입니다. : 친구가 아닙니다.");
         }
-        sourceFriends.get().setEstablishState(FriendState.REJECT);
-        targetFriends.get().setEstablishState(FriendState.REJECT);
+        setFriendsStateAndTime(sourceFriends.get(), FriendState.REJECT);
+        setFriendsStateAndTime(targetFriends.get(), FriendState.REJECT);
+
         if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.REJECT) &&
                 isFriendsRequestExist(targetMemberId, sourceMemberId, FriendState.REJECT)){
             return true;
@@ -133,6 +144,11 @@ public class FriendsService {
 
     private Optional<Friends> findFriendsRequest(Long sourceMemberId, Long targetMemberId, FriendState friendState){
         return friendsRepository.findBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, friendState);
+    }
+
+    private void setFriendsStateAndTime(Friends friends, FriendState friendState) {
+        friends.setRegisteredDate(Timestamp.valueOf(LocalDateTime.now()));
+        friends.setEstablishState(friendState);
     }
 
 }
