@@ -8,19 +8,24 @@ import sprint.server.repository.MemberRepository;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class MemberService {
 
     private final MemberRepository memberRepository;
 
-    @Transactional //기본적으로 트렌젝션 안에서 되어야함
+    @Transactional
     public Long join(Member member){
         memberRepository.save(member);
         return member.getId();
     }
 
-    @Transactional
     public Member findById(Long id){
         return memberRepository.findById(id).get();
     }
 
+    public void isMemberExistById(Long sourceMemberId, String message) {
+        if (!memberRepository.existsById(sourceMemberId)) {
+            throw new IllegalStateException(message);
+        }
+    }
 }

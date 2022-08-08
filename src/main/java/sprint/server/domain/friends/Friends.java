@@ -5,9 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 import sprint.server.domain.Member;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
@@ -15,23 +13,25 @@ import java.sql.Timestamp;
 @Getter @Setter @ToString
 public class Friends implements Serializable {
 
-    @Id
+    @Id @GeneratedValue
+    private Long Id;
+
     @Column(name = "source_user_id")
     private Long sourceMemberId;
 
-    @Id
     @Column(name = "target_user_id")
     private Long targetMemberId;
     private Timestamp registeredDate;
+
+    @Enumerated(EnumType.STRING)
     private FriendState establishState;
 
 
-    public static Friends createFriendsRelationship(Member sourceMember, Member targetMember) {
+    public static Friends createFriendsRelationship(Long sourceMemberId, Long targetMemberId) {
         Friends friends = new Friends();
-        friends.setSourceMemberId(sourceMember.getId());
-        friends.setTargetMemberId(targetMember.getId());
+        friends.setSourceMemberId(sourceMemberId);
+        friends.setTargetMemberId(targetMemberId);
         friends.setEstablishState(FriendState.REQUEST);
         return friends;
     }
-
 }
