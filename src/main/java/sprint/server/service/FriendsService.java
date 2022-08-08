@@ -110,12 +110,6 @@ public class FriendsService {
         }
     }
 
-    public List<Member> LoadFriends(Long memberId) {
-        List<Friends> friendsList = friendsRepository.findBySourceMemberIdAndEstablishState(memberId, FriendState.ACCEPT);
-        List<Member> result = friendsList.stream().map(friends -> memberService.findById(friends.getTargetMemberId())).collect(Collectors.toList());
-        return result;
-    }
-
 
     /**
      * 친구 요청 Validation
@@ -129,6 +123,21 @@ public class FriendsService {
             throw new IllegalStateException("이미 전송된 요청입니다.");
         } else if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.ACCEPT)) {
             throw new IllegalStateException("이미 친구입니다.");
+        }
+    }
+
+    @Transactional
+    public Boolean CancelFriends(Long sourceMemberId, Long targetMemberId) {
+        Optional<Friends> sourceFriends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.REQUEST);
+        if (!sourceFriends.isPresent()) {
+            throw new IllegalStateException("친구요청을 보낸적이 없습니다.");
+        }
+        setFriendsStateAndTime(sourceFriends.get(), FriendState.CANCELED);
+
+        if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.CANCELED)) {
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -151,4 +160,15 @@ public class FriendsService {
         friends.setEstablishState(friendState);
     }
 
+    public List<Member> LoadFriendsBySourceMember(Long memberId, FriendState friendState) {
+        List<Friends> friendsList = friendsRepository.findBySourceMemberIdAndEstablishState(memberId, friendState);
+        List<Member> result = friendsList.stream().map(friends -> memberService.findById(friends.getTargetMemberId())).collect(Collectors.toList());
+        return result;
+    }
+
+    public List<Member> LoadFriendsByTargetMember(Long memberId, FriendState friendState) {
+        List<Friends> friendsList = friendsRepository.findByTargetMemberIdAndEstablishState(memberId, friendState);
+        List<Member> result = friendsList.stream().map(friends -> memberService.findById(friends.getSourceMemberId())).collect(Collectors.toList());
+        return result;
+    }
 }

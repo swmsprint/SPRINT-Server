@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class CreateFriendsResultResponse {
-    Boolean result;
+    private Boolean result;
 }
