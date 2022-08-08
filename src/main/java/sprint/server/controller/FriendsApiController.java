@@ -27,12 +27,12 @@ public class FriendsApiController {
 
     @PostMapping("/api/friends/accept")
     public CreateFriendsResultResponse AcceptFriends(@RequestBody @Valid CreateFriendsResultRequest request) {
-        return new CreateFriendsResultResponse(friendsService.AcceptFriendsRequest(request.getSourceUserId(), request.getTargetUserId()));
+        return new CreateFriendsResultResponse(friendsService.AcceptFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
     }
 
     @PutMapping("/api/friends/reject")
     public CreateFriendsResultResponse RejectFriends(@RequestBody @Valid CreateFriendsResultRequest request) {
-        return new CreateFriendsResultResponse(friendsService.RejectFriendsRequest(request.getSourceUserId(), request.getTargetUserId()));
+        return new CreateFriendsResultResponse(friendsService.RejectFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
     }
 
     @PutMapping("/api/friends/delete")

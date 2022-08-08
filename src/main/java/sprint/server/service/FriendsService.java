@@ -49,7 +49,7 @@ public class FriendsService {
             throw new IllegalStateException("해당 친구 요청이 존재하지 않습니다.");
         }
         Friends friends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.REQUEST).get();
-        setFriendsStateAndTime(friends, FriendState.REJECT);
+        setFriendsByStateAndTime(friends, FriendState.REJECT);
         if (friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, FriendState.REJECT)) {
             return true;
         } else {
@@ -73,9 +73,9 @@ public class FriendsService {
             throw new IllegalStateException("이미 친구입니다.");
         }
         Friends friends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.REQUEST).get();
-        setFriendsStateAndTime(friends, FriendState.ACCEPT);
+        setFriendsByStateAndTime(friends, FriendState.ACCEPT);
         Friends newFriends = Friends.createFriendsRelationship(targetMemberId, sourceMemberId);
-        setFriendsStateAndTime(newFriends, FriendState.ACCEPT);
+        setFriendsByStateAndTime(newFriends, FriendState.ACCEPT);
 
         friendsRepository.save(newFriends);
         if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.ACCEPT) &&
@@ -99,8 +99,8 @@ public class FriendsService {
         if(!sourceFriends.isPresent() || !targetFriends.isPresent()) {
             throw new IllegalStateException("잘못된 요청입니다. : 친구가 아닙니다.");
         }
-        setFriendsStateAndTime(sourceFriends.get(), FriendState.REJECT);
-        setFriendsStateAndTime(targetFriends.get(), FriendState.REJECT);
+        setFriendsByStateAndTime(sourceFriends.get(), FriendState.REJECT);
+        setFriendsByStateAndTime(targetFriends.get(), FriendState.REJECT);
 
         if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.REJECT) &&
                 isFriendsRequestExist(targetMemberId, sourceMemberId, FriendState.REJECT)){
@@ -110,6 +110,27 @@ public class FriendsService {
         }
     }
 
+
+    /**
+     * 친구 요청 취소
+     * @param sourceMemberId
+     * @param targetMemberId
+     * @return
+     */
+    @Transactional
+    public Boolean CancelFriends(Long sourceMemberId, Long targetMemberId) {
+        Optional<Friends> sourceFriends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.REQUEST);
+        if (!sourceFriends.isPresent()) {
+            throw new IllegalStateException("친구요청을 보낸적이 없습니다.");
+        }
+        setFriendsByStateAndTime(sourceFriends.get(), FriendState.CANCELED);
+
+        if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.CANCELED)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     /**
      * 친구 요청 Validation
@@ -123,21 +144,6 @@ public class FriendsService {
             throw new IllegalStateException("이미 전송된 요청입니다.");
         } else if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.ACCEPT)) {
             throw new IllegalStateException("이미 친구입니다.");
-        }
-    }
-
-    @Transactional
-    public Boolean CancelFriends(Long sourceMemberId, Long targetMemberId) {
-        Optional<Friends> sourceFriends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.REQUEST);
-        if (!sourceFriends.isPresent()) {
-            throw new IllegalStateException("친구요청을 보낸적이 없습니다.");
-        }
-        setFriendsStateAndTime(sourceFriends.get(), FriendState.CANCELED);
-
-        if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.CANCELED)) {
-            return true;
-        } else {
-            return false;
         }
     }
 
@@ -155,7 +161,7 @@ public class FriendsService {
         return friendsRepository.findBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, friendState);
     }
 
-    private void setFriendsStateAndTime(Friends friends, FriendState friendState) {
+    private void setFriendsByStateAndTime(Friends friends, FriendState friendState) {
         friends.setRegisteredDate(Timestamp.valueOf(LocalDateTime.now()));
         friends.setEstablishState(friendState);
     }
