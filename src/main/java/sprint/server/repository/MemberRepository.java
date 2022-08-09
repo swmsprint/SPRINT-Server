@@ -6,5 +6,5 @@ import sprint.server.domain.Member;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member,Long> {
-
+    Member findByName(String name);
 }

@@ -1,6 +1,7 @@
 package sprint.server.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,7 +17,6 @@ import java.util.List;
 public class StatisticsApiController {
 
     private final StatisticsService statisticsService;
-    private final MemberService memberService;
 
     @GetMapping("/api/statistics/join/{id}")
     public long createStatistics(@PathVariable("id")long memberId){
@@ -29,7 +29,6 @@ public class StatisticsApiController {
 
         return statisticsService.findByStatisticsTypeAndMember_Id(StatisticsType.Daily,memberID);
     }
-
 
 
 }
