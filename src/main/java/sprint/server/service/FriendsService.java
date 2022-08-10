@@ -3,6 +3,8 @@ package sprint.server.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sprint.server.controller.exception.ApiException;
+import sprint.server.controller.exception.ExceptionEnum;
 import sprint.server.domain.Member;
 import sprint.server.domain.friends.FriendState;
 import sprint.server.domain.friends.Friends;
@@ -47,7 +49,7 @@ public class FriendsService {
     public Boolean RejectFriendsRequest(Long sourceMemberId, Long targetMemberId){
         boolean isExists = isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.REQUEST);
         if (!isExists) {
-            throw new IllegalStateException("해당 친구 요청이 존재하지 않습니다.");
+            throw new ApiException(ExceptionEnum.FRIENDS_REQUEST_NOT_FOUND);
         }
         Friends friends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.REQUEST).get();
         setFriendsByStateAndTime(friends, FriendState.REJECT);
@@ -68,11 +70,11 @@ public class FriendsService {
     public Boolean AcceptFriendsRequest(Long sourceMemberId, Long targetMemberId){
         boolean isExists = isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.REQUEST);
         if (!isExists) {
-            throw new IllegalStateException("해당 친구 요청이 존재하지 않습니다.");
+            throw new ApiException(ExceptionEnum.FRIENDS_REQUEST_NOT_FOUND);
         }
         boolean isExists2 = isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.ACCEPT);
         if (isExists2) {
-            throw new IllegalStateException("이미 친구입니다.");
+            throw new ApiException(ExceptionEnum.FRIENDS_ALREADY_FRIEND);
         }
         Friends friends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.REQUEST).get();
         setFriendsByStateAndTime(friends, FriendState.ACCEPT);
@@ -99,7 +101,7 @@ public class FriendsService {
         Optional<Friends> sourceFriends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.ACCEPT);
         Optional<Friends> targetFriends = findFriendsRequest(targetMemberId, sourceMemberId, FriendState.ACCEPT);
         if(!sourceFriends.isPresent() || !targetFriends.isPresent()) {
-            throw new IllegalStateException("잘못된 요청입니다. : 친구가 아닙니다.");
+            throw new ApiException(ExceptionEnum.FRIENDS_NOT_FRIEND);
         }
         setFriendsByStateAndTime(sourceFriends.get(), FriendState.REJECT);
         setFriendsByStateAndTime(targetFriends.get(), FriendState.REJECT);
@@ -123,7 +125,7 @@ public class FriendsService {
     public Boolean CancelFriends(Long sourceMemberId, Long targetMemberId) {
         Optional<Friends> sourceFriends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.REQUEST);
         if (!sourceFriends.isPresent()) {
-            throw new IllegalStateException("친구요청을 보낸적이 없습니다.");
+            throw new ApiException(ExceptionEnum.FRIENDS_REQUEST_NOT_FOUND);
         }
         setFriendsByStateAndTime(sourceFriends.get(), FriendState.CANCELED);
 
@@ -143,9 +145,9 @@ public class FriendsService {
         memberService.isMemberExistById(sourceMemberId, "sourceMember가 database에 존재하지 않습니다.");
         memberService.isMemberExistById(targetMemberId, "targetMember가 database에 존재하지 않습니다.");
         if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.REQUEST)){
-            throw new IllegalStateException("이미 전송된 요청입니다.");
+            throw new ApiException(ExceptionEnum.FRIENDS_ALREADY_SENT);
         } else if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.ACCEPT)) {
-            throw new IllegalStateException("이미 친구입니다.");
+            throw new ApiException(ExceptionEnum.FRIENDS_ALREADY_FRIEND);
         }
     }
 
