@@ -68,13 +68,13 @@ public class FriendsService {
      */
     @Transactional
     public Boolean AcceptFriendsRequest(Long sourceMemberId, Long targetMemberId){
-        boolean isExists = isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.REQUEST);
-        if (!isExists) {
-            throw new ApiException(ExceptionEnum.FRIENDS_REQUEST_NOT_FOUND);
-        }
-        boolean isExists2 = isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.ACCEPT);
-        if (isExists2) {
+        boolean isExists1 = isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.ACCEPT);
+        if (isExists1) {
             throw new ApiException(ExceptionEnum.FRIENDS_ALREADY_FRIEND);
+        }
+        boolean isExists2 = isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.REQUEST);
+        if (!isExists2) {
+            throw new ApiException(ExceptionEnum.FRIENDS_REQUEST_NOT_FOUND);
         }
         Friends friends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.REQUEST).get();
         setFriendsByStateAndTime(friends, FriendState.ACCEPT);
@@ -144,10 +144,10 @@ public class FriendsService {
     private void validationFriendsRequest(Long sourceMemberId, Long targetMemberId){
         memberService.isMemberExistById(sourceMemberId, "sourceMember가 database에 존재하지 않습니다.");
         memberService.isMemberExistById(targetMemberId, "targetMember가 database에 존재하지 않습니다.");
-        if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.REQUEST)){
-            throw new ApiException(ExceptionEnum.FRIENDS_ALREADY_SENT);
-        } else if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.ACCEPT)) {
+        if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.ACCEPT)) {
             throw new ApiException(ExceptionEnum.FRIENDS_ALREADY_FRIEND);
+        } else if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.REQUEST)){
+            throw new ApiException(ExceptionEnum.FRIENDS_ALREADY_SENT);
         }
     }
 
