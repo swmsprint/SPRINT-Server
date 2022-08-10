@@ -3,6 +3,8 @@ package sprint.server.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sprint.server.controller.exception.ApiException;
+import sprint.server.controller.exception.ExceptionEnum;
 import sprint.server.domain.Member;
 import sprint.server.domain.friends.FriendState;
 import sprint.server.domain.friends.Friends;
@@ -23,8 +25,8 @@ public class FriendsService {
 
     /**
      * 친구 요청
-     * @param sourceMemberId
-     * @param targetMemberId
+     * @param sourceMemberId -> 친구요청을 보내는 UserId
+     * @param targetMemberId -> 친구요청을 받는 UserId
      * @return friends
      */
     @Transactional
@@ -39,17 +41,18 @@ public class FriendsService {
 
     /**
      * 친구 요청 거절
-     * @param sourceMemberId, targetMemberId
+     * @param sourceMemberId -> 친구요청을 거절하는 UserId
+     * @param targetMemberId -> 친구요청을 보낸 UserId
      * @return 결과(true/false)
      */
     @Transactional
     public Boolean RejectFriendsRequest(Long sourceMemberId, Long targetMemberId){
         boolean isExists = isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.REQUEST);
         if (!isExists) {
-            throw new IllegalStateException("해당 친구 요청이 존재하지 않습니다.");
+            throw new ApiException(ExceptionEnum.FRIENDS_REQUEST_NOT_FOUND);
         }
         Friends friends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.REQUEST).get();
-        setFriendsStateAndTime(friends, FriendState.REJECT);
+        setFriendsByStateAndTime(friends, FriendState.REJECT);
         if (friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, FriendState.REJECT)) {
             return true;
         } else {
@@ -59,23 +62,24 @@ public class FriendsService {
 
     /**
      * 친구 요청 수락
-     * @param sourceMemberId, targetMemberId
+     * @param sourceMemberId -> 친구요청을 수락하는 UserId
+     * @param targetMemberId -> 친구요청을 요청한 UserId
      * @return 결과(true/false)
      */
     @Transactional
     public Boolean AcceptFriendsRequest(Long sourceMemberId, Long targetMemberId){
-        boolean isExists = isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.REQUEST);
-        if (!isExists) {
-            throw new IllegalStateException("해당 친구 요청이 존재하지 않습니다.");
+        boolean isExists1 = isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.ACCEPT);
+        if (isExists1) {
+            throw new ApiException(ExceptionEnum.FRIENDS_ALREADY_FRIEND);
         }
-        boolean isExists2 = isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.ACCEPT);
-        if (isExists2) {
-            throw new IllegalStateException("이미 친구입니다.");
+        boolean isExists2 = isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.REQUEST);
+        if (!isExists2) {
+            throw new ApiException(ExceptionEnum.FRIENDS_REQUEST_NOT_FOUND);
         }
         Friends friends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.REQUEST).get();
-        setFriendsStateAndTime(friends, FriendState.ACCEPT);
+        setFriendsByStateAndTime(friends, FriendState.ACCEPT);
         Friends newFriends = Friends.createFriendsRelationship(targetMemberId, sourceMemberId);
-        setFriendsStateAndTime(newFriends, FriendState.ACCEPT);
+        setFriendsByStateAndTime(newFriends, FriendState.ACCEPT);
 
         friendsRepository.save(newFriends);
         if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.ACCEPT) &&
@@ -88,19 +92,19 @@ public class FriendsService {
 
     /**
      * 친구 제거
-     * @param sourceMemberId
-     * @param targetMemberId
-     * @return
+     * @param sourceMemberId -> 친구 제거를 요청한 UserId
+     * @param targetMemberId -> 친구 목록에서 삭제되길 기대되는 UserId
+     * @return 결과(true/false)
      */
     @Transactional
     public Boolean DeleteFriends(Long sourceMemberId, Long targetMemberId) {
         Optional<Friends> sourceFriends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.ACCEPT);
         Optional<Friends> targetFriends = findFriendsRequest(targetMemberId, sourceMemberId, FriendState.ACCEPT);
         if(!sourceFriends.isPresent() || !targetFriends.isPresent()) {
-            throw new IllegalStateException("잘못된 요청입니다. : 친구가 아닙니다.");
+            throw new ApiException(ExceptionEnum.FRIENDS_NOT_FRIEND);
         }
-        setFriendsStateAndTime(sourceFriends.get(), FriendState.REJECT);
-        setFriendsStateAndTime(targetFriends.get(), FriendState.REJECT);
+        setFriendsByStateAndTime(sourceFriends.get(), FriendState.REJECT);
+        setFriendsByStateAndTime(targetFriends.get(), FriendState.REJECT);
 
         if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.REJECT) &&
                 isFriendsRequestExist(targetMemberId, sourceMemberId, FriendState.REJECT)){
@@ -110,12 +114,27 @@ public class FriendsService {
         }
     }
 
-    public List<Member> LoadFriends(Long memberId) {
-        List<Friends> friendsList = friendsRepository.findBySourceMemberIdAndEstablishState(memberId, FriendState.ACCEPT);
-        List<Member> result = friendsList.stream().map(friends -> memberService.findById(friends.getTargetMemberId())).collect(Collectors.toList());
-        return result;
-    }
 
+    /**
+     * 친구 요청 취소
+     * @param sourceMemberId -> 친구요청 취소를 요청한 UserId
+     * @param targetMemberId -> 친구요청 대상 UserId
+     * @return
+     */
+    @Transactional
+    public Boolean CancelFriends(Long sourceMemberId, Long targetMemberId) {
+        Optional<Friends> sourceFriends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.REQUEST);
+        if (!sourceFriends.isPresent()) {
+            throw new ApiException(ExceptionEnum.FRIENDS_REQUEST_NOT_FOUND);
+        }
+        setFriendsByStateAndTime(sourceFriends.get(), FriendState.CANCELED);
+
+        if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.CANCELED)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     /**
      * 친구 요청 Validation
@@ -125,10 +144,10 @@ public class FriendsService {
     private void validationFriendsRequest(Long sourceMemberId, Long targetMemberId){
         memberService.isMemberExistById(sourceMemberId, "sourceMember가 database에 존재하지 않습니다.");
         memberService.isMemberExistById(targetMemberId, "targetMember가 database에 존재하지 않습니다.");
-        if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.REQUEST)){
-            throw new IllegalStateException("이미 전송된 요청입니다.");
-        } else if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.ACCEPT)) {
-            throw new IllegalStateException("이미 친구입니다.");
+        if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.ACCEPT)) {
+            throw new ApiException(ExceptionEnum.FRIENDS_ALREADY_FRIEND);
+        } else if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.REQUEST)){
+            throw new ApiException(ExceptionEnum.FRIENDS_ALREADY_SENT);
         }
     }
 
@@ -146,9 +165,20 @@ public class FriendsService {
         return friendsRepository.findBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, friendState);
     }
 
-    private void setFriendsStateAndTime(Friends friends, FriendState friendState) {
+    private void setFriendsByStateAndTime(Friends friends, FriendState friendState) {
         friends.setRegisteredDate(Timestamp.valueOf(LocalDateTime.now()));
         friends.setEstablishState(friendState);
     }
 
+    public List<Member> LoadFriendsBySourceMember(Long memberId, FriendState friendState) {
+        List<Friends> friendsList = friendsRepository.findBySourceMemberIdAndEstablishState(memberId, friendState);
+        List<Member> result = friendsList.stream().map(friends -> memberService.findById(friends.getTargetMemberId())).collect(Collectors.toList());
+        return result;
+    }
+
+    public List<Member> LoadFriendsByTargetMember(Long memberId, FriendState friendState) {
+        List<Friends> friendsList = friendsRepository.findByTargetMemberIdAndEstablishState(memberId, friendState);
+        List<Member> result = friendsList.stream().map(friends -> memberService.findById(friends.getSourceMemberId())).collect(Collectors.toList());
+        return result;
+    }
 }
