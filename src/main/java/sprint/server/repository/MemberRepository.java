@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface MemberRepository extends JpaRepository<Member,Long> {
     List<Member> findByNickname(String Nickname);
+    List<Member> findByNicknameContaining(String Nickname);
 }
