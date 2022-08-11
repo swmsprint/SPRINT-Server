@@ -20,25 +20,14 @@ public class MemberService {
 
     @Transactional // readOnly = false
     public Long join(Member member){
-        if (!IsExistsByNickname(member.getNickname())) {
+        if (IsExistsByNickname(member.getNickname())){
+            throw new ApiException(ExceptionEnum.MEMBER_DUPLICATE_NICKNAME);
+        } else if (IsExistsByEmail(member.getEmail())){
+            throw new ApiException(ExceptionEnum.MEMBER_DUPLICATE_EMAIL);
+        } else {
             memberRepository.save(member);
             return member.getId();
-        } else {
-            throw new ApiException(ExceptionEnum.MEMBER_DUPLICATE_NICKNAME);
         }
-    }
-
-    public Member findById(Long id){
-        return memberRepository.findById(id).get();
-    }
-
-    public void isMemberExistById(Long sourceMemberId, String message) {
-        if (!memberRepository.existsById(sourceMemberId)) {
-            throw new IllegalStateException(message);
-        }
-    }
-    public Boolean IsExistsByNickname(String nickname) {
-        return memberRepository.existsByNickname(nickname);
     }
 
     @Transactional
@@ -55,5 +44,22 @@ public class MemberService {
         member.get().setWeight(request.getWeight());
         member.get().setPicture(request.getPicture());
         return true;
+    }
+
+    public Member findById(Long id){
+        return memberRepository.findById(id).get();
+    }
+    public void isMemberExistById(Long sourceMemberId, String message) {
+        if (!memberRepository.existsById(sourceMemberId)) {
+            throw new IllegalStateException(message);
+        }
+    }
+
+    public Boolean IsExistsByNickname(String nickname) {
+        return memberRepository.existsByNickname(nickname);
+    }
+
+    public boolean IsExistsByEmail(String email) {
+        return memberRepository.existsByEmail(email);
     }
 }

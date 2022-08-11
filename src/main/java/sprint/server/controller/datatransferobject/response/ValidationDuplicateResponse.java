@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class ValidationDuplicateNicknameResponse {
+public class ValidationDuplicateResponse {
     Boolean result;
 }

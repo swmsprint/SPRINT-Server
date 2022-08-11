@@ -2,10 +2,7 @@ package sprint.server.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import sprint.server.controller.datatransferobject.request.CreateMemberRequest;
-import sprint.server.controller.datatransferobject.request.LoadMembersByNicknameRequest;
-import sprint.server.controller.datatransferobject.request.ModifyMembersRequest;
-import sprint.server.controller.datatransferobject.request.ValidationDuplicateNicknameRequest;
+import sprint.server.controller.datatransferobject.request.*;
 import sprint.server.controller.datatransferobject.response.*;
 import sprint.server.domain.Member.Member;
 import sprint.server.repository.MemberRepository;
@@ -60,7 +57,16 @@ public class MemberApiController {
      * return (true -> 존재하지 않음, false -> 존재함)
      */
     @GetMapping ("/api/members/validation_duplicate_name")
-    public ValidationDuplicateNicknameResponse ValidationDuplicateNickname(@RequestBody @Valid ValidationDuplicateNicknameRequest request) {
-        return new ValidationDuplicateNicknameResponse(!memberService.IsExistsByNickname(request.getNickname()));
+    public ValidationDuplicateResponse ValidationDuplicateNickname(@RequestBody @Valid ValidationDuplicateNicknameRequest request) {
+        return new ValidationDuplicateResponse(!memberService.IsExistsByNickname(request.getNickname()));
+    }
+
+    /**
+     * 중복 이메일 확인
+     * return (true -> 존재하지 않음, false -> 존재함)
+     */
+    @GetMapping ("/api/members/validation_duplicate_email")
+    public ValidationDuplicateResponse ValidationDuplicateEmail(@RequestBody @Valid ValidationDuplicateEmailRequest request) {
+        return new ValidationDuplicateResponse(!memberService.IsExistsByEmail(request.getEmail()));
     }
 }
