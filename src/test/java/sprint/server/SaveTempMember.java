@@ -20,23 +20,8 @@ public class SaveTempMember {
 
     @Bean
     public void Save2TestMember() {
-        Member member1 = new Member();
-        Member member2 = new Member();
-        member1.setNickname("Test1");
-        member1.setEmail("test1@sprint.com");
-        member1.setBirthDay(LocalDate.of(2011, 02, 28));
-        member1.setGender(Gender.FEMALE);
-        member1.setHeight(180.0f);
-        member1.setWeight(70f);
-        member1.setTierId(0);
-
-        member2.setNickname("Test2");
-        member2.setGender(Gender.MALE);
-        member2.setEmail("test2@sprint.com");
-        member2.setBirthDay(LocalDate.of(2001, 02, 11));
-        member2.setHeight(180.0f);
-        member2.setWeight(70f);
-        member2.setTierId(0);
+        Member member1 = Member.createMember("Test1", Gender.FEMALE, "test1@sprint.com", LocalDate.of(2011, 02, 28), 180.0f, 70f, null);
+        Member member2 = Member.createMember("Test2", Gender.FEMALE, "test2@sprint.com", LocalDate.of(2012, 02, 12), 166.0f, 65f, null);
         memberService.join(member1);
         memberService.join(member2);
     }

@@ -20,7 +20,6 @@ public class MemberService {
     @Transactional // readOnly = false
     public Long join(Member member){
         validateDuplicateMember(member);
-        member.setJoinDay(Timestamp.valueOf(LocalDateTime.now()));
         memberRepository.save(member);
         return member.getId();
     }
