@@ -3,7 +3,7 @@ package sprint.server.domain.groupmember;
 import lombok.Getter;
 import lombok.Setter;
 import sprint.server.domain.Groups;
-import sprint.server.domain.Member;
+import sprint.server.domain.Member.Member;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;

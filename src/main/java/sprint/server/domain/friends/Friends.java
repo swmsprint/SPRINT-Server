@@ -3,7 +3,7 @@ package sprint.server.domain.friends;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import sprint.server.domain.Member;
+import sprint.server.domain.Member.Member;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

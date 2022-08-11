@@ -1,12 +1,11 @@
 package sprint.server;
 
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import sprint.server.domain.Member;
+import sprint.server.domain.Member.Member;
 import sprint.server.service.MemberService;
 
 @SpringBootTest

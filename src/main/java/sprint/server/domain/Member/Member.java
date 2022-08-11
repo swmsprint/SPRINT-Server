@@ -1,12 +1,9 @@
-package sprint.server.domain;
+package sprint.server.domain.Member;
 
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 @Getter @Setter
@@ -17,17 +14,12 @@ public class Member {
     private long id;
 
     private String name;
-
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
     private String email;
-
     private float height;
     private float weight;
-
-
     private int mainGroupId;
     private int tierId;
-
     private String picture;
-
-
 }

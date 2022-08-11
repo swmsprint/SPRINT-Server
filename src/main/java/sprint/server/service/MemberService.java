@@ -3,7 +3,7 @@ package sprint.server.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sprint.server.domain.Member;
+import sprint.server.domain.Member.Member;
 import sprint.server.repository.MemberRepository;
 
 import java.util.List;

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sprint.server.domain.Member;
+import sprint.server.domain.Member.Member;
 import sprint.server.domain.Running;
 import sprint.server.domain.RunningRowData;
 import sprint.server.repository.MemberRepository;
