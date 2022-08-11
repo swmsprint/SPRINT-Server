@@ -5,10 +5,8 @@ import org.springframework.web.bind.annotation.*;
 import sprint.server.controller.datatransferobject.request.CreateMemberRequest;
 import sprint.server.controller.datatransferobject.request.LoadMembersByNicknameRequest;
 import sprint.server.controller.datatransferobject.request.ModifyMembersRequest;
-import sprint.server.controller.datatransferobject.response.CreateMemberResponse;
-import sprint.server.controller.datatransferobject.response.LoadMembersResponse;
-import sprint.server.controller.datatransferobject.response.LoadMembersResponseDto;
-import sprint.server.controller.datatransferobject.response.ModifyMembersResponse;
+import sprint.server.controller.datatransferobject.request.ValidationDuplicateNicknameRequest;
+import sprint.server.controller.datatransferobject.response.*;
 import sprint.server.domain.Member.Member;
 import sprint.server.repository.MemberRepository;
 import sprint.server.service.MemberService;
@@ -54,7 +52,15 @@ public class MemberApiController {
      */
     @PutMapping("/api/members/modify")
     public ModifyMembersResponse ModifyMembers(@RequestBody @Valid ModifyMembersRequest request) {
-        Boolean result = memberService.ModifyMembers(request);
-        return new ModifyMembersResponse(result);
+        return new ModifyMembersResponse(memberService.ModifyMembers(request));
+    }
+
+    /**
+     * 중복 닉네임 확인
+     * return (true -> 존재하지 않음, false -> 존재함)
+     */
+    @GetMapping ("/api/members/validation_duplicate_name")
+    public ValidationDuplicateNicknameResponse ValidationDuplicateNickname(@RequestBody @Valid ValidationDuplicateNicknameRequest request) {
+        return new ValidationDuplicateNicknameResponse(!memberService.IsExistsByNickname(request.getNickname()));
     }
 }

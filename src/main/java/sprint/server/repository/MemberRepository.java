@@ -10,4 +10,5 @@ import java.util.List;
 public interface MemberRepository extends JpaRepository<Member,Long> {
     List<Member> findByNickname(String Nickname);
     List<Member> findByNicknameContaining(String Nickname);
+    Boolean existsByNickname(String Nickname);
 }

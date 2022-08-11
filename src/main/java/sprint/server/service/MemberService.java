@@ -9,9 +9,6 @@ import sprint.server.controller.exception.ExceptionEnum;
 import sprint.server.domain.Member.Member;
 import sprint.server.repository.MemberRepository;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -23,9 +20,12 @@ public class MemberService {
 
     @Transactional // readOnly = false
     public Long join(Member member){
-        validateDuplicateMember(member);
-        memberRepository.save(member);
-        return member.getId();
+        if (!IsExistsByNickname(member.getNickname())) {
+            memberRepository.save(member);
+            return member.getId();
+        } else {
+            throw new ApiException(ExceptionEnum.MEMBER_DUPLICATE_NICKNAME);
+        }
     }
 
     public Member findById(Long id){
@@ -37,11 +37,8 @@ public class MemberService {
             throw new IllegalStateException(message);
         }
     }
-    private void validateDuplicateMember(Member member) {
-        List<Member> findMembers = memberRepository.findByNickname(member.getNickname());
-        if (!findMembers.isEmpty()) {
-            throw new IllegalStateException("이미 존재하는 닉네임 입니다.");
-        }
+    public Boolean IsExistsByNickname(String nickname) {
+        return memberRepository.existsByNickname(nickname);
     }
 
     @Transactional
