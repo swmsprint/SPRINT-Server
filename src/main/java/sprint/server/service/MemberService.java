@@ -6,6 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import sprint.server.domain.Member.Member;
 import sprint.server.repository.MemberRepository;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -18,6 +20,7 @@ public class MemberService {
     @Transactional // readOnly = false
     public Long join(Member member){
         validateDuplicateMember(member);
+        member.setJoinDay(Timestamp.valueOf(LocalDateTime.now()));
         memberRepository.save(member);
         return member.getId();
     }

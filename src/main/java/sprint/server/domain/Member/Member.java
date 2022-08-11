@@ -20,6 +20,7 @@ public class Member {
     private Gender gender;
     private String email;
     private LocalDate birthDay;
+    private Timestamp joinDay;
     private float height;
     private float weight;
     private int mainGroupId;
