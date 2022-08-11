@@ -14,7 +14,8 @@ public enum ExceptionEnum {
     FRIENDS_REQUEST_NOT_FOUND(HttpStatus.BAD_REQUEST, "F0001", "해당 친구요청이 존재하지 않습니다."),
     FRIENDS_ALREADY_SENT(HttpStatus.BAD_REQUEST, "F0002", "이미 전송된 요청입니다."),
     FRIENDS_ALREADY_FRIEND(HttpStatus.BAD_REQUEST, "F0003", "이미 친구입니다."),
-    FRIENDS_NOT_FRIEND(HttpStatus.BAD_REQUEST, "F0004", "친구가 아닙니다.")
+    FRIENDS_NOT_FRIEND(HttpStatus.BAD_REQUEST, "F0004", "친구가 아닙니다."),
+    MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "M0001", "해당 유저가 존재하지 않습니다.")
     ;
 
     private final HttpStatus status;
