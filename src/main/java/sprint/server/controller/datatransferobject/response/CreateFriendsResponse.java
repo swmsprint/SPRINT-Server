@@ -1,6 +1,5 @@
 package sprint.server.controller.datatransferobject.response;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

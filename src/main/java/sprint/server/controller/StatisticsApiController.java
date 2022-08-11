@@ -23,13 +23,8 @@ public class StatisticsApiController {
         return statisticsService.join(memberId);
     }
 
-
     @GetMapping("/api/statistics/{id}")
     public List<Statistics> viewStatisticsDetail(@PathVariable("id")Long memberID){
-
         return statisticsService.findByStatisticsTypeAndMember_Id(StatisticsType.Daily,memberID);
     }
-
-
-
 }

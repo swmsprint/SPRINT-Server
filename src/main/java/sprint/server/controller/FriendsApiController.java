@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import sprint.server.controller.datatransferobject.request.*;
 import sprint.server.controller.datatransferobject.response.*;
-import sprint.server.domain.Member;
+import sprint.server.domain.Member.Member;
 import sprint.server.domain.friends.FriendState;
 import sprint.server.domain.friends.Friends;
 import sprint.server.repository.FriendsRepository;

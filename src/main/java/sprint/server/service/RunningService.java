@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sprint.server.controller.datatransferobject.request.FinishRunningRequest;
-import sprint.server.domain.Member;
+import sprint.server.domain.Member.Member;
 import sprint.server.domain.Running;
 import sprint.server.domain.RunningRawData;
 import sprint.server.repository.MemberRepository;
@@ -149,5 +149,4 @@ public class RunningService {
     private static double degreeToRadians(double degree){
         return (degree * Math.PI/180.0);
     }
-
 }

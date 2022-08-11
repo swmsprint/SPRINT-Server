@@ -13,5 +13,4 @@ public class RunningRawData {
     protected RunningRawData(){
         //함부로 생성하는 걸 막는다는 의미
     }
-
 }

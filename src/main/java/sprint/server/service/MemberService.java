@@ -3,8 +3,12 @@ package sprint.server.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sprint.server.domain.Member;
+import sprint.server.domain.Member.Member;
 import sprint.server.repository.MemberRepository;
+
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -13,8 +17,9 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
-    @Transactional
+    @Transactional // readOnly = false
     public Long join(Member member){
+        validateDuplicateMember(member);
         memberRepository.save(member);
         return member.getId();
     }
@@ -26,6 +31,12 @@ public class MemberService {
     public void isMemberExistById(Long sourceMemberId, String message) {
         if (!memberRepository.existsById(sourceMemberId)) {
             throw new IllegalStateException(message);
+        }
+    }
+    private void validateDuplicateMember(Member member) {
+        List<Member> findMembers = memberRepository.findByNickname(member.getNickname());
+        if (!findMembers.isEmpty()) {
+            throw new IllegalStateException("이미 존재하는 닉네임 입니다.");
         }
     }
 }

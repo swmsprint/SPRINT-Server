@@ -1,17 +1,12 @@
 package sprint.server.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import net.bytebuddy.asm.Advice;
+import sprint.server.domain.Member.Member;
 
 import javax.persistence.*;
-import java.sql.Time;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter @Setter
@@ -29,12 +24,9 @@ public class Running {
     private Timestamp startTime;
 
     private int duration;
-
     private double distance;
     private double energy;
-
     private float weight;
-
 
     @Column(length = 10000)
     private String rawData;

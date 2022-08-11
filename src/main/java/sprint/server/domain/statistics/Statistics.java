@@ -2,7 +2,7 @@ package sprint.server.domain.statistics;
 
 import lombok.Getter;
 import lombok.Setter;
-import sprint.server.domain.Member;
+import sprint.server.domain.Member.Member;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -25,7 +25,5 @@ public class Statistics {
     private double distance;
     private int totalSeconds;
     private int count;
-
     private LocalDateTime saveTime;
-
 }

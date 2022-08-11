@@ -1,13 +1,12 @@
 package sprint.server.controller.datatransferobject.response;
 
 import lombok.Data;
-import sprint.server.domain.Member;
-
+import sprint.server.domain.Member.Member;
 
 @Data
 public class LoadFriendsResponseDto {
     private Long userId;
-    private String name;
+    private String nickName;
     private String email;
     private float height;
     private float weight;
@@ -16,7 +15,7 @@ public class LoadFriendsResponseDto {
 
     public LoadFriendsResponseDto(Member member){
         this.userId = member.getId();
-        this.name = member.getName();
+        this.nickName = member.getNickname();
         this.email = member.getEmail();
         this.height = member.getHeight();
         this.weight = member.getWeight();

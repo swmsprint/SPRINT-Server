@@ -13,10 +13,7 @@ public interface FriendsRepository extends JpaRepository<Friends, Long>{
     Boolean existsBySourceMemberIdAndTargetMemberIdAndEstablishState(Long sourceMemberId, Long targetMemberId, FriendState friendState);
     Optional<Friends> findBySourceMemberIdAndTargetMemberId(Long sourceMemberId, Long targetMemberId);
     Optional<Friends> findBySourceMemberIdAndTargetMemberIdAndEstablishState(Long sourceMemberId, Long targetMemberId, FriendState friendState);
-
     boolean existsBySourceMemberIdAndTargetMemberId(Long sourceMemberId, Long targetMemberId);
-
     List<Friends> findBySourceMemberIdAndEstablishState(Long sourceMemberId, FriendState friendState);
-
     List<Friends> findByTargetMemberIdAndEstablishState(Long targetMemberId, FriendState friendState);
 }

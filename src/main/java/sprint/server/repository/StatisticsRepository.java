@@ -10,8 +10,5 @@ import java.util.List;
 
 @Repository
 public interface StatisticsRepository extends JpaRepository<Statistics,Long> {
-
     List<Statistics> findByStatisticsTypeAndMember_Id(StatisticsType statisticsType,long member_id);
-
-
 }

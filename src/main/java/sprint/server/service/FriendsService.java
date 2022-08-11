@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sprint.server.controller.exception.ApiException;
 import sprint.server.controller.exception.ExceptionEnum;
-import sprint.server.domain.Member;
+import sprint.server.domain.Member.Member;
 import sprint.server.domain.friends.FriendState;
 import sprint.server.domain.friends.Friends;
 import sprint.server.repository.FriendsRepository;
