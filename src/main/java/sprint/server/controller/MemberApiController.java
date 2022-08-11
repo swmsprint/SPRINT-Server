@@ -21,7 +21,7 @@ public class MemberApiController {
         // 그냥 setName 을 setUserName으로 바꿔버리면 되기에 전혀 신경쓸필요 ㄴㄴ
         //즉 엔티티와 api 스펙을 분리해버릴 수 있음
         Member member = new Member();
-        member.setName(request.getName());
+        member.setNickname(request.getNickname());
         member.setEmail(request.getEmail());
         member.setGender(request.getGender());
         member.setHeight(request.getHeight());

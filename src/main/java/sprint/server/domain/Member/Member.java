@@ -13,7 +13,7 @@ public class Member {
     @Column(name = "member_id")
     private long id;
 
-    private String name;
+    private String nickname;
     @Enumerated(EnumType.STRING)
     private Gender gender;
     private String email;

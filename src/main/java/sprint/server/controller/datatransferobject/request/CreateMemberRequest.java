@@ -6,7 +6,7 @@ import sprint.server.domain.Member.Gender;
 @Data
 public class CreateMemberRequest {
 
-    private String name;
+    private String nickname;
     private String email;
     private Gender gender;
     private float height;
