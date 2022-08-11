@@ -3,7 +3,7 @@ package sprint.server.domain;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import sprint.server.domain.Member.Member;
+import sprint.server.domain.member.Member;
 
 import javax.persistence.*;
 import java.sql.Timestamp;

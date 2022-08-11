@@ -1,7 +1,7 @@
 package sprint.server.controller.datatransferobject.response;
 
 import lombok.Data;
-import sprint.server.domain.Member.Member;
+import sprint.server.domain.member.Member;
 
 import java.util.Comparator;
 

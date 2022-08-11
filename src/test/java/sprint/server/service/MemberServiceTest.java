@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import sprint.server.domain.Member.Member;
+import sprint.server.domain.member.Member;
 
 import static org.junit.jupiter.api.Assertions.*;
 

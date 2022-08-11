@@ -2,7 +2,7 @@ package sprint.server.controller.datatransferobject.request;
 
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
-import sprint.server.domain.Member.Gender;
+import sprint.server.domain.member.Gender;
 import java.time.LocalDate;
 
 @Data

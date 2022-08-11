@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import sprint.server.controller.datatransferobject.request.ModifyMembersRequest;
 import sprint.server.controller.exception.ApiException;
 import sprint.server.controller.exception.ExceptionEnum;
-import sprint.server.domain.Member.Member;
+import sprint.server.domain.member.Member;
 import sprint.server.repository.MemberRepository;
 
 import java.util.Optional;

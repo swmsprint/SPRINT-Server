@@ -5,8 +5,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import sprint.server.domain.Member.Gender;
-import sprint.server.domain.Member.Member;
+import sprint.server.domain.member.Gender;
+import sprint.server.domain.member.Member;
 import sprint.server.service.MemberService;
 
 import java.time.LocalDate;
