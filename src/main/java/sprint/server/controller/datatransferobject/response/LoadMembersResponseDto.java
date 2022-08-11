@@ -4,7 +4,7 @@ import lombok.Data;
 import sprint.server.domain.Member.Member;
 
 @Data
-public class LoadFriendsResponseDto {
+public class LoadMembersResponseDto {
     private Long userId;
     private String nickName;
     private String email;
@@ -13,7 +13,7 @@ public class LoadFriendsResponseDto {
     private int tierId;
     private String picture;
 
-    public LoadFriendsResponseDto(Member member){
+    public LoadMembersResponseDto(Member member){
         this.userId = member.getId();
         this.nickName = member.getNickname();
         this.email = member.getEmail();
