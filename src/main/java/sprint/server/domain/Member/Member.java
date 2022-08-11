@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
+import java.time.LocalDate;
 
 @Entity
 @Getter @Setter
@@ -17,6 +19,7 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Gender gender;
     private String email;
+    private LocalDate birthDay;
     private float height;
     private float weight;
     private int mainGroupId;

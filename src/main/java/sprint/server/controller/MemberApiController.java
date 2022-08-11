@@ -10,6 +10,7 @@ import sprint.server.domain.Member.Member;
 import sprint.server.service.MemberService;
 
 import javax.validation.Valid;
+import java.sql.Timestamp;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,6 +24,7 @@ public class MemberApiController {
         Member member = new Member();
         member.setNickname(request.getNickname());
         member.setEmail(request.getEmail());
+        member.setBirthDay(request.getBirthDay());
         member.setGender(request.getGender());
         member.setHeight(request.getHeight());
         member.setWeight(request.getWeight());
