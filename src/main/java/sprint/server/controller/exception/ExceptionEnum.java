@@ -17,7 +17,9 @@ public enum ExceptionEnum {
     FRIENDS_NOT_FRIEND(HttpStatus.BAD_REQUEST, "F0004", "친구가 아닙니다."),
     MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "M0001", "해당 유저가 존재하지 않습니다."),
     MEMBER_DUPLICATE_NICKNAME(HttpStatus.BAD_REQUEST, "M0002", "이미 존재하는 닉네임입니다."),
-    MEMBER_DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "M0003", "이미 가입된 이메일입니다." );
+    MEMBER_DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "M0003", "이미 가입된 이메일입니다." ),
+    MEMBER_NOT_DISABLED(HttpStatus.BAD_REQUEST, "M0004", "이미 활성화된 계정입니다." ),
+    MEMBER_ALREADY_DISABLED(HttpStatus.BAD_REQUEST, "M0005", "이미 비활성화된 계정입니다.");
 
     private final HttpStatus status;
     private final String code;

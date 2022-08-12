@@ -53,9 +53,25 @@ public class MemberService {
         Optional<Member> member = memberRepository.findById(memberId);
         if (member.isEmpty()) {
             throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
+        } else if (member.get().getDisableDay() != null) {
+            throw new ApiException(ExceptionEnum.MEMBER_ALREADY_DISABLED);
+        } else {
+            member.get().setDisableDay(LocalDate.now());
+            return true;
         }
-        member.get().setDisableDay(LocalDate.now());
-        return true;
+    }
+
+    @Transactional
+    public Boolean enableMember(Long memberId) {
+        Optional<Member> member = memberRepository.findById(memberId);
+        if (member.isEmpty()) {
+            throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
+        } else if (member.get().getDisableDay() == null){
+            throw new ApiException(ExceptionEnum.MEMBER_NOT_DISABLED);
+        } else {
+            member.get().setDisableDay(null);
+            return true;
+        }
     }
 
     public Member findById(Long id){
@@ -75,6 +91,7 @@ public class MemberService {
     public Boolean IsExistsByNickname(String nickname) {
         return memberRepository.existsByNickname(nickname);
     }
+
     public boolean IsExistsByEmail(String email) {
         return memberRepository.existsByEmail(email);
     }

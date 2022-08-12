@@ -42,9 +42,20 @@ public class MemberApiController {
         return new LoadMembersResponse(result.size(), result);
     }
 
+    /**
+     * 회원 비활성화
+     */
     @PutMapping("/api/members/disable")
     public BooleanResponse DisableMember(@RequestBody @Valid OneMemberRequest request) {
         return new BooleanResponse(memberService.disableMember(request.getUserId()));
+    }
+
+    /**
+     * 회원 활성화
+     */
+    @PutMapping("/api/members/enable")
+    public BooleanResponse EnableMember(@RequestBody @Valid OneMemberRequest request) {
+        return new BooleanResponse(memberService.enableMember(request.getUserId()));
     }
 
     /**
