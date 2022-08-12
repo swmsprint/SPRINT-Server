@@ -43,16 +43,16 @@ public class MemberApiController {
     }
 
     @PutMapping("/api/members/disable")
-    public DisableMemberResponse DisableMember(@RequestBody @Valid DisableMemberRequest request) {
-        return new DisableMemberResponse(memberService.disableMember(request.getUserId()));
+    public BooleanResponse DisableMember(@RequestBody @Valid DisableMemberRequest request) {
+        return new BooleanResponse(memberService.disableMember(request.getUserId()));
     }
 
     /**
      * 회원 정보 변경
      */
     @PutMapping("/api/members/modify")
-    public ModifyMembersResponse ModifyMembers(@RequestBody @Valid ModifyMembersRequest request) {
-        return new ModifyMembersResponse(memberService.ModifyMembers(request));
+    public BooleanResponse ModifyMembers(@RequestBody @Valid ModifyMembersRequest request) {
+        return new BooleanResponse(memberService.ModifyMembers(request));
     }
 
     /**
@@ -60,8 +60,8 @@ public class MemberApiController {
      * return (true -> 존재하지 않음, false -> 존재함)
      */
     @GetMapping ("/api/members/validation_duplicate_name")
-    public ValidationDuplicateResponse ValidationDuplicateNickname(@RequestBody @Valid ValidationDuplicateNicknameRequest request) {
-        return new ValidationDuplicateResponse(!memberService.IsExistsByNickname(request.getNickname()));
+    public BooleanResponse ValidationDuplicateNickname(@RequestBody @Valid ValidationDuplicateNicknameRequest request) {
+        return new BooleanResponse(!memberService.IsExistsByNickname(request.getNickname()));
     }
 
     /**
@@ -69,7 +69,7 @@ public class MemberApiController {
      * return (true -> 존재하지 않음, false -> 존재함)
      */
     @GetMapping ("/api/members/validation_duplicate_email")
-    public ValidationDuplicateResponse ValidationDuplicateEmail(@RequestBody @Valid ValidationDuplicateEmailRequest request) {
-        return new ValidationDuplicateResponse(!memberService.IsExistsByEmail(request.getEmail()));
+    public BooleanResponse ValidationDuplicateEmail(@RequestBody @Valid ValidationDuplicateEmailRequest request) {
+        return new BooleanResponse(!memberService.IsExistsByEmail(request.getEmail()));
     }
 }

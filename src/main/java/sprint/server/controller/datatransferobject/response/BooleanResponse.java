@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class DisableMemberResponse {
+public class BooleanResponse {
     private Boolean result;
 }

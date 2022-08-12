@@ -20,29 +20,29 @@ public class FriendsApiController {
     private final FriendsService friendsService;
     private final FriendsRepository friendsRepository;
     @PostMapping("/api/friends")
-    public CreateFriendsResponse createFriends(@RequestBody @Valid CreateFriendsRequest request) {
+    public BooleanResponse createFriends(@RequestBody @Valid CreateFriendsRequest request) {
         Friends friends = friendsService.FriendsRequest(request.getSourceUserId(), request.getTargetUserId());
-        return new CreateFriendsResponse(friendsRepository.existsById(friends.getId()));
+        return new BooleanResponse(friendsRepository.existsById(friends.getId()));
     }
 
     @PostMapping("/api/friends/accept")
-    public CreateFriendsResultResponse AcceptFriends(@RequestBody @Valid CreateFriendsResultRequest request) {
-        return new CreateFriendsResultResponse(friendsService.AcceptFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
+    public BooleanResponse AcceptFriends(@RequestBody @Valid CreateFriendsResultRequest request) {
+        return new BooleanResponse(friendsService.AcceptFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
     }
 
     @PutMapping("/api/friends/reject")
-    public CreateFriendsResultResponse RejectFriends(@RequestBody @Valid CreateFriendsResultRequest request) {
-        return new CreateFriendsResultResponse(friendsService.RejectFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
+    public BooleanResponse RejectFriends(@RequestBody @Valid CreateFriendsResultRequest request) {
+        return new BooleanResponse(friendsService.RejectFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
     }
 
     @PutMapping("/api/friends/delete")
-    public DeleteFriendsResponse DeleteFriends(@RequestBody @Valid DeleteFriendsRequest request) {
-        return new DeleteFriendsResponse(friendsService.DeleteFriends(request.getSourceUserId(), request.getTargetUserId()));
+    public BooleanResponse DeleteFriends(@RequestBody @Valid DeleteFriendsRequest request) {
+        return new BooleanResponse(friendsService.DeleteFriends(request.getSourceUserId(), request.getTargetUserId()));
     }
 
     @PutMapping("api/friends/cancel")
-    public CancelFriendsResponse CancelFriendsRequest(@RequestBody @Valid CancelFriendsRequest request){
-        return new CancelFriendsResponse(friendsService.CancelFriends(request.getSourceUserId(), request.getTargetUserId()));
+    public BooleanResponse CancelFriendsRequest(@RequestBody @Valid CancelFriendsRequest request){
+        return new BooleanResponse(friendsService.CancelFriends(request.getSourceUserId(), request.getTargetUserId()));
     }
 
 
