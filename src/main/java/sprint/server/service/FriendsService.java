@@ -111,7 +111,6 @@ public class FriendsService {
      * 친구 요청 취소
      * @param sourceMemberId -> 친구요청 취소를 요청한 UserId
      * @param targetMemberId -> 친구요청 대상 UserId
-     * @return
      */
     @Transactional
     public Boolean CancelFriends(Long sourceMemberId, Long targetMemberId) {
@@ -126,8 +125,8 @@ public class FriendsService {
 
     /**
      * 친구 요청 Validation
-     * @param sourceMemberId
-     * @param targetMemberId
+     * @param sourceMemberId -> 친구요청을 보내는 사람
+     * @param targetMemberId -> 친구요청을 받는 사람
      */
     private void validationFriendsRequest(Long sourceMemberId, Long targetMemberId){
         if (!memberService.isMemberExistById(sourceMemberId)) {
@@ -141,11 +140,6 @@ public class FriendsService {
         }
     }
 
-    /**
-     * 친구 요청 응답 전 Validation
-     * @param sourceMemberId
-     * @param targetMemberId
-     */
     private boolean isFriendsRequestExist(Long sourceMemberId, Long targetMemberId, FriendState friendState) {
         return friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, friendState);
     }
