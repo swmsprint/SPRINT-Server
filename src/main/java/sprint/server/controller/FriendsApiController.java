@@ -55,7 +55,7 @@ public class FriendsApiController {
     public LoadMembersResponse<LoadMembersResponseDto> LoadFriendsFriends(@RequestBody @Valid LoadFriendsRequest request) {
         List<Member> members = friendsService.LoadFriendsBySourceMember(request.getUserId(), FriendState.ACCEPT);
         List<LoadMembersResponseDto> result = members.stream()
-                .map(member -> new LoadMembersResponseDto(member))
+                .map(LoadMembersResponseDto::new)
                 .collect(Collectors.toList());
         return new LoadMembersResponse(result.size(), result);
     }
@@ -69,7 +69,7 @@ public class FriendsApiController {
     public LoadMembersResponse<LoadMembersResponseDto> LoadFriendsReceive(@RequestBody @Valid LoadFriendsRequest request) {
         List<Member> members = friendsService.LoadFriendsByTargetMember(request.getUserId(), FriendState.REQUEST);
         List<LoadMembersResponseDto> result = members.stream()
-                .map(member -> new LoadMembersResponseDto(member))
+                .map(LoadMembersResponseDto::new)
                 .collect(Collectors.toList());
         return new LoadMembersResponse(result.size(), result);
     }
@@ -83,7 +83,7 @@ public class FriendsApiController {
     public LoadMembersResponse<LoadMembersResponseDto> LoadFriendsRequest(@RequestBody @Valid LoadFriendsRequest request) {
         List<Member> members = friendsService.LoadFriendsBySourceMember(request.getUserId(), FriendState.REQUEST);
         List<LoadMembersResponseDto> result = members.stream()
-                .map(member -> new LoadMembersResponseDto(member))
+                .map(LoadMembersResponseDto::new)
                 .collect(Collectors.toList());
         return new LoadMembersResponse(result.size(), result);
     }
