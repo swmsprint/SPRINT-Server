@@ -42,6 +42,11 @@ public class MemberApiController {
         return new LoadMembersResponse(result.size(), result);
     }
 
+    @PutMapping("/api/members/disable")
+    public DisableMemberResponse DisableMember(@RequestBody @Valid DisableMemberRequest request) {
+        return new DisableMemberResponse(memberService.disableMember(request.getUserId()));
+    }
+
     /**
      * 회원 정보 변경
      */

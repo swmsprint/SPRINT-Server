@@ -28,6 +28,11 @@ public class Member {
     private int tierId;
     private String picture;
 
+    private LocalDate disableDay;
+
+    protected Member() {
+    }
+
     public static Member createMember(String nickname, Gender gender, String email, LocalDate birthDay, float height, float weight, String picture) {
         Member member = new Member();
         member.setNickname(nickname);

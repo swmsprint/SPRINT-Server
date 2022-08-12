@@ -7,7 +7,6 @@ import java.time.LocalDate;
 
 @Data
 public class CreateMemberRequest {
-
     private String nickname;
     private String email;
     private Gender gender;

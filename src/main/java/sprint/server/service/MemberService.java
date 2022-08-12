@@ -9,6 +9,7 @@ import sprint.server.controller.exception.ExceptionEnum;
 import sprint.server.domain.member.Member;
 import sprint.server.repository.MemberRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,6 +45,16 @@ public class MemberService {
         member.get().setHeight(request.getHeight());
         member.get().setWeight(request.getWeight());
         member.get().setPicture(request.getPicture());
+        return true;
+    }
+
+    @Transactional
+    public Boolean disableMember(Long memberId) {
+        Optional<Member> member = memberRepository.findById(memberId);
+        if (member.isEmpty()) {
+            throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
+        }
+        member.get().setDisableDay(LocalDate.now());
         return true;
     }
 
