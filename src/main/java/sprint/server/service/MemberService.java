@@ -22,9 +22,9 @@ public class MemberService {
 
     @Transactional // readOnly = false
     public Long join(Member member){
-        if (IsExistsByNickname(member.getNickname())){
+        if (existsByNickname(member.getNickname())){
             throw new ApiException(ExceptionEnum.MEMBER_DUPLICATE_NICKNAME);
-        } else if (IsExistsByEmail(member.getEmail())){
+        } else if (existsByEmail(member.getEmail())){
             throw new ApiException(ExceptionEnum.MEMBER_DUPLICATE_EMAIL);
         } else {
             memberRepository.save(member);
@@ -34,7 +34,7 @@ public class MemberService {
 
     @Transactional
     public Boolean ModifyMembers(ModifyMembersRequest request) {
-        Optional<Member> member = memberRepository.findById(request.getId());
+        Optional<Member> member = memberRepository.findByIdAndDisableDayIsNull(request.getId());
         if (member.isEmpty()) {
             throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
         }
@@ -50,7 +50,7 @@ public class MemberService {
 
     @Transactional
     public Boolean disableMember(Long memberId) {
-        Optional<Member> member = memberRepository.findById(memberId);
+        Optional<Member> member = memberRepository.findByIdAndDisableDayIsNull(memberId);
         if (member.isEmpty()) {
             throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
         } else if (member.get().getDisableDay() != null) {
@@ -63,7 +63,7 @@ public class MemberService {
 
     @Transactional
     public Boolean enableMember(Long memberId) {
-        Optional<Member> member = memberRepository.findById(memberId);
+        Optional<Member> member = memberRepository.findByIdAndDisableDayIsNull(memberId);
         if (member.isEmpty()) {
             throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
         } else if (member.get().getDisableDay() == null){
@@ -75,24 +75,24 @@ public class MemberService {
     }
 
     public Member findById(Long id){
-        Optional<Member> member = memberRepository.findById(id);
+        Optional<Member> member = memberRepository.findByIdAndDisableDayIsNull(id);
         if (member.isPresent()) {
             return member.get();
         } else {
             throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
         }
     }
-    public Boolean isMemberExistById(Long sourceMemberId) {
-        return memberRepository.existsById(sourceMemberId);
+    public Boolean existById(Long sourceMemberId) {
+        return memberRepository.existsByIdAndDisableDayIsNull(sourceMemberId);
     }
     public List<Member> findByNicknameContaining(String nickname) {
-        return memberRepository.findByNicknameContaining(nickname);
+        return memberRepository.findByNicknameContainingAndDisableDayIsNull(nickname);
     }
-    public Boolean IsExistsByNickname(String nickname) {
-        return memberRepository.existsByNickname(nickname);
+    public Boolean existsByNickname(String nickname) {
+        return memberRepository.existsByNicknameAndDisableDayIsNull(nickname);
     }
 
-    public boolean IsExistsByEmail(String email) {
-        return memberRepository.existsByEmail(email);
+    public boolean existsByEmail(String email) {
+        return memberRepository.existsByEmailAndDisableDayIsNull(email);
     }
 }

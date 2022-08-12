@@ -104,11 +104,12 @@ public class MemberServiceTest {
         /* 정상적인 요청 */
         Boolean result = memberService.disableMember(1L);
         assertEquals(true, result);
-        assertNotEquals(null, memberService.findById(1L).getDisableDay());
+        ApiException thrown = assertThrows(ApiException.class, () -> memberService.findById(1L));
+        assertEquals("M0001",thrown.getErrorCode());
         assertNull(memberService.findById(2L).getDisableDay());
 
         /* 해당 유저가 없을때 */
-        ApiException thrown = assertThrows(ApiException.class, () -> memberService.disableMember(-1L));
-        assertEquals("M0001", thrown.getErrorCode());
+        ApiException thrown2 = assertThrows(ApiException.class, () -> memberService.disableMember(-1L));
+        assertEquals("M0001", thrown2.getErrorCode());
     }
 }

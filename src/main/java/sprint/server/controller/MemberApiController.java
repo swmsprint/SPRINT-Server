@@ -72,7 +72,7 @@ public class MemberApiController {
      */
     @GetMapping ("/api/members/validation_duplicate_name")
     public BooleanResponse ValidationDuplicateNickname(@RequestBody @Valid ValidationDuplicateNicknameRequest request) {
-        return new BooleanResponse(!memberService.IsExistsByNickname(request.getNickname()));
+        return new BooleanResponse(!memberService.existsByNickname(request.getNickname()));
     }
 
     /**
@@ -81,6 +81,6 @@ public class MemberApiController {
      */
     @GetMapping ("/api/members/validation_duplicate_email")
     public BooleanResponse ValidationDuplicateEmail(@RequestBody @Valid ValidationDuplicateEmailRequest request) {
-        return new BooleanResponse(!memberService.IsExistsByEmail(request.getEmail()));
+        return new BooleanResponse(!memberService.existsByEmail(request.getEmail()));
     }
 }

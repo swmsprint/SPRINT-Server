@@ -9,6 +9,7 @@ import sprint.server.domain.member.Member;
 import sprint.server.domain.friends.FriendState;
 import sprint.server.domain.friends.Friends;
 import sprint.server.repository.FriendsRepository;
+import sprint.server.repository.MemberRepository;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 public class FriendsService {
     private final FriendsRepository friendsRepository;
     private final MemberService memberService;
+    private final MemberRepository memberRepository;
 
     /**
      * 친구 요청
@@ -129,9 +131,9 @@ public class FriendsService {
      * @param targetMemberId -> 친구요청을 받는 사람
      */
     private void validationFriendsRequest(Long sourceMemberId, Long targetMemberId){
-        if (!memberService.isMemberExistById(sourceMemberId)) {
+        if (!memberService.existById(sourceMemberId)) {
             throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND, "Source Member가 존재하지 않습니다.");
-        } else if (!memberService.isMemberExistById(targetMemberId)) {
+        } else if (!memberService.existById(targetMemberId)) {
             throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND, "Target Member가 존재하지 않습니다.");
         } else if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.ACCEPT)) {
             throw new ApiException(ExceptionEnum.FRIENDS_ALREADY_FRIEND);
@@ -155,11 +157,18 @@ public class FriendsService {
 
     public List<Member> LoadFriendsBySourceMember(Long memberId, FriendState friendState) {
         List<Friends> friendsList = friendsRepository.findBySourceMemberIdAndEstablishState(memberId, friendState);
-        return friendsList.stream().map(friends -> memberService.findById(friends.getTargetMemberId())).collect(Collectors.toList());
+        return friendsList.stream()
+                .filter(friends -> memberRepository.findById(friends.getTargetMemberId()).get().getDisableDay() == null)
+                .map(friends -> memberService.findById(friends.getTargetMemberId()))
+                .collect(Collectors.toList());
     }
 
     public List<Member> LoadFriendsByTargetMember(Long memberId, FriendState friendState) {
         List<Friends> friendsList = friendsRepository.findByTargetMemberIdAndEstablishState(memberId, friendState);
         return friendsList.stream().map(friends -> memberService.findById(friends.getSourceMemberId())).collect(Collectors.toList());
+    }
+
+    public Boolean existsById(Long memberId) {
+        return friendsRepository.existsById(memberId);
     }
 }

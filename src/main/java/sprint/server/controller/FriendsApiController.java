@@ -7,7 +7,6 @@ import sprint.server.controller.datatransferobject.response.*;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.friends.FriendState;
 import sprint.server.domain.friends.Friends;
-import sprint.server.repository.FriendsRepository;
 import sprint.server.service.FriendsService;
 
 import javax.validation.Valid;
@@ -18,11 +17,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FriendsApiController {
     private final FriendsService friendsService;
-    private final FriendsRepository friendsRepository;
+
     @PostMapping("/api/friends")
     public BooleanResponse createFriends(@RequestBody @Valid TwoMemberRequest request) {
         Friends friends = friendsService.FriendsRequest(request.getSourceUserId(), request.getTargetUserId());
-        return new BooleanResponse(friendsRepository.existsById(friends.getId()));
+        return new BooleanResponse(friendsService.existsById(friends.getId()));
     }
 
     @PostMapping("/api/friends/accept")
@@ -56,6 +55,7 @@ public class FriendsApiController {
         List<Member> members = friendsService.LoadFriendsBySourceMember(request.getUserId(), FriendState.ACCEPT);
         List<LoadMembersResponseDto> result = members.stream()
                 .map(LoadMembersResponseDto::new)
+                .sorted(LoadMembersResponseDto.COMPARE_BY_NICKNAME)
                 .collect(Collectors.toList());
         return new LoadMembersResponse(result.size(), result);
     }
