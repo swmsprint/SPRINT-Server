@@ -32,7 +32,7 @@ public class MemberApiController {
      * 회원 조회 (by Nickname, 사전순 출력)
      */
     @GetMapping("/api/members/list")
-    public LoadMembersResponse<LoadMembersResponseDto> LoadMembersByNickname(@RequestBody @Valid LoadMembersByNicknameRequest request){
+    public LoadMembersResponse<LoadMembersResponseDto> loadMembersByNickname(@RequestBody @Valid LoadMembersByNicknameRequest request){
         List<Member> members = memberService.findByNicknameContaining(request.getNickname());
         List<LoadMembersResponseDto> result = members.stream()
                 .map(LoadMembersResponseDto::new)
@@ -43,11 +43,27 @@ public class MemberApiController {
     }
 
     /**
+     * 회원 비활성화
+     */
+    @PutMapping("/api/members/disable")
+    public BooleanResponse disableMember(@RequestBody @Valid OneMemberRequest request) {
+        return new BooleanResponse(memberService.disableMember(request.getUserId()));
+    }
+
+    /**
+     * 회원 활성화
+     */
+    @PutMapping("/api/members/enable")
+    public BooleanResponse enableMember(@RequestBody @Valid OneMemberRequest request) {
+        return new BooleanResponse(memberService.enableMember(request.getUserId()));
+    }
+
+    /**
      * 회원 정보 변경
      */
     @PutMapping("/api/members/modify")
-    public ModifyMembersResponse ModifyMembers(@RequestBody @Valid ModifyMembersRequest request) {
-        return new ModifyMembersResponse(memberService.ModifyMembers(request));
+    public BooleanResponse modifyMembers(@RequestBody @Valid ModifyMembersRequest request) {
+        return new BooleanResponse(memberService.modifyMembers(request));
     }
 
     /**
@@ -55,8 +71,8 @@ public class MemberApiController {
      * return (true -> 존재하지 않음, false -> 존재함)
      */
     @GetMapping ("/api/members/validation_duplicate_name")
-    public ValidationDuplicateResponse ValidationDuplicateNickname(@RequestBody @Valid ValidationDuplicateNicknameRequest request) {
-        return new ValidationDuplicateResponse(!memberService.IsExistsByNickname(request.getNickname()));
+    public BooleanResponse validationDuplicateNickname(@RequestBody @Valid ValidationDuplicateNicknameRequest request) {
+        return new BooleanResponse(!memberService.existsByNickname(request.getNickname()));
     }
 
     /**
@@ -64,7 +80,7 @@ public class MemberApiController {
      * return (true -> 존재하지 않음, false -> 존재함)
      */
     @GetMapping ("/api/members/validation_duplicate_email")
-    public ValidationDuplicateResponse ValidationDuplicateEmail(@RequestBody @Valid ValidationDuplicateEmailRequest request) {
-        return new ValidationDuplicateResponse(!memberService.IsExistsByEmail(request.getEmail()));
+    public BooleanResponse validationDuplicateEmail(@RequestBody @Valid ValidationDuplicateEmailRequest request) {
+        return new BooleanResponse(!memberService.existsByEmail(request.getEmail()));
     }
 }

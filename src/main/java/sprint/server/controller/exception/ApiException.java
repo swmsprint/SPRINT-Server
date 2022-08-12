@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public class ApiException extends RuntimeException{
-    private ExceptionEnum error;
-    private String errorCode;
+    private final ExceptionEnum error;
+    private final String errorCode;
     public ApiException(ExceptionEnum e) {
         super(e.getMessages());
         this.error = e;

@@ -7,7 +7,6 @@ import sprint.server.controller.datatransferobject.response.*;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.friends.FriendState;
 import sprint.server.domain.friends.Friends;
-import sprint.server.repository.FriendsRepository;
 import sprint.server.service.FriendsService;
 
 import javax.validation.Valid;
@@ -18,44 +17,45 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FriendsApiController {
     private final FriendsService friendsService;
-    private final FriendsRepository friendsRepository;
+
     @PostMapping("/api/friends")
-    public CreateFriendsResponse createFriends(@RequestBody @Valid CreateFriendsRequest request) {
-        Friends friends = friendsService.FriendsRequest(request.getSourceUserId(), request.getTargetUserId());
-        return new CreateFriendsResponse(friendsRepository.existsById(friends.getId()));
+    public BooleanResponse createFriends(@RequestBody @Valid TwoMemberRequest request) {
+        Friends friends = friendsService.requestFriends(request.getSourceUserId(), request.getTargetUserId());
+        return new BooleanResponse(friendsService.existsById(friends.getId()));
     }
 
     @PostMapping("/api/friends/accept")
-    public CreateFriendsResultResponse AcceptFriends(@RequestBody @Valid CreateFriendsResultRequest request) {
-        return new CreateFriendsResultResponse(friendsService.AcceptFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
+    public BooleanResponse acceptFriends(@RequestBody @Valid TwoMemberRequest request) {
+        return new BooleanResponse(friendsService.acceptFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
     }
 
     @PutMapping("/api/friends/reject")
-    public CreateFriendsResultResponse RejectFriends(@RequestBody @Valid CreateFriendsResultRequest request) {
-        return new CreateFriendsResultResponse(friendsService.RejectFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
+    public BooleanResponse rejectFriends(@RequestBody @Valid TwoMemberRequest request) {
+        return new BooleanResponse(friendsService.rejectFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
     }
 
     @PutMapping("/api/friends/delete")
-    public DeleteFriendsResponse DeleteFriends(@RequestBody @Valid DeleteFriendsRequest request) {
-        return new DeleteFriendsResponse(friendsService.DeleteFriends(request.getSourceUserId(), request.getTargetUserId()));
+    public BooleanResponse deleteFriends(@RequestBody @Valid TwoMemberRequest request) {
+        return new BooleanResponse(friendsService.deleteFriends(request.getSourceUserId(), request.getTargetUserId()));
     }
 
     @PutMapping("api/friends/cancel")
-    public CancelFriendsResponse CancelFriendsRequest(@RequestBody @Valid CancelFriendsRequest request){
-        return new CancelFriendsResponse(friendsService.CancelFriends(request.getSourceUserId(), request.getTargetUserId()));
+    public BooleanResponse cancelFriendsRequest(@RequestBody @Valid TwoMemberRequest request){
+        return new BooleanResponse(friendsService.cancelFriends(request.getSourceUserId(), request.getTargetUserId()));
     }
 
 
     /**
      * 나의 친구 목록
      * @param request -> userId
-     * @return
+     * @return number of friends list, friends list
      */
     @GetMapping("/api/friends/list/myfriends")
-    public LoadMembersResponse<LoadMembersResponseDto> LoadFriendsFriends(@RequestBody @Valid LoadFriendsRequest request) {
-        List<Member> members = friendsService.LoadFriendsBySourceMember(request.getUserId(), FriendState.ACCEPT);
+    public LoadMembersResponse<LoadMembersResponseDto> loadFriendsFriends(@RequestBody @Valid OneMemberRequest request) {
+        List<Member> members = friendsService.loadFriendsBySourceMember(request.getUserId(), FriendState.ACCEPT);
         List<LoadMembersResponseDto> result = members.stream()
                 .map(LoadMembersResponseDto::new)
+                .sorted(LoadMembersResponseDto.COMPARE_BY_NICKNAME)
                 .collect(Collectors.toList());
         return new LoadMembersResponse(result.size(), result);
     }
@@ -63,11 +63,11 @@ public class FriendsApiController {
     /**
      * 내가 받은 친구 요청 목록
      * @param request -> userId
-     * @return
+     * @return number of list, list
      */
     @GetMapping("/api/friends/list/receive")
-    public LoadMembersResponse<LoadMembersResponseDto> LoadFriendsReceive(@RequestBody @Valid LoadFriendsRequest request) {
-        List<Member> members = friendsService.LoadFriendsByTargetMember(request.getUserId(), FriendState.REQUEST);
+    public LoadMembersResponse<LoadMembersResponseDto> loadFriendsReceive(@RequestBody @Valid OneMemberRequest request) {
+        List<Member> members = friendsService.loadFriendsByTargetMember(request.getUserId(), FriendState.REQUEST);
         List<LoadMembersResponseDto> result = members.stream()
                 .map(LoadMembersResponseDto::new)
                 .collect(Collectors.toList());
@@ -77,11 +77,11 @@ public class FriendsApiController {
     /**
      * 내가 보낸 친구 요청 목록
      * @param request -> userId
-     * @return
+     * @return number of list, list
      */
     @GetMapping("/api/friends/list/request")
-    public LoadMembersResponse<LoadMembersResponseDto> LoadFriendsRequest(@RequestBody @Valid LoadFriendsRequest request) {
-        List<Member> members = friendsService.LoadFriendsBySourceMember(request.getUserId(), FriendState.REQUEST);
+    public LoadMembersResponse<LoadMembersResponseDto> loadFriendsRequest(@RequestBody @Valid OneMemberRequest request) {
+        List<Member> members = friendsService.loadFriendsBySourceMember(request.getUserId(), FriendState.REQUEST);
         List<LoadMembersResponseDto> result = members.stream()
                 .map(LoadMembersResponseDto::new)
                 .collect(Collectors.toList());
