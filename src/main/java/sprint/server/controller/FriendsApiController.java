@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import sprint.server.controller.datatransferobject.request.*;
 import sprint.server.controller.datatransferobject.response.*;
-import sprint.server.domain.Member.Member;
+import sprint.server.domain.member.Member;
 import sprint.server.domain.friends.FriendState;
 import sprint.server.domain.friends.Friends;
 import sprint.server.repository.FriendsRepository;
@@ -52,12 +52,12 @@ public class FriendsApiController {
      * @return
      */
     @GetMapping("/api/friends/list/myfriends")
-    public LoadFriendsResponse<LoadFriendsResponseDto> LoadFriendsFriends(@RequestBody @Valid LoadFriendsRequest request) {
+    public LoadMembersResponse<LoadMembersResponseDto> LoadFriendsFriends(@RequestBody @Valid LoadFriendsRequest request) {
         List<Member> members = friendsService.LoadFriendsBySourceMember(request.getUserId(), FriendState.ACCEPT);
-        List<LoadFriendsResponseDto> result = members.stream()
-                .map(member -> new LoadFriendsResponseDto(member))
+        List<LoadMembersResponseDto> result = members.stream()
+                .map(LoadMembersResponseDto::new)
                 .collect(Collectors.toList());
-        return new LoadFriendsResponse(result.size(), result);
+        return new LoadMembersResponse(result.size(), result);
     }
 
     /**
@@ -66,12 +66,12 @@ public class FriendsApiController {
      * @return
      */
     @GetMapping("/api/friends/list/receive")
-    public LoadFriendsResponse<LoadFriendsResponseDto> LoadFriendsReceive(@RequestBody @Valid LoadFriendsRequest request) {
+    public LoadMembersResponse<LoadMembersResponseDto> LoadFriendsReceive(@RequestBody @Valid LoadFriendsRequest request) {
         List<Member> members = friendsService.LoadFriendsByTargetMember(request.getUserId(), FriendState.REQUEST);
-        List<LoadFriendsResponseDto> result = members.stream()
-                .map(member -> new LoadFriendsResponseDto(member))
+        List<LoadMembersResponseDto> result = members.stream()
+                .map(LoadMembersResponseDto::new)
                 .collect(Collectors.toList());
-        return new LoadFriendsResponse(result.size(), result);
+        return new LoadMembersResponse(result.size(), result);
     }
 
     /**
@@ -80,11 +80,11 @@ public class FriendsApiController {
      * @return
      */
     @GetMapping("/api/friends/list/request")
-    public LoadFriendsResponse<LoadFriendsResponseDto> LoadFriendsRequest(@RequestBody @Valid LoadFriendsRequest request) {
+    public LoadMembersResponse<LoadMembersResponseDto> LoadFriendsRequest(@RequestBody @Valid LoadFriendsRequest request) {
         List<Member> members = friendsService.LoadFriendsBySourceMember(request.getUserId(), FriendState.REQUEST);
-        List<LoadFriendsResponseDto> result = members.stream()
-                .map(member -> new LoadFriendsResponseDto(member))
+        List<LoadMembersResponseDto> result = members.stream()
+                .map(LoadMembersResponseDto::new)
                 .collect(Collectors.toList());
-        return new LoadFriendsResponse(result.size(), result);
+        return new LoadMembersResponse(result.size(), result);
     }
 }

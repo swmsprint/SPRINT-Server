@@ -1,10 +1,12 @@
 package sprint.server.controller.datatransferobject.response;
 
 import lombok.Data;
-import sprint.server.domain.Member.Member;
+import sprint.server.domain.member.Member;
+
+import java.util.Comparator;
 
 @Data
-public class LoadFriendsResponseDto {
+public class LoadMembersResponseDto {
     private Long userId;
     private String nickName;
     private String email;
@@ -13,7 +15,7 @@ public class LoadFriendsResponseDto {
     private int tierId;
     private String picture;
 
-    public LoadFriendsResponseDto(Member member){
+    public LoadMembersResponseDto(Member member){
         this.userId = member.getId();
         this.nickName = member.getNickname();
         this.email = member.getEmail();
@@ -22,6 +24,13 @@ public class LoadFriendsResponseDto {
         this.tierId = member.getTierId();
         this.picture = member.getPicture();
     }
+
+    public static Comparator<LoadMembersResponseDto> COMPARE_BY_NICKNAME = new Comparator<LoadMembersResponseDto>() {
+        @Override
+        public int compare(LoadMembersResponseDto o1, LoadMembersResponseDto o2) {
+            return o1.nickName.compareTo(o2.nickName);
+        }
+    };
 }
 
 

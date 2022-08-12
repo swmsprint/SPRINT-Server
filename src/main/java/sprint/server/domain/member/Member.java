@@ -1,4 +1,4 @@
-package sprint.server.domain.Member;
+package sprint.server.domain.member;
 
 import lombok.Getter;
 import lombok.Setter;

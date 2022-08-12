@@ -3,11 +3,12 @@ package sprint.server.controller.datatransferobject.request;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 import sprint.server.domain.member.Gender;
+
 import java.time.LocalDate;
 
 @Data
-public class CreateMemberRequest {
-
+public class ModifyMembersRequest {
+    private Long id;
     private String nickname;
     private String email;
     private Gender gender;

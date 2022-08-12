@@ -9,7 +9,7 @@ import sprint.server.controller.datatransferobject.request.FinishRunningRequest;
 import sprint.server.controller.datatransferobject.response.CreateRunningResponse;
 import sprint.server.controller.datatransferobject.response.FinishRunningResponse;
 import sprint.server.controller.datatransferobject.response.ViewRunningResponse;
-import sprint.server.domain.Member.Member;
+import sprint.server.domain.member.Member;
 import sprint.server.domain.Running;
 import sprint.server.domain.RunningRawData;
 import sprint.server.service.MemberService;

@@ -2,7 +2,7 @@ package sprint.server.domain.statistics;
 
 import lombok.Getter;
 import lombok.Setter;
-import sprint.server.domain.Member.Member;
+import sprint.server.domain.member.Member;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
