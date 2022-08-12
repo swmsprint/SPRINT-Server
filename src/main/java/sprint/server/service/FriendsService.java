@@ -161,6 +161,9 @@ public class FriendsService {
     }
 
     public List<Member> loadFriendsBySourceMember(Long memberId, FriendState friendState) {
+        if (!memberService.existById(memberId)){
+            throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
+        }
         List<Friends> friendsList = friendsRepository.findBySourceMemberIdAndEstablishState(memberId, friendState);
         return friendsList.stream()
                 .filter(friends -> memberRepository.findById(friends.getTargetMemberId()).get().getDisableDay() == null)
@@ -169,11 +172,14 @@ public class FriendsService {
     }
 
     public List<Member> loadFriendsByTargetMember(Long memberId, FriendState friendState) {
+        if (!memberService.existById(memberId)){
+            throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
+        }
         List<Friends> friendsList = friendsRepository.findByTargetMemberIdAndEstablishState(memberId, friendState);
         return friendsList.stream().map(friends -> memberService.findById(friends.getSourceMemberId())).collect(Collectors.toList());
     }
 
-    public Boolean existsById(Long memberId) {
-        return friendsRepository.existsById(memberId);
+    public Boolean existsById(Long friendsId) {
+        return friendsRepository.existsById(friendsId);
     }
 }

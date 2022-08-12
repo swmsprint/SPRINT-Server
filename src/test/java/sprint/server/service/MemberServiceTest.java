@@ -26,7 +26,7 @@ public class MemberServiceTest {
      * 회원가입 테스트
      */
     @Test
-    public void MemberJoinTest(){
+    public void memberJoinTest(){
         String testName = "TestName";
         String testName2 = "TestName2";
         /* 정상적인 요청 */
@@ -52,7 +52,7 @@ public class MemberServiceTest {
      * 회원 정보 수정 테스트
      */
     @Test
-    public void ModifyMembersTest(){
+    public void modifyMembersTest(){
         /* 정상적인 요청 */
         ModifyMembersRequest modifyMembersRequest = new ModifyMembersRequest();
         modifyMembersRequest.setId(1L);
