@@ -8,8 +8,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 @ToString
 public class ExceptionDto {
-    private String errorCode;
-    private String errorMessage;
+    private final String errorCode;
+    private final String errorMessage;
 
     @Builder
     public ExceptionDto(HttpStatus status, String errorCode, String errorMessage) {

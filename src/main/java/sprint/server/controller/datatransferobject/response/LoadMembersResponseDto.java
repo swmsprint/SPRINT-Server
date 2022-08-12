@@ -25,12 +25,7 @@ public class LoadMembersResponseDto {
         this.picture = member.getPicture();
     }
 
-    public static Comparator<LoadMembersResponseDto> COMPARE_BY_NICKNAME = new Comparator<LoadMembersResponseDto>() {
-        @Override
-        public int compare(LoadMembersResponseDto o1, LoadMembersResponseDto o2) {
-            return o1.nickName.compareTo(o2.nickName);
-        }
-    };
+    public static Comparator<LoadMembersResponseDto> COMPARE_BY_NICKNAME = Comparator.comparing(o -> o.nickName);
 }
 
 
