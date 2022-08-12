@@ -1,7 +1,6 @@
 package sprint.server.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sprint.server.controller.datatransferobject.request.ModifyMembersRequest;
@@ -49,7 +48,12 @@ public class MemberService {
     }
 
     public Member findById(Long id){
-        return memberRepository.findById(id).get();
+        Optional<Member> member = memberRepository.findById(id);
+        if (member.isPresent()) {
+            return member.get();
+        } else {
+            throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
+        }
     }
     public Boolean isMemberExistById(Long sourceMemberId) {
         return memberRepository.existsById(sourceMemberId);

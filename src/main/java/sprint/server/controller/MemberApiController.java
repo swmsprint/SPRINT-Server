@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.*;
 import sprint.server.controller.datatransferobject.request.*;
 import sprint.server.controller.datatransferobject.response.*;
 import sprint.server.domain.member.Member;
-import sprint.server.repository.MemberRepository;
 import sprint.server.service.MemberService;
 
 import javax.validation.Valid;
@@ -16,7 +15,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MemberApiController {
     private final MemberService memberService;
-    private final MemberRepository memberRepository;
 
     /**
      * 회원 가입
@@ -37,7 +35,7 @@ public class MemberApiController {
     public LoadMembersResponse<LoadMembersResponseDto> LoadMembersByNickname(@RequestBody @Valid LoadMembersByNicknameRequest request){
         List<Member> members = memberService.findByNicknameContaining(request.getNickname());
         List<LoadMembersResponseDto> result = members.stream()
-                .map(member -> new LoadMembersResponseDto(member))
+                .map(LoadMembersResponseDto::new)
                 .sorted(LoadMembersResponseDto.COMPARE_BY_NICKNAME)
                 .collect(Collectors.toList());
 
