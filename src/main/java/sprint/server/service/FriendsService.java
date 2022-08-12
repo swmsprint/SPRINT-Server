@@ -32,12 +32,17 @@ public class FriendsService {
      * @return friends
      */
     @Transactional
-    public Friends FriendsRequest(Long sourceMemberId, Long targetMemberId) {
+    public Friends requestFriends(Long sourceMemberId, Long targetMemberId) {
         validationFriendsRequest(sourceMemberId, targetMemberId);
-        Friends friends = Friends.createFriendsRelationship(sourceMemberId, targetMemberId);
-        friends.setRegisteredDate(Timestamp.valueOf(LocalDateTime.now()));
-        friendsRepository.save(friends);
-        return friends;
+        /* 만약 이미 targetMemberId가 sourceMemberId에게 친구요청을 면낸적이 있다 */
+        if (isFriendsRequestExist(targetMemberId, sourceMemberId, FriendState.REQUEST) && (acceptFriendsRequest(targetMemberId, sourceMemberId)) ){
+            return findFriendsRequest(sourceMemberId, targetMemberId, FriendState.ACCEPT).get();
+        } else {
+            Friends friends = Friends.createFriendsRelationship(sourceMemberId, targetMemberId);
+            friends.setRegisteredDate(Timestamp.valueOf(LocalDateTime.now()));
+            friendsRepository.save(friends);
+            return friends;
+        }
     }
 
 
@@ -48,7 +53,7 @@ public class FriendsService {
      * @return 결과(true/false)
      */
     @Transactional
-    public Boolean RejectFriendsRequest(Long sourceMemberId, Long targetMemberId){
+    public Boolean rejectFriendsRequest(Long sourceMemberId, Long targetMemberId){
         boolean isExists = isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.REQUEST);
         if (!isExists) {
             throw new ApiException(ExceptionEnum.FRIENDS_REQUEST_NOT_FOUND);
@@ -68,7 +73,7 @@ public class FriendsService {
      * @return 결과(true/false)
      */
     @Transactional
-    public Boolean AcceptFriendsRequest(Long sourceMemberId, Long targetMemberId){
+    public Boolean acceptFriendsRequest(Long sourceMemberId, Long targetMemberId){
         if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.ACCEPT)) {
             throw new ApiException(ExceptionEnum.FRIENDS_ALREADY_FRIEND);
         }
@@ -95,7 +100,7 @@ public class FriendsService {
      * @return 결과(true/false)
      */
     @Transactional
-    public Boolean DeleteFriends(Long sourceMemberId, Long targetMemberId) {
+    public Boolean deleteFriends(Long sourceMemberId, Long targetMemberId) {
         Optional<Friends> sourceFriends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.ACCEPT);
         Optional<Friends> targetFriends = findFriendsRequest(targetMemberId, sourceMemberId, FriendState.ACCEPT);
         if(sourceFriends.isEmpty() || targetFriends.isEmpty()) {
@@ -115,7 +120,7 @@ public class FriendsService {
      * @param targetMemberId -> 친구요청 대상 UserId
      */
     @Transactional
-    public Boolean CancelFriends(Long sourceMemberId, Long targetMemberId) {
+    public Boolean cancelFriends(Long sourceMemberId, Long targetMemberId) {
         Optional<Friends> sourceFriends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.REQUEST);
         if (sourceFriends.isEmpty()) {
             throw new ApiException(ExceptionEnum.FRIENDS_REQUEST_NOT_FOUND);
@@ -155,7 +160,7 @@ public class FriendsService {
         friends.setEstablishState(friendState);
     }
 
-    public List<Member> LoadFriendsBySourceMember(Long memberId, FriendState friendState) {
+    public List<Member> loadFriendsBySourceMember(Long memberId, FriendState friendState) {
         List<Friends> friendsList = friendsRepository.findBySourceMemberIdAndEstablishState(memberId, friendState);
         return friendsList.stream()
                 .filter(friends -> memberRepository.findById(friends.getTargetMemberId()).get().getDisableDay() == null)
@@ -163,7 +168,7 @@ public class FriendsService {
                 .collect(Collectors.toList());
     }
 
-    public List<Member> LoadFriendsByTargetMember(Long memberId, FriendState friendState) {
+    public List<Member> loadFriendsByTargetMember(Long memberId, FriendState friendState) {
         List<Friends> friendsList = friendsRepository.findByTargetMemberIdAndEstablishState(memberId, friendState);
         return friendsList.stream().map(friends -> memberService.findById(friends.getSourceMemberId())).collect(Collectors.toList());
     }

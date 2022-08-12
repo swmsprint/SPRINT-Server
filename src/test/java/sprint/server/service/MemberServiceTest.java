@@ -63,7 +63,7 @@ public class MemberServiceTest {
         modifyMembersRequest.setHeight(166.7F);
         modifyMembersRequest.setWeight(70F);
         modifyMembersRequest.setPicture("modify@mtest.com");
-        Boolean result = memberService.ModifyMembers(modifyMembersRequest);
+        Boolean result = memberService.modifyMembers(modifyMembersRequest);
         assertEquals(true, result);
         Optional<Member> member = memberRepository.findById(1L);
         if (member.isPresent()) {
@@ -80,7 +80,7 @@ public class MemberServiceTest {
 
         /* 해당 회원이 존재하지 않을 때 */
         modifyMembersRequest.setId(0L);
-        ApiException thrown = assertThrows(ApiException.class, ()->memberService.ModifyMembers(modifyMembersRequest));
+        ApiException thrown = assertThrows(ApiException.class, ()->memberService.modifyMembers(modifyMembersRequest));
         assertEquals("M0001", thrown.getErrorCode());
     }
 

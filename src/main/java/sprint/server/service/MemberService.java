@@ -33,7 +33,7 @@ public class MemberService {
     }
 
     @Transactional
-    public Boolean ModifyMembers(ModifyMembersRequest request) {
+    public Boolean modifyMembers(ModifyMembersRequest request) {
         Optional<Member> member = memberRepository.findByIdAndDisableDayIsNull(request.getId());
         if (member.isEmpty()) {
             throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
