@@ -50,7 +50,7 @@ public class MemberService {
 
     @Transactional
     public Boolean disableMember(Long memberId) {
-        Optional<Member> member = memberRepository.findByIdAndDisableDayIsNull(memberId);
+        Optional<Member> member = memberRepository.findById(memberId);
         if (member.isEmpty()) {
             throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
         } else if (member.get().getDisableDay() != null) {
@@ -63,7 +63,7 @@ public class MemberService {
 
     @Transactional
     public Boolean enableMember(Long memberId) {
-        Optional<Member> member = memberRepository.findByIdAndDisableDayIsNull(memberId);
+        Optional<Member> member = memberRepository.findById(memberId);
         if (member.isEmpty()) {
             throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
         } else if (member.get().getDisableDay() == null){
