@@ -43,7 +43,7 @@ public class MemberApiController {
     }
 
     @PutMapping("/api/members/disable")
-    public BooleanResponse DisableMember(@RequestBody @Valid DisableMemberRequest request) {
+    public BooleanResponse DisableMember(@RequestBody @Valid OneMemberRequest request) {
         return new BooleanResponse(memberService.disableMember(request.getUserId()));
     }
 

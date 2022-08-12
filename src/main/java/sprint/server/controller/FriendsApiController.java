@@ -20,28 +20,28 @@ public class FriendsApiController {
     private final FriendsService friendsService;
     private final FriendsRepository friendsRepository;
     @PostMapping("/api/friends")
-    public BooleanResponse createFriends(@RequestBody @Valid CreateFriendsRequest request) {
+    public BooleanResponse createFriends(@RequestBody @Valid TwoMemberRequest request) {
         Friends friends = friendsService.FriendsRequest(request.getSourceUserId(), request.getTargetUserId());
         return new BooleanResponse(friendsRepository.existsById(friends.getId()));
     }
 
     @PostMapping("/api/friends/accept")
-    public BooleanResponse AcceptFriends(@RequestBody @Valid CreateFriendsResultRequest request) {
+    public BooleanResponse AcceptFriends(@RequestBody @Valid TwoMemberRequest request) {
         return new BooleanResponse(friendsService.AcceptFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
     }
 
     @PutMapping("/api/friends/reject")
-    public BooleanResponse RejectFriends(@RequestBody @Valid CreateFriendsResultRequest request) {
+    public BooleanResponse RejectFriends(@RequestBody @Valid TwoMemberRequest request) {
         return new BooleanResponse(friendsService.RejectFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
     }
 
     @PutMapping("/api/friends/delete")
-    public BooleanResponse DeleteFriends(@RequestBody @Valid DeleteFriendsRequest request) {
+    public BooleanResponse DeleteFriends(@RequestBody @Valid TwoMemberRequest request) {
         return new BooleanResponse(friendsService.DeleteFriends(request.getSourceUserId(), request.getTargetUserId()));
     }
 
     @PutMapping("api/friends/cancel")
-    public BooleanResponse CancelFriendsRequest(@RequestBody @Valid CancelFriendsRequest request){
+    public BooleanResponse CancelFriendsRequest(@RequestBody @Valid TwoMemberRequest request){
         return new BooleanResponse(friendsService.CancelFriends(request.getSourceUserId(), request.getTargetUserId()));
     }
 
@@ -52,7 +52,7 @@ public class FriendsApiController {
      * @return
      */
     @GetMapping("/api/friends/list/myfriends")
-    public LoadMembersResponse<LoadMembersResponseDto> LoadFriendsFriends(@RequestBody @Valid LoadFriendsRequest request) {
+    public LoadMembersResponse<LoadMembersResponseDto> LoadFriendsFriends(@RequestBody @Valid OneMemberRequest request) {
         List<Member> members = friendsService.LoadFriendsBySourceMember(request.getUserId(), FriendState.ACCEPT);
         List<LoadMembersResponseDto> result = members.stream()
                 .map(LoadMembersResponseDto::new)
@@ -66,7 +66,7 @@ public class FriendsApiController {
      * @return
      */
     @GetMapping("/api/friends/list/receive")
-    public LoadMembersResponse<LoadMembersResponseDto> LoadFriendsReceive(@RequestBody @Valid LoadFriendsRequest request) {
+    public LoadMembersResponse<LoadMembersResponseDto> LoadFriendsReceive(@RequestBody @Valid OneMemberRequest request) {
         List<Member> members = friendsService.LoadFriendsByTargetMember(request.getUserId(), FriendState.REQUEST);
         List<LoadMembersResponseDto> result = members.stream()
                 .map(LoadMembersResponseDto::new)
@@ -80,7 +80,7 @@ public class FriendsApiController {
      * @return
      */
     @GetMapping("/api/friends/list/request")
-    public LoadMembersResponse<LoadMembersResponseDto> LoadFriendsRequest(@RequestBody @Valid LoadFriendsRequest request) {
+    public LoadMembersResponse<LoadMembersResponseDto> LoadFriendsRequest(@RequestBody @Valid OneMemberRequest request) {
         List<Member> members = friendsService.LoadFriendsBySourceMember(request.getUserId(), FriendState.REQUEST);
         List<LoadMembersResponseDto> result = members.stream()
                 .map(LoadMembersResponseDto::new)
