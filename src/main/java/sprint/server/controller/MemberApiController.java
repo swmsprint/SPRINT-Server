@@ -35,7 +35,7 @@ public class MemberApiController {
      */
     @GetMapping("/api/members/list")
     public LoadMembersResponse<LoadMembersResponseDto> LoadMembersByNickname(@RequestBody @Valid LoadMembersByNicknameRequest request){
-        List<Member> members = memberRepository.findByNicknameContaining(request.getNickname());
+        List<Member> members = memberService.findByNicknameContaining(request.getNickname());
         List<LoadMembersResponseDto> result = members.stream()
                 .map(member -> new LoadMembersResponseDto(member))
                 .sorted(LoadMembersResponseDto.COMPARE_BY_NICKNAME)

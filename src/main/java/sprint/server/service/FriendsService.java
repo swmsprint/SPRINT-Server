@@ -1,6 +1,7 @@
 package sprint.server.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sprint.server.controller.exception.ApiException;
@@ -142,9 +143,11 @@ public class FriendsService {
      * @param targetMemberId
      */
     private void validationFriendsRequest(Long sourceMemberId, Long targetMemberId){
-        memberService.isMemberExistById(sourceMemberId, "sourceMember가 database에 존재하지 않습니다.");
-        memberService.isMemberExistById(targetMemberId, "targetMember가 database에 존재하지 않습니다.");
-        if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.ACCEPT)) {
+        if (!memberService.isMemberExistById(sourceMemberId)) {
+            throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND, "Source Member가 존재하지 않습니다.");
+        } else if (!memberService.isMemberExistById(targetMemberId)) {
+            throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND, "Target Member가 존재하지 않습니다.");
+        } else if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.ACCEPT)) {
             throw new ApiException(ExceptionEnum.FRIENDS_ALREADY_FRIEND);
         } else if (isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.REQUEST)){
             throw new ApiException(ExceptionEnum.FRIENDS_ALREADY_SENT);

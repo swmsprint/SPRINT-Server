@@ -38,8 +38,12 @@ public class FriendsServiceTest {
         assertEquals("F0003", thrown2.getErrorCode());
 
         /** 해당 유저가 존재하지 않은 경우
-         *  추후 추가 예정
+         *
          */
+        ApiException thrown3 = assertThrows(ApiException.class, () -> friendsService.FriendsRequest(-1L, 1L));
+        assertEquals("Source Member가 존재하지 않습니다.", thrown3.getMessage());
+        ApiException thrown4 = assertThrows(ApiException.class, () -> friendsService.FriendsRequest(1L, -1L));
+        assertEquals("Target Member가 존재하지 않습니다.", thrown4.getMessage());
     }
 
     /**
@@ -110,7 +114,6 @@ public class FriendsServiceTest {
         Boolean result = friendsService.CancelFriends(1L, 2L);
         assertEquals(true, friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(1L, 2L, FriendState.CANCELED));
         assertEquals(true, result);
-
     }
 
     /**

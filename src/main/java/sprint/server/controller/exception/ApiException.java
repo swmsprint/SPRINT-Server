@@ -11,4 +11,9 @@ public class ApiException extends RuntimeException{
         this.error = e;
         this.errorCode = e.getCode();
     }
+    public ApiException(ExceptionEnum e, String messages){
+        super(messages);
+        this.error = e;
+        this.errorCode = e.getCode();
+    }
 }

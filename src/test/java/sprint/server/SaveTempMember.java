@@ -19,7 +19,7 @@ public class SaveTempMember {
     MemberService memberService;
 
     @Bean
-    public void Save2TestMember() {
+    public void Save5TestMember() {
         Member member1 = Member.createMember("Test1", Gender.FEMALE, "test1@sprint.com", LocalDate.of(2011, 02, 28), 180.0f, 70f, null);
         Member member2 = Member.createMember("Test2", Gender.FEMALE, "test2@sprint.com", LocalDate.of(2012, 02, 12), 166.0f, 65f, null);
         Member member3 = Member.createMember("Test3", Gender.FEMALE, "test3@sprint.com", LocalDate.of(2006, 11, 30), 180.0f, 70f, null);
