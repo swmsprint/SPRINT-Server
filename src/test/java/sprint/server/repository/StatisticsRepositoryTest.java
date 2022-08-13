@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.statistics.Statistics;
 import sprint.server.domain.statistics.StatisticsType;
@@ -14,6 +15,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 @SpringBootTest
+@Transactional
+@Rollback
 class StatisticsRepositoryTest {
 
     @Autowired StatisticsRepository statisticsRepository;

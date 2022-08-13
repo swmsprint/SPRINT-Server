@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 import sprint.server.domain.Running;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.statistics.StatisticsType;
@@ -29,8 +30,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@Rollback
 @AutoConfigureMockMvc
+@Transactional
 class StatisticsApiControllerTest {
 
     @Autowired private MemberRepository memberRepository;

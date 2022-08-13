@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
 import sprint.server.domain.Running;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.statistics.StatisticsType;
@@ -19,22 +20,13 @@ import java.util.Calendar;
 import java.util.List;
 
 @SpringBootTest
-@Rollback(value = false)
+@Transactional
 class StatisticsServiceTest {
 
     @Autowired StatisticsService statisticsService;
     @Autowired RunningRepository runningRepository;
     @Autowired MemberRepository memberRepository;
             ;
-
-    @Test
-    void updateStatistics() {
-    }
-
-    @Test
-    void makeDailyStatistics() {
-    }
-
     @Test
     void 기본_MonthlyStreak_테스트() {
 
