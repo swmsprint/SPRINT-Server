@@ -1,6 +1,7 @@
 package sprint.server.repository;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,12 +12,7 @@ import sprint.server.domain.statistics.StatisticsType;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Rollback(value = false)
@@ -40,7 +36,7 @@ class StatisticsRepositoryTest {
         statisticsRepository.save(statistics);
 
         //When
-        Statistics statisticsFind = statisticsRepository.findByStatisticsTypeAndMember_IdAndTimeBetween(StatisticsType.Daily,memberRepository.findByName("plz").getId(),Timestamp.valueOf("2021-08-01 00:00:00.0"),Timestamp.valueOf("2021-08-07 00:00:00.0"));
+        Statistics statisticsFind = statisticsRepository.findByStatisticsTypeAndMemberIdAndTimeBetween(StatisticsType.Daily,memberRepository.findByName("plz").getId(),Timestamp.valueOf("2021-08-01 00:00:00.0"),Timestamp.valueOf("2021-08-07 00:00:00.0"));
 
         //Then
         Assertions.assertEquals(null,statisticsFind);

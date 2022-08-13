@@ -26,6 +26,7 @@ public class Statistics {
     private double distance;
     private int totalSeconds;
     private int count;
+    private double energy;
 
     private Timestamp time;
 

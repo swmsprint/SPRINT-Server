@@ -1,4 +1,4 @@
-package sprint.server.domain;
+package sprint.server.controller.datatransferobject;
 
 
 import lombok.Getter;

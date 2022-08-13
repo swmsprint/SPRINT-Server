@@ -9,9 +9,10 @@ import sprint.server.controller.datatransferobject.request.FinishRunningRequest;
 import sprint.server.controller.datatransferobject.response.CreateRunningResponse;
 import sprint.server.controller.datatransferobject.response.FinishRunningResponse;
 import sprint.server.controller.datatransferobject.response.ViewRunningResponse;
+import sprint.server.controller.datatransferobject.response.ViewStatisticsResponse;
 import sprint.server.domain.Member;
 import sprint.server.domain.Running;
-import sprint.server.domain.RunningRawData;
+import sprint.server.controller.datatransferobject.RunningRawData;
 import sprint.server.domain.statistics.StatisticsType;
 import sprint.server.service.MemberService;
 import sprint.server.service.RunningService;
@@ -19,6 +20,7 @@ import sprint.server.service.StatisticsService;
 
 import javax.validation.Valid;
 import java.util.Arrays;
+import java.util.Calendar;
 
 @RestController
 @RequiredArgsConstructor
@@ -62,6 +64,14 @@ public class RunningApiController {
                 running.getDuration(),running.getEnergy(),
                 Arrays.asList(objectMapper.readValue(running.getRawData(), RunningRawData[].class)));
     }
+
+//    @GetMapping("/api/running/recent/{id}")
+//    public ViewStatisticsResponse viewSteakDetail(@PathVariable("id")Long memberID){
+//
+//        statisticsService.findMonthlyStreak(memberID, Calendar.getInstance());
+//
+//        return null;
+//    }
 
 
 }

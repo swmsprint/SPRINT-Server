@@ -2,7 +2,7 @@ package sprint.server.controller.datatransferobject.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import sprint.server.domain.RunningRawData;
+import sprint.server.controller.datatransferobject.RunningRawData;
 
 import java.util.List;
 
