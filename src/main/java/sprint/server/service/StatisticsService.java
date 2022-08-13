@@ -183,8 +183,6 @@ public class StatisticsService {
         Calendar endTime = getCalendarEnd(Timestamp.valueOf(dateFormat.format(calendar.getTime())),StatisticsType.Daily);
 
         for(int i =0; i<calendar.getActualMaximum(Calendar.DAY_OF_MONTH); i++){
-            System.out.println(i);
-            System.out.println(dateFormat.format(startTime.getTime())+" "+dateFormat.format(endTime.getTime()));
             Statistics dailyStatistics = statisticsRepository.findByStatisticsTypeAndMemberIdAndTimeBetween(StatisticsType.Daily, memberID,
                     Timestamp.valueOf(dateFormat.format(startTime.getTime())),
                     Timestamp.valueOf(dateFormat.format(endTime.getTime())));

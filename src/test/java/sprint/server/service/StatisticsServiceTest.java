@@ -6,18 +6,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import sprint.server.domain.Member;
 import sprint.server.domain.Running;
-import sprint.server.domain.statistics.Statistics;
 import sprint.server.domain.statistics.StatisticsType;
 import sprint.server.repository.MemberRepository;
 import sprint.server.repository.RunningRepository;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @Rollback(value = false)
 class StatisticsServiceTest {
