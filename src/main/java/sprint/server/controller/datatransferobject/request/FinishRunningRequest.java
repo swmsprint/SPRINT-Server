@@ -1,7 +1,7 @@
 package sprint.server.controller.datatransferobject.request;
 
 import lombok.Data;
-import sprint.server.domain.RunningRawData;
+import sprint.server.controller.datatransferobject.RunningRawData;
 
 import java.util.List;
 

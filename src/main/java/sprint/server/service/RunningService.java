@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import sprint.server.controller.datatransferobject.request.FinishRunningRequest;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.Running;
-import sprint.server.domain.RunningRawData;
+import sprint.server.controller.datatransferobject.RunningRawData;
 import sprint.server.repository.MemberRepository;
 import sprint.server.repository.RunningRepository;
 

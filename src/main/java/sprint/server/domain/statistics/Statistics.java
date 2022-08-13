@@ -5,6 +5,7 @@ import lombok.Setter;
 import sprint.server.domain.member.Member;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Entity
@@ -25,5 +26,8 @@ public class Statistics {
     private double distance;
     private int totalSeconds;
     private int count;
-    private LocalDateTime saveTime;
+    private double energy;
+
+    private Timestamp time;
+
 }
