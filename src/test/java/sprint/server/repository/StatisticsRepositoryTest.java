@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
-import sprint.server.domain.Member;
+import sprint.server.domain.member.Member;
 import sprint.server.domain.statistics.Statistics;
 import sprint.server.domain.statistics.StatisticsType;
 
@@ -14,7 +14,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 @SpringBootTest
-@Rollback(value = false)
 class StatisticsRepositoryTest {
 
     @Autowired StatisticsRepository statisticsRepository;
@@ -24,18 +23,16 @@ class StatisticsRepositoryTest {
     void 통계레포지토리_Between_테스트() {
 
         //Given
-        Member member = new Member();
-        member.setName("plz");
-        memberRepository.save(member);
+        Member member = memberRepository.findById(1L).orElse(null);
 
         Statistics statistics = new Statistics();
-        statistics.setMember(memberRepository.findByName("plz"));
+        statistics.setMember(member);
         statistics.setTime(Timestamp.valueOf("2022-08-02 07:48:29.391"));
         statistics.setStatisticsType(StatisticsType.Daily);
         statisticsRepository.save(statistics);
 
         //When
-        Statistics statisticsFind = statisticsRepository.findByStatisticsTypeAndMemberIdAndTimeBetween(StatisticsType.Daily,memberRepository.findByName("plz").getId(),Timestamp.valueOf("2021-08-01 00:00:00.0"),Timestamp.valueOf("2021-08-07 00:00:00.0"));
+        Statistics statisticsFind = statisticsRepository.findByStatisticsTypeAndMemberIdAndTimeBetween(StatisticsType.Daily,member.getId(),Timestamp.valueOf("2021-08-01 00:00:00.0"),Timestamp.valueOf("2021-08-07 00:00:00.0"));
 
         //Then
         Assertions.assertEquals(null,statisticsFind);

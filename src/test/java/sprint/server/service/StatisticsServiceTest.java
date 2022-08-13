@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
-import sprint.server.domain.Member;
 import sprint.server.domain.Running;
+import sprint.server.domain.member.Member;
 import sprint.server.domain.statistics.StatisticsType;
 import sprint.server.repository.MemberRepository;
 import sprint.server.repository.RunningRepository;
@@ -40,16 +40,14 @@ class StatisticsServiceTest {
 
         //Given
 
-        Member member = new Member();
-        member.setName("yewon");
-        memberRepository.save(member);
+        Member member = memberRepository.findById(1L).orElse(null);
 
         Running running = new Running();
         running.setStartTime(Timestamp.valueOf(LocalDateTime.now()));
         running.setDistance(12.323);
         running.setEnergy(213);
         running.setWeight(80);
-        running.setMember(memberRepository.findByName("yewon"));
+        running.setMember(member);
         runningRepository.save(running);
 
         statisticsService.updateStatistics(running, StatisticsType.Daily);
@@ -69,16 +67,14 @@ class StatisticsServiceTest {
 
         //Given
 
-        Member member = new Member();
-        member.setName("yewon");
-        memberRepository.save(member);
+        Member member =  memberRepository.findById(1L).orElse(null);
 
         Running running = new Running();
         running.setStartTime(Timestamp.valueOf("2021-08-02 07:48:29.391"));
         running.setDistance(12.32);
         running.setEnergy(213);
         running.setWeight(80);
-        running.setMember(memberRepository.findByName("yewon"));
+        running.setMember(member);
         runningRepository.save(running);
 
         statisticsService.updateStatistics(running, StatisticsType.Daily);
