@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@Rollback(value = false)
+@Rollback
 @AutoConfigureMockMvc
 class StatisticsApiControllerTest {
 
@@ -98,7 +98,7 @@ class StatisticsApiControllerTest {
     void viewStreakDetail() throws Exception{
         //given
         Member member = new Member();
-        member.setName("yewon");
+        member.setName("yewon2");
         memberRepository.save(member);
 
         Running running1 = new Running();
@@ -107,7 +107,7 @@ class StatisticsApiControllerTest {
         running1.setEnergy(213);
         running1.setWeight(80);
         running1.setDuration(12);
-        running1.setMember(memberRepository.findByName("yewon"));
+        running1.setMember(memberRepository.findByName("yewon2"));
         runningRepository.save(running1);
         statisticsService.updateStatistics(running1, StatisticsType.Daily);
         statisticsService.updateStatistics(running1, StatisticsType.Weekly);
@@ -119,7 +119,7 @@ class StatisticsApiControllerTest {
         running2.setEnergy(522);
         running2.setWeight(81);
         running2.setDuration(9);
-        running2.setMember(memberRepository.findByName("yewon"));
+        running2.setMember(memberRepository.findByName("yewon2"));
         runningRepository.save(running2);
         statisticsService.updateStatistics(running2, StatisticsType.Daily);
         statisticsService.updateStatistics(running2, StatisticsType.Weekly);
@@ -127,7 +127,7 @@ class StatisticsApiControllerTest {
 
         List<Double> result = new ArrayList<>(Arrays.asList(new Double[]{12.323,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,15.23,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}));
         //when
-        String url = "/api/statistics/streak/"+memberRepository.findByName("yewon").getId()+"?year="+2022+"&month="+8;
+        String url = "/api/statistics/streak/"+memberRepository.findByName("yewon2").getId()+"?year="+2022+"&month="+8;
 
         //then
         mvc.perform(get(url))
