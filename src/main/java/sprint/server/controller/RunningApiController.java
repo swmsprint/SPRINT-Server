@@ -4,13 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import sprint.server.controller.datatransferobject.response.RunningInfoDTO;
 import sprint.server.controller.datatransferobject.request.CreateRunningRequest;
 import sprint.server.controller.datatransferobject.request.FinishRunningRequest;
 import sprint.server.controller.datatransferobject.response.CreateRunningResponse;
 import sprint.server.controller.datatransferobject.response.FinishRunningResponse;
 import sprint.server.controller.datatransferobject.response.ViewRunningResponse;
 import sprint.server.domain.Running;
-import sprint.server.controller.datatransferobject.RunningRawData;
+import sprint.server.controller.datatransferobject.response.RunningRawDataVo;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.statistics.StatisticsType;
 import sprint.server.service.MemberService;
@@ -18,8 +19,9 @@ import sprint.server.service.RunningService;
 import sprint.server.service.StatisticsService;
 
 import javax.validation.Valid;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Calendar;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -57,16 +59,17 @@ public class RunningApiController {
          */
         return new ViewRunningResponse(running.getId(),running.getDistance(),
                 running.getDuration(),running.getEnergy(),
-                Arrays.asList(objectMapper.readValue(running.getRawData(), RunningRawData[].class)));
+                Arrays.asList(objectMapper.readValue(running.getRawData(), RunningRawDataVo[].class)));
     }
 
-//    @GetMapping("/api/running/recent/{id}")
-//    public ViewStatisticsResponse viewSteakDetail(@PathVariable("id")Long memberID){
-//
-//        statisticsService.findMonthlyStreak(memberID, Calendar.getInstance());
-//
-//        return null;
-//    }
+    @GetMapping("/api/runnings")
+    public List<RunningInfoDTO> viewRecentRunning(@RequestParam(value="memberId")Long memberId,
+                                                  @RequestParam(value="lastRunningId")Long lastRunningId){
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        return runningService.fetchRunningPagesBy(lastRunningId,memberId).toList().stream()
+                .map(running -> new RunningInfoDTO(running.getId(),running.getDuration(),running.getDistance(),dateFormat.format(running.getStartTime()),running.getEnergy()))
+                .collect(java.util.stream.Collectors.toList());
+    }
 
 
 }

@@ -3,12 +3,14 @@ package sprint.server.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sprint.server.controller.datatransferobject.request.FinishRunningRequest;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.Running;
-import sprint.server.controller.datatransferobject.RunningRawData;
+import sprint.server.controller.datatransferobject.response.RunningRawDataVo;
 import sprint.server.repository.MemberRepository;
 import sprint.server.repository.RunningRepository;
 
@@ -64,13 +66,18 @@ public class RunningService {
         return running;
     }
 
+    @Transactional
+    public Page<Running> fetchRunningPagesBy(Long lastRunningId, Long memberId) {
+        PageRequest pageRequest = PageRequest.of(0,3);
+        return runningRepository.findByIdLessThanAndMemberIdOrderByIdDesc(lastRunningId, memberId, pageRequest);
+    }
 
     /**
      *
      * @param rowData 경도, 위도, 고도, 시간 등의 데이터가 저장되어있음
      * @return
      */
-    private double calculateTotalDistance(List<RunningRawData> rowData) {
+    private double calculateTotalDistance(List<RunningRawDataVo> rowData) {
         double distance = 0;
         for(int i = 0; i< rowData.size()-1; i++){
             /**
@@ -149,4 +156,5 @@ public class RunningService {
     private static double degreeToRadians(double degree){
         return (degree * Math.PI/180.0);
     }
+
 }

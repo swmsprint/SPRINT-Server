@@ -4,7 +4,7 @@ package sprint.server.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sprint.server.controller.datatransferobject.StatisticsDTO;
+import sprint.server.controller.datatransferobject.response.StatisticsInfoVO;
 import sprint.server.domain.Running;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.statistics.Statistics;
@@ -57,7 +57,7 @@ public class StatisticsService {
     }
 
     @Transactional
-    public StatisticsDTO findDailyStatistics(Long memberID, Calendar calendar) {
+    public StatisticsInfoVO findDailyStatistics(Long memberID, Calendar calendar) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         Calendar startTime = getCalendarStart(Timestamp.valueOf(dateFormat.format(calendar.getTime())),StatisticsType.Daily);
         Calendar endTime = getCalendarEnd(Timestamp.valueOf(dateFormat.format(calendar.getTime())),StatisticsType.Daily);
@@ -65,9 +65,9 @@ public class StatisticsService {
         Statistics statistics = statisticsRepository.findByStatisticsTypeAndMemberIdAndTimeBetween(StatisticsType.Daily, memberID,
                 Timestamp.valueOf(dateFormat.format(startTime.getTime())), Timestamp.valueOf(dateFormat.format(endTime.getTime())));
         if(statistics == null) {
-            return StatisticsDTO.builder().build();
+            return StatisticsInfoVO.builder().build();
         }else
-            return StatisticsDTO.builder()
+            return StatisticsInfoVO.builder()
                     .distance(statistics.getDistance())
                     .totalSeconds(statistics.getTotalSeconds())
                     .pace((1000/statistics.getDistance())*(statistics.getTotalSeconds()/3600.0))
@@ -76,7 +76,7 @@ public class StatisticsService {
     }
 
     @Transactional
-    public StatisticsDTO findWeeklyStatistics(Long memberID, Calendar calendar) {
+    public StatisticsInfoVO findWeeklyStatistics(Long memberID, Calendar calendar) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
         calendar.set(Calendar.DAY_OF_WEEK, 1);
@@ -87,9 +87,9 @@ public class StatisticsService {
         Statistics statistics = statisticsRepository.findByStatisticsTypeAndMemberIdAndTimeBetween(StatisticsType.Weekly, memberID,
                 Timestamp.valueOf(dateFormat.format(startTime.getTime())), Timestamp.valueOf(dateFormat.format(endTime.getTime())));
         if(statistics == null) {
-            return StatisticsDTO.builder().build();
+            return StatisticsInfoVO.builder().build();
         }else
-            return StatisticsDTO.builder()
+            return StatisticsInfoVO.builder()
                 .distance(statistics.getDistance())
                 .totalSeconds(statistics.getTotalSeconds())
                 .pace((1000/statistics.getDistance())*(statistics.getTotalSeconds()/3600.0))
@@ -98,7 +98,7 @@ public class StatisticsService {
     }
 
     @Transactional
-    public StatisticsDTO findMonthlyStatistics(Long memberID, Calendar calendar) {
+    public StatisticsInfoVO findMonthlyStatistics(Long memberID, Calendar calendar) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
         calendar.set(Calendar.DAY_OF_MONTH, 1);
@@ -109,9 +109,9 @@ public class StatisticsService {
         Statistics statistics = statisticsRepository.findByStatisticsTypeAndMemberIdAndTimeBetween(StatisticsType.Monthly, memberID,
                 Timestamp.valueOf(dateFormat.format(startTime.getTime())), Timestamp.valueOf(dateFormat.format(endTime.getTime())));
         if(statistics == null) {
-            return StatisticsDTO.builder().build();
+            return StatisticsInfoVO.builder().build();
         }else
-            return StatisticsDTO.builder()
+            return StatisticsInfoVO.builder()
                 .distance(statistics.getDistance())
                 .totalSeconds(statistics.getTotalSeconds())
                 .pace((1000/statistics.getDistance())*(statistics.getTotalSeconds()/3600.0))
@@ -120,7 +120,7 @@ public class StatisticsService {
     }
 
     @Transactional
-    public StatisticsDTO findYearlyStatistics(Long memberID, Calendar calendar) {
+    public StatisticsInfoVO findYearlyStatistics(Long memberID, Calendar calendar) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
         calendar.set(Calendar.DAY_OF_MONTH, 1);
@@ -139,7 +139,7 @@ public class StatisticsService {
         double totalSeconds = allStatistics.stream().mapToDouble(Statistics::getTotalSeconds).sum();
         double pace = (1000/distance)*(totalSeconds/3600.0);
 
-        return StatisticsDTO.builder()
+        return StatisticsInfoVO.builder()
                 .distance(distance)
                 .totalSeconds(totalSeconds)
                 .pace((1000/distance)*(totalSeconds/3600.0))
@@ -150,7 +150,7 @@ public class StatisticsService {
     }
 
     @Transactional
-    public StatisticsDTO findTotalStatistics(Long memberID) {
+    public StatisticsInfoVO findTotalStatistics(Long memberID) {
         List<Statistics> allStatistics = statisticsRepository.findAllByStatisticsTypeAndMemberId(StatisticsType.Monthly, memberID);
 
         double distance = allStatistics.stream().mapToDouble(Statistics::getDistance).sum();
@@ -158,7 +158,7 @@ public class StatisticsService {
         double totalSeconds = allStatistics.stream().mapToDouble(Statistics::getTotalSeconds).sum();
         double pace = (1000/distance)*(totalSeconds/3600.0);
 
-        return StatisticsDTO.builder()
+        return StatisticsInfoVO.builder()
                 .distance(distance)
                 .totalSeconds(totalSeconds)
                 .pace(pace)
