@@ -49,18 +49,30 @@ public class RunningApiController {
         return new FinishRunningResponse(running.getId(),running.getDistance(),running.getDuration(),running.getEnergy());
     }
 
+    /**러닝 정보 반환 api -> 렌더링을 위한 로우 데이터만 반환**/
     @GetMapping("/api/running/detail")
-    public ViewRunningResponse viewRunningDetail(@RequestParam(value="runningId")Long runningId,
+    public List<RunningRawDataVO> viewRunningDetail(@RequestParam(value="runningId")Long runningId,
                                                  @RequestParam(value="memberId")Long memberId )throws JsonProcessingException{
         Running running = runningService.findOne(runningId).get();
         /**
          * 아직 러닝 정보 공개 정책이 없기때문에 전부 받아서 반환해줌 -> 추후 수정 필요
          */
-
-        return new ViewRunningResponse(running.getId(),running.getDistance(),
-                running.getDuration(),running.getEnergy(),
-                Arrays.asList(objectMapper.readValue(running.getRawData(), RunningRawDataVO[].class)));
+        return Arrays.asList(objectMapper.readValue(running.getRawData(), RunningRawDataVO[].class));
     }
+
+//    /**러닝 정보 반환 api -> 일반 러닝 정보 및 로우 데이터 포함**/
+//    @GetMapping("/api/running/detail")
+//    public ViewRunningResponse viewRunningDetail(@RequestParam(value="runningId")Long runningId,
+//                                                 @RequestParam(value="memberId")Long memberId )throws JsonProcessingException{
+//        Running running = runningService.findOne(runningId).get();
+//        /**
+//         * 아직 러닝 정보 공개 정책이 없기때문에 전부 받아서 반환해줌 -> 추후 수정 필요
+//         */
+//
+//        return new ViewRunningResponse(running.getId(),running.getDistance(),
+//                running.getDuration(),running.getEnergy(),
+//                Arrays.asList(objectMapper.readValue(running.getRawData(), RunningRawDataVO[].class)));
+//    }
 
     @GetMapping("/api/runnings")
     public List<RunningInfoDTO> viewRecentRunning(@RequestParam(value="memberId")Long memberId,
