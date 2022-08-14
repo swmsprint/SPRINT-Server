@@ -24,7 +24,7 @@ public class Statistics {
     private StatisticsType statisticsType;
 
     private double distance;
-    private int totalSeconds;
+    private double totalSeconds;
     private int count;
     private double energy;
 

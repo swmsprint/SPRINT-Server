@@ -3,12 +3,14 @@ package sprint.server.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sprint.server.controller.datatransferobject.request.FinishRunningRequest;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.Running;
-import sprint.server.controller.datatransferobject.RunningRawData;
+import sprint.server.controller.datatransferobject.response.RunningRawDataVO;
 import sprint.server.repository.MemberRepository;
 import sprint.server.repository.RunningRepository;
 
@@ -40,7 +42,7 @@ public class RunningService {
 
 
     @Transactional
-    public void finishRunning(FinishRunningRequest request) throws JsonProcessingException {
+    public Running finishRunning(FinishRunningRequest request) throws JsonProcessingException {
 
         Running running = runningRepository.findById(request.getRunningId()).get();
         Member member = memberRepository.findById(request.getUserId()).get();
@@ -50,27 +52,34 @@ public class RunningService {
         double energy = calculateEnergy(weight, request.getDuration(), distance);
         ObjectMapper mapper = new ObjectMapper();
 
+
         running.setEnergy(energy);
         running.setWeight(weight);
         running.setDuration(request.getDuration());
         running.setDistance(distance);
         running.setRawData(mapper.writeValueAsString(request.getRunningData()));
+
+        return running;
     }
 
-    @Transactional
     public Running createRunning(Member member){
         Running running = new Running();
         running.setMember(member);
         return running;
     }
 
+    @Transactional
+    public Page<Running> fetchRunningPagesBy(Long lastRunningId, Long memberId) {
+        PageRequest pageRequest = PageRequest.of(0,3);
+        return runningRepository.findByIdLessThanAndMemberIdOrderByIdDesc(lastRunningId, memberId, pageRequest);
+    }
 
     /**
      *
      * @param rowData 경도, 위도, 고도, 시간 등의 데이터가 저장되어있음
      * @return
      */
-    private double calculateTotalDistance(List<RunningRawData> rowData) {
+    private double calculateTotalDistance(List<RunningRawDataVO> rowData) {
         double distance = 0;
         for(int i = 0; i< rowData.size()-1; i++){
             /**
@@ -96,7 +105,7 @@ public class RunningService {
      * @param distance 총 달린거리(미터 단위)
      * @return 소모 칼로리 반환
      */
-    public static double calculateEnergy(double weight, int duration, double distance){
+    public static double calculateEnergy(double weight, double duration, double distance){
         double coefficient;
         double speed =  distance /( 1000 * secondToHour(duration));
         /**칼로리 계산 매커니즘**/
@@ -116,7 +125,7 @@ public class RunningService {
      * @param duration 달린 시간 (초단위)
      * @return 초단위의 달린시간을 시간단위로 반환
      */
-    private static double secondToHour(int duration){
+    private static double secondToHour(double duration){
         return (duration/3600.0);
     }
 
@@ -149,4 +158,5 @@ public class RunningService {
     private static double degreeToRadians(double degree){
         return (degree * Math.PI/180.0);
     }
+
 }

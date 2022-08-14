@@ -1,19 +1,17 @@
-package sprint.server.controller.datatransferobject;
+package sprint.server.controller.datatransferobject.response;
 
 import lombok.Builder;
 import lombok.Getter;
 
-import java.awt.geom.Point2D;
-
 @Getter
-public class StatisticsDTO {
+public class StatisticsInfoVO {
     private double distance;
     private double totalSeconds;
     private double energy;
     private double pace;
 
     @Builder
-    public StatisticsDTO(double distance, double totalSeconds, double energy, double pace) {
+    public StatisticsInfoVO(double distance, double totalSeconds, double energy, double pace) {
         this.distance = distance;
         this.totalSeconds = totalSeconds;
         this.energy = energy;
