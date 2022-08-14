@@ -23,7 +23,7 @@ public class Running {
     @Column(name = "start_time")
     private Timestamp startTime;
 
-    private int duration;
+    private double duration;
     private double distance;
     private double energy;
     private float weight;

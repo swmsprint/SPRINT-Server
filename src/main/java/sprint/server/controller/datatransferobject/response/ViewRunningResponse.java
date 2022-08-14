@@ -12,5 +12,5 @@ public class ViewRunningResponse {
     private double distance;
     private double duration;
     private double energy;
-    private List<RunningRawDataVo> runningData;
+    private List<RunningRawDataVO> runningData;
 }
