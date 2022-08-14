@@ -2,9 +2,11 @@ package sprint.server.controller.datatransferobject.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class ViewStatisticsResponse {
 
     private StatisticsInfoVO dailyStatistics;

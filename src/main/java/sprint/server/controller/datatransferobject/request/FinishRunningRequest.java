@@ -1,6 +1,7 @@
 package sprint.server.controller.datatransferobject.request;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import sprint.server.controller.datatransferobject.response.RunningRawDataVO;
 
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.List;
  * 러닝 종료후 전달받은 요청 정보
  */
 @Data
+@NoArgsConstructor
 public class FinishRunningRequest {
     private Long userId;
     private Long runningId;

@@ -2,8 +2,10 @@ package sprint.server.controller.datatransferobject.response;
 
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class RunningRawDataVO {
     private double latitude;
     private double longitude;
