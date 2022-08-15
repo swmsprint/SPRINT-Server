@@ -27,7 +27,7 @@ public class MemberApiController {
     })
     @PostMapping("/api/members")
     public CreateMemberResponse saveMember(@RequestBody @Valid CreateMemberRequest request){
-        Member member = Member.createMember(request.getNickname(), request.getGender(), request.getEmail(), request.getBirthDay(), request.getHeight(), request.getWeight(), request.getPicture());
+        Member member = new Member(request.getNickname(), request.getGender(), request.getEmail(), request.getBirthDay(), request.getHeight(), request.getWeight(), request.getPicture());
         Long id = memberService.join(member);
         return new CreateMemberResponse(id);
     }

@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter @Setter
+@Getter
 public class Member {
 
     @Id @GeneratedValue
@@ -41,17 +41,30 @@ public class Member {
     protected Member() {
     }
 
-    public static Member createMember(String nickname, Gender gender, String email, LocalDate birthDay, float height, float weight, String picture) {
-        Member member = new Member();
-        member.setNickname(nickname);
-        member.setGender(gender);
-        member.setEmail(email);
-        member.setBirthDay(birthDay);
-        member.setJoinDay(Timestamp.valueOf(LocalDateTime.now()));
-        member.setHeight(height);
-        member.setWeight(weight);
-        member.setPicture(picture);
-        member.setTierId(0);
-        return member;
+    public Member(String nickname, Gender gender, String email, LocalDate birthDay, float height, float weight, String picture) {
+        this.nickname = nickname;
+        this.gender = gender;
+        this.email = email;
+        this.birthDay = birthDay;
+        this.height = height;
+        this.weight = weight;
+        this.picture = picture;
+        this.joinDay = Timestamp.valueOf(LocalDateTime.now());
+        this.tierId = 0;
+    }
+
+    public void changeMemberInfo(String nickname, Gender gender, String email, LocalDate birthDay, float height, float weight, String picture){
+        this.nickname = nickname;
+        this.gender = gender;
+        this.email = email;
+        this.birthDay = birthDay;
+        this.height = height;
+        this.weight = weight;
+        this.picture = picture;
+        this.joinDay = Timestamp.valueOf(LocalDateTime.now());
+    }
+
+    public void setDisableDay(LocalDate localDate){
+        this.disableDay = localDate;
     }
 }

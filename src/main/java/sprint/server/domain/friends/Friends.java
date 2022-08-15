@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 
 @Entity
-@Getter @Setter @ToString
+@Getter @ToString
 public class Friends implements Serializable {
 
     @Id @GeneratedValue
@@ -30,12 +30,19 @@ public class Friends implements Serializable {
     @NotNull
     private FriendState establishState;
 
+    protected Friends(){}
 
-    public static Friends createFriendsRelationship(Long sourceMemberId, Long targetMemberId) {
-        Friends friends = new Friends();
-        friends.setSourceMemberId(sourceMemberId);
-        friends.setTargetMemberId(targetMemberId);
-        friends.setEstablishState(FriendState.REQUEST);
-        return friends;
+    public Friends(Long sourceMemberId, Long targetMemberId) {
+        this.sourceMemberId = sourceMemberId;
+        this.targetMemberId = targetMemberId;
+        this.establishState = FriendState.REQUEST;
+    }
+
+    public void setRegisteredDate(Timestamp timestamp){
+        this.registeredDate = timestamp;
+    }
+
+    public void setEstablishState(FriendState establishState) {
+        this.establishState = establishState;
     }
 }
