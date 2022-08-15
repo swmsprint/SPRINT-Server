@@ -2,10 +2,8 @@ package sprint.server.controller;
 
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import sprint.server.controller.datatransferobject.request.AnswerGroupRequest;
 import sprint.server.controller.datatransferobject.request.CreateGroupMemberRequest;
 import sprint.server.controller.datatransferobject.request.CreateGroupRequest;
 import sprint.server.controller.datatransferobject.request.LoadGroupsByGroupNameRequest;
@@ -48,11 +46,18 @@ public class GroupsApiController {
         return new LoadGroupsResponse(result.size(), result);
     }
 
+    @ApiOperation(value="그룹 가입 요청")
     @PostMapping("/api/groups/request")
     public BooleanResponse createGroupMember(@RequestBody @Valid CreateGroupMemberRequest request){
         Groups groups = groupsService.findById(request.getGroupId());
         Member member = memberService.findById(request.getMemberId());
         GroupMember groupMember = new GroupMember(new GroupMemberId(groups, member));
         return new BooleanResponse(groupsService.joinGroupMember(groupMember));
+    }
+
+    @ApiOperation(value="그룹 가입 승인")
+    @PutMapping("/api/groups/response")
+    public BooleanResponse answerGroupMember(@RequestBody @Valid AnswerGroupRequest request) {
+        return new BooleanResponse(groupsService.answerGroupMember(request.getGroupId(), request.getUserId(), request.getAcceptance()));
     }
 }

@@ -21,7 +21,9 @@ public enum ExceptionEnum {
     MEMBER_NOT_DISABLED(HttpStatus.BAD_REQUEST, "M0004", "이미 활성화된 계정입니다." ),
     MEMBER_ALREADY_DISABLED(HttpStatus.BAD_REQUEST, "M0005", "이미 비활성화된 계정입니다."),
     GROUPS_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "G0001", "이미 존재하는 그룹 이름입니다."),
-    GROUPS_NOT_FOUND(HttpStatus.BAD_REQUEST, "G0002", "해당 그룹이 존재하지 않습니다." );
+    GROUPS_NOT_FOUND(HttpStatus.BAD_REQUEST, "G0002", "해당 그룹이 존재하지 않습니다." ),
+    GROUPS_REQUEST_NOT_FOUND(HttpStatus.BAD_REQUEST, "G0003", "해당 그룹 가입 요청이 존재하지 않습니다."),
+    GROUPS_ALREADY_JOINED(HttpStatus.BAD_REQUEST, "G0004",  "이미 가입된 그룹입니다.");
 
     private final HttpStatus status;
     private final String code;

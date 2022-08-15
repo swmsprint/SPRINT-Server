@@ -4,10 +4,7 @@ import lombok.Data;
 import sprint.server.domain.Groups;
 import sprint.server.domain.member.Member;
 
-import javax.persistence.Embeddable;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
 

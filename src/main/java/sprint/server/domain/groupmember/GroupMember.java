@@ -13,7 +13,7 @@ import java.sql.Timestamp;
 @Getter
 public class GroupMember{
 
-    @EmbeddedId
+    @EmbeddedId()
     private GroupMemberId groupMemberId;
     private Timestamp registeredDate;
     @Enumerated(EnumType.STRING)
