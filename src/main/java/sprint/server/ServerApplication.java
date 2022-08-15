@@ -2,6 +2,7 @@ package sprint.server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import sprint.server.domain.Running;
 
@@ -10,6 +11,7 @@ import java.util.StringTokenizer;
 
 @SpringBootApplication
 @EnableScheduling
+@PropertySource(value = {"classpath:jdbc.properties"})
 public class ServerApplication {
 
     public static void main(String[] args) {
