@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter @Setter
+@Getter
 public class Member {
 
     @Id @GeneratedValue
@@ -51,5 +51,20 @@ public class Member {
         this.picture = picture;
         this.joinDay = Timestamp.valueOf(LocalDateTime.now());
         this.tierId = 0;
+    }
+
+    public void changeMemberInfo(String nickname, Gender gender, String email, LocalDate birthDay, float height, float weight, String picture){
+        this.nickname = nickname;
+        this.gender = gender;
+        this.email = email;
+        this.birthDay = birthDay;
+        this.height = height;
+        this.weight = weight;
+        this.picture = picture;
+        this.joinDay = Timestamp.valueOf(LocalDateTime.now());
+    }
+
+    public void setDisableDay(LocalDate localDate){
+        this.disableDay = localDate;
     }
 }

@@ -31,19 +31,16 @@ public class MemberServiceTest {
         String testName2 = "TestName2";
         /* 정상적인 요청 */
         Member member = new Member(testName, Gender.FEMALE, testName + "@sprint.com", LocalDate.of(2011, 2, 28), 180.0f, 70f, null);
-        member.setNickname(testName);
         Long saveId = memberService.join(member);
         assertEquals(testName, memberService.findById(saveId).getNickname());
 
         /* 동일 닉네임이 이미 존재하는 경우 */
         Member member2 = new Member(testName, Gender.FEMALE, testName + "@sprint.com", LocalDate.of(2011, 2, 28), 180.0f, 70f, null);
-        member2.setNickname(testName);
         ApiException thrown = assertThrows(ApiException.class, () -> memberService.join(member2));
         assertEquals("M0002", thrown.getErrorCode());
 
         /* 동일 이메일이 존재하는 경우 */
         Member member3 = new Member(testName2, Gender.FEMALE, testName + "@sprint.com", LocalDate.of(2011, 2, 28), 180.0f, 70f, null);
-        member3.setEmail("test1@sprint.com");
         ApiException thrown2 = assertThrows(ApiException.class, () -> memberService.join(member3));
         assertEquals("M0003", thrown2.getErrorCode());
     }

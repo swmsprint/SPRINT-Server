@@ -38,13 +38,7 @@ public class MemberService {
         if (member.isEmpty()) {
             throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
         }
-        member.get().setNickname(request.getNickname());
-        member.get().setEmail(request.getEmail());
-        member.get().setGender(request.getGender());
-        member.get().setBirthDay(request.getBirthDay());
-        member.get().setHeight(request.getHeight());
-        member.get().setWeight(request.getWeight());
-        member.get().setPicture(request.getPicture());
+        member.get().changeMemberInfo(request.getNickname(), request.getGender(), request.getEmail(), request.getBirthDay(), request.getHeight(), request.getWeight(), request.getPicture());
         return true;
     }
 

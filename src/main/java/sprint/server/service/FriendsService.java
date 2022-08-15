@@ -38,7 +38,7 @@ public class FriendsService {
         if (isFriendsRequestExist(targetMemberId, sourceMemberId, FriendState.REQUEST) && (acceptFriendsRequest(targetMemberId, sourceMemberId)) ){
             return findFriendsRequest(sourceMemberId, targetMemberId, FriendState.ACCEPT).get();
         } else {
-            Friends friends = Friends.createFriendsRelationship(sourceMemberId, targetMemberId);
+            Friends friends = new Friends(sourceMemberId, targetMemberId);
             friends.setRegisteredDate(Timestamp.valueOf(LocalDateTime.now()));
             friendsRepository.save(friends);
             return friends;
@@ -85,7 +85,7 @@ public class FriendsService {
             throw new ApiException(ExceptionEnum.FRIENDS_REQUEST_NOT_FOUND);
         }
         setFriendsByStateAndTime(friends.get(), FriendState.ACCEPT);
-        Friends newFriends = Friends.createFriendsRelationship(targetMemberId, sourceMemberId);
+        Friends newFriends = new Friends(targetMemberId, sourceMemberId);
         setFriendsByStateAndTime(newFriends, FriendState.ACCEPT);
 
         friendsRepository.save(newFriends);
