@@ -11,11 +11,11 @@ import java.util.Objects;
 @Data
 @Embeddable
 public class GroupMemberId implements Serializable {
-    @ManyToOne(targetEntity = Groups.class, fetch = FetchType.LAZY)
+    @OneToOne(targetEntity = Groups.class, fetch = FetchType.LAZY)
     @JoinColumn(name="group_id")
     private Groups groups;
 
-    @ManyToOne(targetEntity = Member.class, fetch = FetchType.LAZY)
+    @OneToOne(targetEntity = Member.class, fetch = FetchType.LAZY)
     @JoinColumn(name="member_id")
     private Member member;
 
