@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class LoadMembersResponseDto<T> {
+public class LoadGroupsResponse<T> {
     private int count;
-    private T userFriends;
+    private T GroupList;
 }

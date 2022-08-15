@@ -16,7 +16,7 @@ public class Member {
     @Id @GeneratedValue
     @NotNull
     @Column(name = "member_id")
-    private long id;
+    private Long id;
     @NotNull
     private String nickname;
     @NotNull
@@ -66,5 +66,9 @@ public class Member {
 
     public void setDisableDay(LocalDate localDate){
         this.disableDay = localDate;
+    }
+
+    public void changeMainGroupId(int mainGroupId) {
+        this.mainGroupId = mainGroupId;
     }
 }

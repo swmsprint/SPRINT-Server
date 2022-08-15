@@ -5,27 +5,32 @@ import lombok.Setter;
 import sprint.server.domain.Groups;
 import sprint.server.domain.member.Member;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
 @Entity
-@Getter @Setter
-public class GroupMember implements Serializable {
-    @Id
-    @ManyToOne
-    @JoinColumn(name = "group_id")
-    private Groups group;
+@Getter
+public class GroupMember{
 
-    @Id
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private Member member;
-
+    @EmbeddedId
+    private GroupMemberId groupMemberId;
     private Timestamp registeredDate;
+    @Enumerated(EnumType.STRING)
     private GroupMemberState memberState;
 
+    protected GroupMember(){}
+
+    public GroupMember(GroupMemberId groupMemberId) {
+        this.groupMemberId = groupMemberId;
+        this.memberState = GroupMemberState.REQUEST;
+    }
+
+    public void setRegisteredDate(Timestamp registeredDate) {
+        this.registeredDate = registeredDate;
+    }
+
+    public void setMemberState(GroupMemberState memberState) {
+        this.memberState = memberState;
+    }
 }
