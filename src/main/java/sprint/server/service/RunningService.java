@@ -68,10 +68,9 @@ public class RunningService {
         return running;
     }
 
-    @Transactional
-    public Page<Running> fetchRunningPagesBy(Long lastRunningId, Long memberId) {
-        PageRequest pageRequest = PageRequest.of(0,3);
-        return runningRepository.findByIdLessThanAndMemberIdOrderByIdDesc(lastRunningId, memberId, pageRequest);
+    public Page<Running> fetchRunningPagesBy(Integer pageNumber, Long memberId) {
+        PageRequest pageRequest = PageRequest.of(pageNumber,3);
+        return runningRepository.findByMemberIdOrderByIdDesc(memberId, pageRequest);
     }
 
     /**

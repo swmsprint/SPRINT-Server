@@ -2,15 +2,14 @@ package sprint.server.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.models.auth.In;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import sprint.server.controller.datatransferobject.response.RunningInfoDTO;
+import sprint.server.controller.datatransferobject.response.*;
 import sprint.server.controller.datatransferobject.request.CreateRunningRequest;
 import sprint.server.controller.datatransferobject.request.FinishRunningRequest;
-import sprint.server.controller.datatransferobject.response.CreateRunningResponse;
-import sprint.server.controller.datatransferobject.response.FinishRunningResponse;
 import sprint.server.domain.Running;
-import sprint.server.controller.datatransferobject.response.RunningRawDataVO;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.statistics.StatisticsType;
 import sprint.server.service.MemberService;
@@ -31,6 +30,7 @@ public class RunningApiController {
     private final MemberService memberService;
     private final StatisticsService statisticsService;
 
+    @ApiOperation(value="러닝 시작", notes = "성공시 저장된 runningId를 반환합니다")
     @PostMapping("/api/running/start")
     public CreateRunningResponse createRunning(@RequestBody @Valid CreateRunningRequest request) {
         Member member = memberService.findById(request.getUserId());
@@ -38,6 +38,7 @@ public class RunningApiController {
         return new CreateRunningResponse(runningId);
     }
 
+    @ApiOperation(value="러닝 종료", notes = "성공시 저장및 계산된 running 정보를 반환합니다")
     @PostMapping("/api/running/finish")
     public FinishRunningResponse finishRunning(@RequestBody @Valid FinishRunningRequest request) throws JsonProcessingException {
         Running running = runningService.finishRunning(request);
@@ -48,36 +49,28 @@ public class RunningApiController {
         return new FinishRunningResponse(running.getId(),running.getDistance(),running.getDuration(),running.getEnergy());
     }
 
-    /**러닝 정보 반환 api -> 렌더링을 위한 로우 데이터만 반환**/
+
+    @ApiOperation(value="러닝 정보 반환", notes = "성공시 저장된 running 정보의 자세한 정보들을 반환합니다")
     @GetMapping("/api/running/detail")
-    public List<RunningRawDataVO> viewRunningDetail(@RequestParam(value="runningId")Long runningId,
-                                                 @RequestParam(value="memberId")Long memberId )throws JsonProcessingException{
+    public ViewRunningResponse viewRunningDetail(@RequestParam(value="runningId")Long runningId,
+                                                 @RequestParam(value="userId")Long memberId )throws JsonProcessingException{
         Running running = runningService.findOne(runningId).get();
         /**
          * 아직 러닝 정보 공개 정책이 없기때문에 전부 받아서 반환해줌 -> 추후 수정 필요
          */
-        return Arrays.asList(objectMapper.readValue(running.getRawData(), RunningRawDataVO[].class));
+
+        return new ViewRunningResponse(running.getId(),running.getDistance(),
+                running.getDuration(),running.getEnergy(),
+                Arrays.asList(objectMapper.readValue(running.getRawData(), RunningRawDataVO[].class)));
     }
 
-//    /**러닝 정보 반환 api -> 일반 러닝 정보 및 로우 데이터 포함**/
-//    @GetMapping("/api/running/detail")
-//    public ViewRunningResponse viewRunningDetail(@RequestParam(value="runningId")Long runningId,
-//                                                 @RequestParam(value="memberId")Long memberId )throws JsonProcessingException{
-//        Running running = runningService.findOne(runningId).get();
-//        /**
-//         * 아직 러닝 정보 공개 정책이 없기때문에 전부 받아서 반환해줌 -> 추후 수정 필요
-//         */
-//
-//        return new ViewRunningResponse(running.getId(),running.getDistance(),
-//                running.getDuration(),running.getEnergy(),
-//                Arrays.asList(objectMapper.readValue(running.getRawData(), RunningRawDataVO[].class)));
-//    }
 
+    @ApiOperation(value="최근 러닝 3개 리스트 반환", notes = "성공시 저장된 3개의 running 정보를 반환합니다")
     @GetMapping("/api/runnings")
-    public List<RunningInfoDTO> viewRecentRunning(@RequestParam(value="memberId")Long memberId,
-                                                  @RequestParam(value="lastRunningId")Long lastRunningId){
+    public List<RunningInfoDTO> viewRecentRunningList(@RequestParam(value="userId")Long memberId,
+                                                  @RequestParam(value="pageNumber") Integer pageNumber){
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        return runningService.fetchRunningPagesBy(lastRunningId,memberId).toList().stream()
+        return runningService.fetchRunningPagesBy(pageNumber,memberId).toList().stream()
                 .map(running -> new RunningInfoDTO(running.getId(),running.getDuration(),running.getDistance(),dateFormat.format(running.getStartTime()),running.getEnergy()))
                 .collect(java.util.stream.Collectors.toList());
     }

@@ -12,6 +12,7 @@ import java.util.List;
 @Repository
 public interface RunningRepository extends JpaRepository<Running,Long> {
 
+    Page<Running> findByMemberIdOrderByIdDesc(Long memberId, PageRequest pageRequest);
     Page<Running> findByIdLessThanAndMemberIdOrderByIdDesc(Long lastRunningId, Long memberId, PageRequest pageRequest);
 
     Running findByMember_IdAndAndStartTime(Long memberId, Timestamp startTime);

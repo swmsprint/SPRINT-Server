@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 import sprint.server.controller.datatransferobject.request.FinishRunningRequest;
 import sprint.server.controller.datatransferobject.response.FinishRunningResponse;
@@ -93,12 +94,12 @@ class RunningServiceTest {
         runningService.finishRunning(tempRequest4);
 
         //When
-        Page<Running>  runnings = runningService.fetchRunningPagesBy(running4Id,member.getId());
+        Page<Running>  runnings = runningService.fetchRunningPagesBy(0,member.getId());
         //Then
 
-        assertEquals(runnings.getContent().get(0).getId(),running3Id);
-        assertEquals(runnings.getContent().get(1).getId(),running2Id);
-        assertEquals(runnings.getContent().get(2).getId(),running1Id);
+        assertEquals(runnings.getContent().get(0).getId(),running4Id);
+        assertEquals(runnings.getContent().get(1).getId(),running3Id);
+        assertEquals(runnings.getContent().get(2).getId(),running2Id);
     }
 
 }
