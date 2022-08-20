@@ -3,6 +3,7 @@ package sprint.server.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.models.auth.In;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import sprint.server.controller.datatransferobject.response.*;
@@ -64,12 +65,12 @@ public class RunningApiController {
     }
 
 
-    @ApiOperation(value="최근 러닝 정보 반환", notes = "성공시 저장된 3개의 running 정보를 반환합니다")
+    @ApiOperation(value="최근 러닝 3개 리스트 반환", notes = "성공시 저장된 3개의 running 정보를 반환합니다")
     @GetMapping("/api/runnings")
-    public List<RunningInfoDTO> viewRecentRunning(@RequestParam(value="userId")Long memberId,
-                                                  @RequestParam(value="lastRunningId")Long lastRunningId){
+    public List<RunningInfoDTO> viewRecentRunningList(@RequestParam(value="userId")Long memberId,
+                                                  @RequestParam(value="pageNumber") Integer pageNumber){
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        return runningService.fetchRunningPagesBy(lastRunningId,memberId).toList().stream()
+        return runningService.fetchRunningPagesBy(pageNumber,memberId).toList().stream()
                 .map(running -> new RunningInfoDTO(running.getId(),running.getDuration(),running.getDistance(),dateFormat.format(running.getStartTime()),running.getEnergy()))
                 .collect(java.util.stream.Collectors.toList());
     }
