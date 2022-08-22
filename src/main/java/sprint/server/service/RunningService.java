@@ -8,22 +8,24 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sprint.server.controller.datatransferobject.request.FinishRunningRequest;
+import sprint.server.domain.friends.FriendState;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.Running;
-import sprint.server.controller.datatransferobject.response.RunningRawDataVO;
+import sprint.server.domain.RunningRawData;
+import sprint.server.repository.FriendsRepository;
 import sprint.server.repository.MemberRepository;
 import sprint.server.repository.RunningRepository;
 
 import java.sql.Timestamp;
-import java.util.List;
-import java.util.Optional;
-import java.util.StringTokenizer;
+import java.util.*;
+
 @Service
 @RequiredArgsConstructor
 public class RunningService {
 
     private final MemberRepository memberRepository;
     private final RunningRepository runningRepository;
+    private final FriendsRepository friendsRepository;
 
 
     public Optional<Running> findOne(Long runningId){
@@ -52,12 +54,16 @@ public class RunningService {
         double energy = calculateEnergy(weight, request.getDuration(), distance);
         ObjectMapper mapper = new ObjectMapper();
 
-
         running.setEnergy(energy);
         running.setWeight(weight);
         running.setDuration(request.getDuration());
         running.setDistance(distance);
-        running.setRawData(mapper.writeValueAsString(request.getRunningData()));
+        running.setRunningRawDataList(request.getRunningData());
+
+        for(RunningRawData data : request.getRunningData()){
+            data.setRunning(running);
+        }
+//        running.setRawData(mapper.writeValueAsString(request.getRunningData()));
 
         return running;
     }
@@ -68,17 +74,37 @@ public class RunningService {
         return running;
     }
 
-    public Page<Running> fetchRunningPagesBy(Integer pageNumber, Long memberId) {
-        PageRequest pageRequest = PageRequest.of(pageNumber,3);
-        return runningRepository.findByMemberIdOrderByIdDesc(memberId, pageRequest);
+
+    public Page<Running> fetchPersonalRunningPages(Integer pageNumber, Long memberId){
+        Member loginMember = memberRepository.findById(memberId).get();
+        List<Member> allMembers = new ArrayList<>(Arrays.asList(loginMember));
+        return fetchRunningPages(pageNumber,allMembers,3);
+    }
+    public Page<Running> fetchPublicRunningPages(Integer pageNumber, Long memberId){
+        Member loginMember = memberRepository.findById(memberId).get();
+        List<Member> allMembers = findFriendsAndLoginMemberList(memberId,loginMember);
+        return fetchRunningPages(pageNumber,allMembers,6);
     }
 
+    public Page<Running> fetchRunningPages(Integer pageNumber, List<Member> allMembers,int size) {
+        PageRequest pageRequest = PageRequest.of(pageNumber,size);
+        return runningRepository.findByMemberInOrderByIdDesc(allMembers, pageRequest);
+    }
+
+    public List<Member> findFriendsAndLoginMemberList(Long memberId, Member loginMember) {
+        List<Member> allMembers = memberRepository.findAllById(friendsRepository.findBySourceMemberIdAndEstablishState(memberId, FriendState.ACCEPT)
+                .stream()
+                .map(friends -> friends.getTargetMemberId())
+                .collect(java.util.stream.Collectors.toList()));
+        allMembers.add(loginMember);
+        return allMembers;
+    }
     /**
      *
      * @param rowData 경도, 위도, 고도, 시간 등의 데이터가 저장되어있음
      * @return
      */
-    private double calculateTotalDistance(List<RunningRawDataVO> rowData) {
+    private double calculateTotalDistance(List<RunningRawData> rowData) {
         double distance = 0;
         for(int i = 0; i< rowData.size()-1; i++){
             /**

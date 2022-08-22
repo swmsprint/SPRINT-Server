@@ -3,13 +3,13 @@ package sprint.server.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.models.auth.In;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import sprint.server.controller.datatransferobject.response.*;
 import sprint.server.controller.datatransferobject.request.CreateRunningRequest;
 import sprint.server.controller.datatransferobject.request.FinishRunningRequest;
 import sprint.server.domain.Running;
+import sprint.server.domain.RunningRawData;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.statistics.StatisticsType;
 import sprint.server.service.MemberService;
@@ -61,17 +61,28 @@ public class RunningApiController {
 
         return new ViewRunningResponse(running.getId(),running.getDistance(),
                 running.getDuration(),running.getEnergy(),
-                Arrays.asList(objectMapper.readValue(running.getRawData(), RunningRawDataVO[].class)));
+                running.getRunningRawDataList());
     }
 
 
-    @ApiOperation(value="최근 러닝 3개 리스트 반환", notes = "성공시 저장된 3개의 running 정보를 반환합니다")
-    @GetMapping("/api/runnings")
-    public List<RunningInfoDTO> viewRecentRunningList(@RequestParam(value="userId")Long memberId,
-                                                  @RequestParam(value="pageNumber") Integer pageNumber){
+    @ApiOperation(value="유저의 최근 러닝 3개 리스트 반환", notes = "성공시 저장된 3개의 running 정보를 반환합니다")
+    @GetMapping("/api/running/personal")
+    public List<PersonalRunningInfoDTO> viewPersonalRecentRunningList(@RequestParam(value="userId")Long memberId,
+                                                                      @RequestParam(value="pageNumber") Integer pageNumber){
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        return runningService.fetchRunningPagesBy(pageNumber,memberId).toList().stream()
-                .map(running -> new RunningInfoDTO(running.getId(),running.getDuration(),running.getDistance(),dateFormat.format(running.getStartTime()),running.getEnergy()))
+        return runningService.fetchPersonalRunningPages(pageNumber,memberId).toList().stream()
+                .map(running -> new PersonalRunningInfoDTO(running.getId(),running.getDuration(),running.getDistance(),dateFormat.format(running.getStartTime()),running.getEnergy()))
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+
+    @ApiOperation(value="유저 및 친구의 최근 러닝 6개 리스트 반환", notes = "성공시 저장된 3개의 running 정보를 반환합니다")
+    @GetMapping("/api/running/public")
+    public List<PublicRunningInfoDTO> viewPublicRecentRunningList(@RequestParam(value="userId")Long memberId,
+                                                      @RequestParam(value="pageNumber") Integer pageNumber){
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        return runningService.fetchPublicRunningPages(pageNumber,memberId).toList().stream()
+                .map(running -> new PublicRunningInfoDTO(running.getId(),running.getMember().getId(),running.getDuration(),running.getDistance(),dateFormat.format(running.getStartTime()),running.getEnergy()))
                 .collect(java.util.stream.Collectors.toList());
     }
 

@@ -9,6 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member,Long> {
+
     List<Member> findByNickname(String Nickname);
     List<Member> findByNicknameContaining(String Nickname);
     List<Member> findByNicknameContainingAndDisableDayIsNull(String Nickname);
