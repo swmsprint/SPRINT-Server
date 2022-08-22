@@ -14,7 +14,7 @@ public class Statistics {
 
     @Id @GeneratedValue
     @Column(name = "statistics_id")
-    private long id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "member_id")

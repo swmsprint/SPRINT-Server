@@ -1,9 +1,6 @@
 package sprint.server.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -17,22 +14,19 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 import sprint.server.controller.datatransferobject.request.CreateRunningRequest;
 import sprint.server.controller.datatransferobject.request.FinishRunningRequest;
-import sprint.server.controller.datatransferobject.response.RunningInfoDTO;
+import sprint.server.controller.datatransferobject.response.PersonalRunningInfoDTO;
 import sprint.server.controller.datatransferobject.response.RunningRawDataVO;
 import sprint.server.domain.Running;
 import sprint.server.domain.member.Member;
 import sprint.server.repository.MemberRepository;
 import sprint.server.repository.RunningRepository;
-import sprint.server.service.MemberService;
 import sprint.server.service.RunningService;
 import sprint.server.service.StatisticsService;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -146,10 +140,10 @@ class RunningApiControllerTest {
 
         //when
         String url = "/api/runnings"+"?memberId="+member.getId()+"&lastRunningId="+running4Id;
-        List<RunningInfoDTO> expected = new ArrayList<>();
-        expected.add(new RunningInfoDTO(running3Id, 3, running3.getDistance(), "2022-08-01 07:48:26.382",running3.getEnergy()));
-        expected.add(new RunningInfoDTO(running2Id, 3, running2.getDistance(), "2021-08-03 07:48:26.382",running2.getEnergy()));
-        expected.add(new RunningInfoDTO(running1Id, 3, running1.getDistance(), "2021-07-02 07:48:26.382",running1.getEnergy()));
+        List<PersonalRunningInfoDTO> expected = new ArrayList<>();
+        expected.add(new PersonalRunningInfoDTO(running3Id, 3, running3.getDistance(), "2022-08-01 07:48:26.382",running3.getEnergy()));
+        expected.add(new PersonalRunningInfoDTO(running2Id, 3, running2.getDistance(), "2021-08-03 07:48:26.382",running2.getEnergy()));
+        expected.add(new PersonalRunningInfoDTO(running1Id, 3, running1.getDistance(), "2021-07-02 07:48:26.382",running1.getEnergy()));
 
         //then
         mvc.perform(get(url))

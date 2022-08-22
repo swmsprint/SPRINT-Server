@@ -1,17 +1,12 @@
 package sprint.server.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.junit.Before;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 import sprint.server.controller.datatransferobject.request.FinishRunningRequest;
-import sprint.server.controller.datatransferobject.response.FinishRunningResponse;
-import sprint.server.controller.datatransferobject.response.RunningInfoDTO;
 import sprint.server.controller.datatransferobject.response.RunningRawDataVO;
 import sprint.server.domain.Running;
 import sprint.server.domain.member.Member;
@@ -19,7 +14,6 @@ import sprint.server.repository.MemberRepository;
 import sprint.server.repository.RunningRepository;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
