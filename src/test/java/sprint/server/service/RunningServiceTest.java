@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
 import sprint.server.controller.datatransferobject.request.FinishRunningRequest;
-import sprint.server.controller.datatransferobject.response.RunningRawDataVO;
+import sprint.server.domain.RunningRawData;
 import sprint.server.domain.Running;
 import sprint.server.domain.member.Member;
 import sprint.server.repository.MemberRepository;
@@ -45,11 +45,11 @@ class RunningServiceTest {
         Member member = memberRepository.findById(1L).orElse(null);
         long id = runningService.addRun(member,"2021-07-02 07:48:26.382");
         Running running = runningRepository.findByMember_IdAndAndStartTime(member.getId(), Timestamp.valueOf("2021-07-02 07:48:26.382"));
-        List<RunningRawDataVO>  runningRawData= new ArrayList<>();
-        runningRawData.add(new RunningRawDataVO(37.33028771,-122.02810514, 4.05,"2022-08-02 07:48:26.382Z"));
-        runningRawData.add(new RunningRawDataVO(37.33028312,-122.02805328, 4.05,"2022-08-02 07:48:27.310Z"));
-        runningRawData.add(new RunningRawDataVO(37.33028179,-122.02799851, 4.21,"2022-08-02 07:48:28.280Z"));
-        runningRawData.add(new RunningRawDataVO(37.33027655,-122.02794361, 4.2,"2022-08-02 07:48:29.391Z"));
+        List<RunningRawData>  runningRawData= new ArrayList<>();
+        runningRawData.add(new RunningRawData(37.33028771,-122.02810514, 4.05,"2022-08-02 07:48:26.382Z"));
+        runningRawData.add(new RunningRawData(37.33028312,-122.02805328, 4.05,"2022-08-02 07:48:27.310Z"));
+        runningRawData.add(new RunningRawData(37.33028179,-122.02799851, 4.21,"2022-08-02 07:48:28.280Z"));
+        runningRawData.add(new RunningRawData(37.33027655,-122.02794361, 4.2,"2022-08-02 07:48:29.391Z"));
 
         FinishRunningRequest tempRequest = new FinishRunningRequest(member.getId(), id, 3, runningRawData);
 
@@ -64,11 +64,11 @@ class RunningServiceTest {
     @Test
     void fetchRunningPagesBy() throws JsonProcessingException {
         //Given
-        List<RunningRawDataVO>  runningRawData= new ArrayList<>();
-        runningRawData.add(new RunningRawDataVO(37.33028771,-122.02810514, 4.05,"2022-08-02 07:48:26.382Z"));
-        runningRawData.add(new RunningRawDataVO(37.33028312,-122.02805328, 4.05,"2022-08-02 07:48:27.310Z"));
-        runningRawData.add(new RunningRawDataVO(37.33028179,-122.02799851, 4.21,"2022-08-02 07:48:28.280Z"));
-        runningRawData.add(new RunningRawDataVO(37.33027655,-122.02794361, 4.2,"2022-08-02 07:48:29.391Z"));
+        List<RunningRawData>  runningRawData= new ArrayList<>();
+        runningRawData.add(new RunningRawData(37.33028771,-122.02810514, 4.05,"2022-08-02 07:48:26.382Z"));
+        runningRawData.add(new RunningRawData(37.33028312,-122.02805328, 4.05,"2022-08-02 07:48:27.310Z"));
+        runningRawData.add(new RunningRawData(37.33028179,-122.02799851, 4.21,"2022-08-02 07:48:28.280Z"));
+        runningRawData.add(new RunningRawData(37.33027655,-122.02794361, 4.2,"2022-08-02 07:48:29.391Z"));
 
         Member member = memberRepository.findById(1L).orElse(null);
         long running1Id = runningService.addRun(member,"2021-07-02 07:48:26.382");

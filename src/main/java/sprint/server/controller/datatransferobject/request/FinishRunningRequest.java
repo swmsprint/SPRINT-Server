@@ -2,7 +2,7 @@ package sprint.server.controller.datatransferobject.request;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import sprint.server.controller.datatransferobject.response.RunningRawDataVO;
+import sprint.server.domain.RunningRawData;
 
 import java.util.List;
 
@@ -16,9 +16,9 @@ public class FinishRunningRequest {
     private Long runningId;
     private double duration;
     private double distance;
-    private List<RunningRawDataVO> runningData;
+    private List<RunningRawData> runningData;
 
-    public FinishRunningRequest(Long userId, Long runningId, int duration, List<RunningRawDataVO> runningData) {
+    public FinishRunningRequest(Long userId, Long runningId, int duration, List<RunningRawData> runningData) {
         this.userId = userId;
         this.runningId = runningId;
         this.duration = duration;

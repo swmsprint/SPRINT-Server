@@ -11,7 +11,7 @@ import sprint.server.controller.datatransferobject.request.FinishRunningRequest;
 import sprint.server.domain.friends.FriendState;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.Running;
-import sprint.server.controller.datatransferobject.response.RunningRawDataVO;
+import sprint.server.domain.RunningRawData;
 import sprint.server.repository.FriendsRepository;
 import sprint.server.repository.MemberRepository;
 import sprint.server.repository.RunningRepository;
@@ -54,12 +54,16 @@ public class RunningService {
         double energy = calculateEnergy(weight, request.getDuration(), distance);
         ObjectMapper mapper = new ObjectMapper();
 
-
         running.setEnergy(energy);
         running.setWeight(weight);
         running.setDuration(request.getDuration());
         running.setDistance(distance);
-        running.setRawData(mapper.writeValueAsString(request.getRunningData()));
+        running.setRunningRawDataList(request.getRunningData());
+
+        for(RunningRawData data : request.getRunningData()){
+            data.setRunning(running);
+        }
+//        running.setRawData(mapper.writeValueAsString(request.getRunningData()));
 
         return running;
     }
@@ -100,7 +104,7 @@ public class RunningService {
      * @param rowData 경도, 위도, 고도, 시간 등의 데이터가 저장되어있음
      * @return
      */
-    private double calculateTotalDistance(List<RunningRawDataVO> rowData) {
+    private double calculateTotalDistance(List<RunningRawData> rowData) {
         double distance = 0;
         for(int i = 0; i< rowData.size()-1; i++){
             /**

@@ -9,6 +9,7 @@ import sprint.server.controller.datatransferobject.response.*;
 import sprint.server.controller.datatransferobject.request.CreateRunningRequest;
 import sprint.server.controller.datatransferobject.request.FinishRunningRequest;
 import sprint.server.domain.Running;
+import sprint.server.domain.RunningRawData;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.statistics.StatisticsType;
 import sprint.server.service.MemberService;
@@ -60,7 +61,7 @@ public class RunningApiController {
 
         return new ViewRunningResponse(running.getId(),running.getDistance(),
                 running.getDuration(),running.getEnergy(),
-                Arrays.asList(objectMapper.readValue(running.getRawData(), RunningRawDataVO[].class)));
+                running.getRunningRawDataList());
     }
 
 
