@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import sprint.server.domain.member.Member;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,16 +26,13 @@ public class Running {
     @Column(name = "start_time")
     private Timestamp startTime;
 
-    private int duration;
-
+    private double duration;
     private double distance;
     private double energy;
-
     private float weight;
 
-
-    @Column(length = 10000)
-    private String rowData;
+    @OneToMany(mappedBy = "running",cascade = CascadeType.ALL)
+    private List<RunningRawData> RunningRawDataList = new ArrayList<>();
 
 
 }

@@ -21,5 +21,4 @@ public class Groups {
     private String groupDescription;
     private String groupPicture;
     private long ongoingGroupMatchId;
-
 }

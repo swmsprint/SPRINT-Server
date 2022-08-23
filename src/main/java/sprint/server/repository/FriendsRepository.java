@@ -1,15 +1,19 @@
 package sprint.server.repository;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import sprint.server.domain.Member;
+import sprint.server.domain.friends.FriendState;
 import sprint.server.domain.friends.Friends;
 
-import javax.persistence.EntityManager;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
-public class  FriendsRepository {
-
-
+public interface FriendsRepository extends JpaRepository<Friends, Long>{
+    Boolean existsBySourceMemberIdAndTargetMemberIdAndEstablishState(Long sourceMemberId, Long targetMemberId, FriendState friendState);
+    Optional<Friends> findBySourceMemberIdAndTargetMemberId(Long sourceMemberId, Long targetMemberId);
+    Optional<Friends> findBySourceMemberIdAndTargetMemberIdAndEstablishState(Long sourceMemberId, Long targetMemberId, FriendState friendState);
+    boolean existsBySourceMemberIdAndTargetMemberId(Long sourceMemberId, Long targetMemberId);
+    List<Friends> findBySourceMemberIdAndEstablishState(Long sourceMemberId, FriendState friendState);
+    List<Friends> findByTargetMemberIdAndEstablishState(Long targetMemberId, FriendState friendState);
 }

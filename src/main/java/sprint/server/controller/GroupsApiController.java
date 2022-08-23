@@ -15,7 +15,6 @@ import javax.validation.Valid;
 public class GroupsApiController {
     private final GroupsService groupsService;
 
-
     @PostMapping("/api/groups")
     public CreateGroupsResponse saveGroup(@RequestBody @Valid CreateGroupRequest request){
         Groups groups = new Groups();
@@ -30,7 +29,6 @@ public class GroupsApiController {
         int groupId = groupsService.addGroup(groups); // return 으로 id를 반환해해야하는지 아님 구분해야하는지 ?
         return new CreateGroupsResponse(groupId);
     }
-
 
     @Data class CreateGroupsResponse{
 

@@ -3,17 +3,21 @@ package sprint.server.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sprint.server.domain.Member;
+import sprint.server.controller.datatransferobject.request.FinishRunningRequest;
+import sprint.server.domain.friends.FriendState;
+import sprint.server.domain.member.Member;
 import sprint.server.domain.Running;
-import sprint.server.domain.RunningRowData;
+import sprint.server.domain.RunningRawData;
+import sprint.server.repository.FriendsRepository;
 import sprint.server.repository.MemberRepository;
 import sprint.server.repository.RunningRepository;
 
 import java.sql.Timestamp;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -21,16 +25,17 @@ public class RunningService {
 
     private final MemberRepository memberRepository;
     private final RunningRepository runningRepository;
+    private final FriendsRepository friendsRepository;
 
 
     public Optional<Running> findOne(Long runningId){
         return runningRepository.findById(runningId);
     }
     @Transactional
-    public Long addRun(Member member){
+    public Long addRun(Member member, String startTime){
 
         Running running = createRunning(member);
-        running.setStartTime(new Timestamp(System.currentTimeMillis()));
+        running.setStartTime(Timestamp.valueOf(new StringTokenizer(startTime,"Z").nextToken()));
         runningRepository.save(running);
 
         return running.getId();
@@ -39,24 +44,30 @@ public class RunningService {
 
 
     @Transactional
-    public void finishRunning(long runningId, long memberId, int duration, List<RunningRowData> rowData) throws JsonProcessingException {
+    public Running finishRunning(FinishRunningRequest request) throws JsonProcessingException {
 
-        Running running = runningRepository.findById(runningId).get();
-        Member member = memberRepository.findById(memberId).get();
+        Running running = runningRepository.findById(request.getRunningId()).get();
+        Member member = memberRepository.findById(request.getUserId()).get();
 
-        double distance = calculateTotalDistance(rowData);
+        double distance = calculateTotalDistance(request.getRunningData());
         float weight = member.getWeight();
-        double energy = calculateEnergy(weight, duration, distance);
+        double energy = calculateEnergy(weight, request.getDuration(), distance);
         ObjectMapper mapper = new ObjectMapper();
 
         running.setEnergy(energy);
         running.setWeight(weight);
-        running.setDuration(duration);
+        running.setDuration(request.getDuration());
         running.setDistance(distance);
-        running.setRowData(mapper.writeValueAsString(rowData));
+        running.setRunningRawDataList(request.getRunningData());
+
+        for(RunningRawData data : request.getRunningData()){
+            data.setRunning(running);
+        }
+//        running.setRawData(mapper.writeValueAsString(request.getRunningData()));
+
+        return running;
     }
 
-    @Transactional
     public Running createRunning(Member member){
         Running running = new Running();
         running.setMember(member);
@@ -64,18 +75,50 @@ public class RunningService {
     }
 
 
+    public Page<Running> fetchPersonalRunningPages(Integer pageNumber, Long memberId){
+        Member loginMember = memberRepository.findById(memberId).get();
+        List<Member> allMembers = new ArrayList<>(Arrays.asList(loginMember));
+        return fetchRunningPages(pageNumber,allMembers,3);
+    }
+    public Page<Running> fetchPublicRunningPages(Integer pageNumber, Long memberId){
+        Member loginMember = memberRepository.findById(memberId).get();
+        List<Member> allMembers = findFriendsAndLoginMemberList(memberId,loginMember);
+        return fetchRunningPages(pageNumber,allMembers,6);
+    }
+
+    public Page<Running> fetchRunningPages(Integer pageNumber, List<Member> allMembers,int size) {
+        PageRequest pageRequest = PageRequest.of(pageNumber,size);
+        return runningRepository.findByMemberInOrderByIdDesc(allMembers, pageRequest);
+    }
+
+    public List<Member> findFriendsAndLoginMemberList(Long memberId, Member loginMember) {
+        List<Member> allMembers = memberRepository.findAllById(friendsRepository.findBySourceMemberIdAndEstablishState(memberId, FriendState.ACCEPT)
+                .stream()
+                .map(friends -> friends.getTargetMemberId())
+                .collect(java.util.stream.Collectors.toList()));
+        allMembers.add(loginMember);
+        return allMembers;
+    }
     /**
      *
      * @param rowData 경도, 위도, 고도, 시간 등의 데이터가 저장되어있음
      * @return
      */
-    private double calculateTotalDistance(List<RunningRowData> rowData) {
+    private double calculateTotalDistance(List<RunningRawData> rowData) {
         double distance = 0;
         for(int i = 0; i< rowData.size()-1; i++){
+            /**
+             * 시간 차이가 1500ms 이상이면 멈췄던 상태이므로 거리에 카운트 하지 않음
+             */
+            Timestamp t1 = Timestamp.valueOf(new StringTokenizer(rowData.get(i).getTimestamp(),"Z").nextToken());
+            Timestamp t2 = Timestamp.valueOf(new StringTokenizer(rowData.get(i+1).getTimestamp(),"Z").nextToken());
+            if(t2.getTime()-t1.getTime() > 1500){ continue; }
+
             distance += calculateDistance(rowData.get(i).getLongitude(),
                     rowData.get(i + 1).getLongitude(),
                     rowData.get(i).getLatitude(),
                     rowData.get(i + 1).getLatitude());
+
         }
         return distance;
     }
@@ -87,7 +130,7 @@ public class RunningService {
      * @param distance 총 달린거리(미터 단위)
      * @return 소모 칼로리 반환
      */
-    public static double calculateEnergy(double weight, int duration, double distance){
+    public static double calculateEnergy(double weight, double duration, double distance){
         double coefficient;
         double speed =  distance /( 1000 * secondToHour(duration));
         /**칼로리 계산 매커니즘**/
@@ -107,26 +150,29 @@ public class RunningService {
      * @param duration 달린 시간 (초단위)
      * @return 초단위의 달린시간을 시간단위로 반환
      */
-    private static double secondToHour(int duration){
+    private static double secondToHour(double duration){
         return (duration/3600.0);
     }
 
     /**
      *
-     * @param longitudeX 출발지 경도
-     * @param longitudeY 도착지 경도
-     * @param latitudeX 출발지 위도
-     * @param latitudeY 도착지 위도
+     * @param startLongitude 출발지 경도
+     * @param endLongitude 도착지 경도
+     * @param startLatitude 출발지 위도
+     * @param endLatitude 도착지 위도
      * @return 전체 뛴 거리 (m단위)
      */
-    public static double calculateDistance(double longitudeX, double longitudeY, double latitudeX, double latitudeY){
-        double theta = longitudeX - longitudeY;
-        double distance = Math.sin(deg2rad(latitudeX))* Math.sin(deg2rad(latitudeY)) + Math.cos(deg2rad(latitudeX))*Math.cos(deg2rad(latitudeY))*Math.cos(deg2rad(theta));
-        distance = Math.acos(distance);
-        distance = rad2deg(distance);
-        distance = distance * 60*1.1515*1609.344;
+    public static double calculateDistance(double startLongitude, double endLongitude, double startLatitude, double endLatitude){
+        double earthRadius = 6378137.0;
+        double dLat = degreeToRadians(endLatitude-startLatitude);
+        double dLon = degreeToRadians(endLongitude - startLongitude);
+        double a = Math.pow(Math.sin(dLat/2),2)+
+                Math.pow(Math.sin(dLon/2),2) *
+                        Math.cos(degreeToRadians(startLatitude))*
+                        Math.cos(degreeToRadians(endLatitude));
+        double c = 2*Math.asin(Math.sqrt(a));
 
-        return distance; //단위 meter
+        return earthRadius*c; //단위 meter
     }
 
     /**
@@ -134,17 +180,8 @@ public class RunningService {
      * @param degree 일반 각도 입력
      * @return 각도를 라디안으로 변환
      */
-    private static double deg2rad(double degree){
+    private static double degreeToRadians(double degree){
         return (degree * Math.PI/180.0);
-    }
-
-    /**
-     *
-     * @param radian 라디안 입력
-     * @return 라디안을 각도로 반환
-환    */
-    private static double rad2deg(double radian){
-        return (radian * 180 / Math.PI);
     }
 
 }

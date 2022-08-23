@@ -2,9 +2,10 @@ package sprint.server.domain.statistics;
 
 import lombok.Getter;
 import lombok.Setter;
-import sprint.server.domain.Member;
+import sprint.server.domain.member.Member;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Entity
@@ -13,7 +14,7 @@ public class Statistics {
 
     @Id @GeneratedValue
     @Column(name = "statistics_id")
-    private long id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "member_id")
@@ -23,9 +24,10 @@ public class Statistics {
     private StatisticsType statisticsType;
 
     private double distance;
-    private int totalSeconds;
+    private double totalSeconds;
     private int count;
+    private double energy;
 
-    private LocalDateTime saveTime;
+    private Timestamp time;
 
 }

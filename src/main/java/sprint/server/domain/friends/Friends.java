@@ -3,35 +3,46 @@ package sprint.server.domain.friends;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import sprint.server.domain.Member;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
 @Entity
-@Getter @Setter @ToString
+@Getter @ToString
 public class Friends implements Serializable {
 
-    @Id
+    @Id @GeneratedValue
+    @NotNull
+    private Long Id;
+
     @Column(name = "source_user_id")
+    @NotNull
     private Long sourceMemberId;
 
-    @Id
     @Column(name = "target_user_id")
+    @NotNull
     private Long targetMemberId;
     private Timestamp registeredDate;
+
+    @Enumerated(EnumType.STRING)
+    @NotNull
     private FriendState establishState;
 
+    protected Friends(){}
 
-    public static Friends createFriendsRelationship(Member sourceMember, Member targetMember) {
-        Friends friends = new Friends();
-        friends.setSourceMemberId(sourceMember.getId());
-        friends.setTargetMemberId(targetMember.getId());
-        friends.setEstablishState(FriendState.REQUEST);
-        return friends;
+    public Friends(Long sourceMemberId, Long targetMemberId) {
+        this.sourceMemberId = sourceMemberId;
+        this.targetMemberId = targetMemberId;
+        this.establishState = FriendState.REQUEST;
     }
 
+    public void setRegisteredDate(Timestamp timestamp){
+        this.registeredDate = timestamp;
+    }
+
+    public void setEstablishState(FriendState establishState) {
+        this.establishState = establishState;
+    }
 }
