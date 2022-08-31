@@ -6,7 +6,7 @@ import sprint.server.domain.member.Member;
 import java.util.Comparator;
 
 @Data
-public class LoadMembersResponseVo {
+public class FindMembersResponseVo {
     private Long userId;
     private String nickName;
     private String email;
@@ -15,7 +15,7 @@ public class LoadMembersResponseVo {
     private int tierId;
     private String picture;
 
-    public LoadMembersResponseVo(Member member){
+    public FindMembersResponseVo(Member member){
         this.userId = member.getId();
         this.nickName = member.getNickname();
         this.email = member.getEmail();
@@ -25,7 +25,7 @@ public class LoadMembersResponseVo {
         this.picture = member.getPicture();
     }
 
-    public static Comparator<LoadMembersResponseVo> COMPARE_BY_NICKNAME = Comparator.comparing(o -> o.nickName);
+    public static Comparator<FindMembersResponseVo> COMPARE_BY_NICKNAME = Comparator.comparing(o -> o.nickName);
 }
 
 

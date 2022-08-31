@@ -40,14 +40,14 @@ public class MemberApiController {
             @ApiResponse(code = 500, message = "서버 에러")
     })
     @GetMapping("list")
-    public LoadMembersResponseDto<LoadMembersResponseVo> loadMembersByNickname(@RequestBody @Valid LoadMembersByNicknameRequest request){
+    public FindMembersResponseDto<FindMembersResponseVo> FindMembersByNickname(@RequestBody @Valid FindMembersByNicknameRequest request){
         List<Member> members = memberService.findByNicknameContaining(request.getNickname());
-        List<LoadMembersResponseVo> result = members.stream()
-                .map(LoadMembersResponseVo::new)
-                .sorted(LoadMembersResponseVo.COMPARE_BY_NICKNAME)
+        List<FindMembersResponseVo> result = members.stream()
+                .map(FindMembersResponseVo::new)
+                .sorted(FindMembersResponseVo.COMPARE_BY_NICKNAME)
                 .collect(Collectors.toList());
 
-        return new LoadMembersResponseDto(result.size(), result);
+        return new FindMembersResponseDto(result.size(), result);
     }
 
     @ApiOperation(value="회원 비활성화", notes="삭제는 아직 미구현")

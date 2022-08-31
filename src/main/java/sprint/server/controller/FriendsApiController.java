@@ -91,13 +91,13 @@ public class FriendsApiController {
             @ApiResponse(code = 500, message = "서버 에러")
     })
     @GetMapping("list")
-    public LoadMembersResponseDto<LoadMembersResponseVo> loadFriendsFriends(@RequestBody @Valid OneMemberRequest request) {
+    public FindMembersResponseDto<FindMembersResponseVo> findFriends(@RequestBody @Valid OneMemberRequest request) {
         List<Member> members = friendsService.loadFriendsBySourceMember(request.getUserId(), FriendState.ACCEPT);
-        List<LoadMembersResponseVo> result = members.stream()
-                .map(LoadMembersResponseVo::new)
-                .sorted(LoadMembersResponseVo.COMPARE_BY_NICKNAME)
+        List<FindMembersResponseVo> result = members.stream()
+                .map(FindMembersResponseVo::new)
+                .sorted(FindMembersResponseVo.COMPARE_BY_NICKNAME)
                 .collect(Collectors.toList());
-        return new LoadMembersResponseDto(result.size(), result);
+        return new FindMembersResponseDto(result.size(), result);
     }
 
     @ApiOperation(value="사용자가 받은 친구 추가 요청 목록", notes = "UserId -> 목록을 요청하는 유저")
@@ -107,12 +107,12 @@ public class FriendsApiController {
             @ApiResponse(code = 500, message = "서버 에러")
     })
     @GetMapping("list/receive")
-    public LoadMembersResponseDto<LoadMembersResponseVo> loadFriendsReceive(@RequestBody @Valid OneMemberRequest request) {
+    public FindMembersResponseDto<FindMembersResponseVo> findFriendsReceive(@RequestBody @Valid OneMemberRequest request) {
         List<Member> members = friendsService.loadFriendsByTargetMember(request.getUserId(), FriendState.REQUEST);
-        List<LoadMembersResponseVo> result = members.stream()
-                .map(LoadMembersResponseVo::new)
+        List<FindMembersResponseVo> result = members.stream()
+                .map(FindMembersResponseVo::new)
                 .collect(Collectors.toList());
-        return new LoadMembersResponseDto(result.size(), result);
+        return new FindMembersResponseDto(result.size(), result);
     }
 
     @ApiOperation(value="사용자가 보낸 친구 추가 요청 목록", notes = "UserId -> 목록을 요청하는 유저")
@@ -122,11 +122,11 @@ public class FriendsApiController {
             @ApiResponse(code = 500, message = "서버 에러")
     })
     @GetMapping("list/request")
-    public LoadMembersResponseDto<LoadMembersResponseVo> loadFriendsRequest(@RequestBody @Valid OneMemberRequest request) {
+    public FindMembersResponseDto<FindMembersResponseVo> findFriendsRequest(@RequestBody @Valid OneMemberRequest request) {
         List<Member> members = friendsService.loadFriendsBySourceMember(request.getUserId(), FriendState.REQUEST);
-        List<LoadMembersResponseVo> result = members.stream()
-                .map(LoadMembersResponseVo::new)
+        List<FindMembersResponseVo> result = members.stream()
+                .map(FindMembersResponseVo::new)
                 .collect(Collectors.toList());
-        return new LoadMembersResponseDto(result.size(), result);
+        return new FindMembersResponseDto(result.size(), result);
     }
 }

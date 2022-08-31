@@ -7,7 +7,7 @@ import lombok.Data;
 import javax.validation.constraints.NotNull;
 
 @Data
-public class LoadMembersByNicknameRequest {
+public class FindMembersByNicknameRequest {
     @NotNull
     @ApiParam(value = "찾고자하는 닉네임")
     @ApiModelProperty(example = "sprint", required = true)
