@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/friends/")
 public class FriendsApiController {
     private final FriendsService friendsService;
 
@@ -28,7 +29,7 @@ public class FriendsApiController {
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @PostMapping("/api/friends")
+    @PostMapping("request")
     public BooleanResponse createFriends(@RequestBody @Valid TwoMemberRequest request) {
         Friends friends = friendsService.requestFriends(request.getSourceUserId(), request.getTargetUserId());
         return new BooleanResponse(friendsService.existsById(friends.getId()));
@@ -41,7 +42,7 @@ public class FriendsApiController {
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @PostMapping("/api/friends/accept")
+    @PostMapping("accept")
     public BooleanResponse acceptFriends(@RequestBody @Valid TwoMemberRequest request) {
         return new BooleanResponse(friendsService.acceptFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
     }
@@ -53,7 +54,7 @@ public class FriendsApiController {
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @PutMapping("/api/friends/reject")
+    @PutMapping("reject")
     public BooleanResponse rejectFriends(@RequestBody @Valid TwoMemberRequest request) {
         return new BooleanResponse(friendsService.rejectFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
     }
@@ -65,7 +66,7 @@ public class FriendsApiController {
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @PutMapping("/api/friends/delete")
+    @PutMapping("delete")
     public BooleanResponse deleteFriends(@RequestBody @Valid TwoMemberRequest request) {
         return new BooleanResponse(friendsService.deleteFriends(request.getSourceUserId(), request.getTargetUserId()));
     }
@@ -77,7 +78,7 @@ public class FriendsApiController {
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @PutMapping("api/friends/cancel")
+    @PutMapping("cancel")
     public BooleanResponse cancelFriendsRequest(@RequestBody @Valid TwoMemberRequest request){
         return new BooleanResponse(friendsService.cancelFriends(request.getSourceUserId(), request.getTargetUserId()));
     }
@@ -89,7 +90,7 @@ public class FriendsApiController {
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @GetMapping("/api/friends/list/myfriends")
+    @GetMapping("list")
     public LoadMembersResponseDto<LoadMembersResponseVo> loadFriendsFriends(@RequestBody @Valid OneMemberRequest request) {
         List<Member> members = friendsService.loadFriendsBySourceMember(request.getUserId(), FriendState.ACCEPT);
         List<LoadMembersResponseVo> result = members.stream()
@@ -105,7 +106,7 @@ public class FriendsApiController {
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @GetMapping("/api/friends/list/receive")
+    @GetMapping("list/receive")
     public LoadMembersResponseDto<LoadMembersResponseVo> loadFriendsReceive(@RequestBody @Valid OneMemberRequest request) {
         List<Member> members = friendsService.loadFriendsByTargetMember(request.getUserId(), FriendState.REQUEST);
         List<LoadMembersResponseVo> result = members.stream()
@@ -120,7 +121,7 @@ public class FriendsApiController {
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @GetMapping("/api/friends/list/request")
+    @GetMapping("list/request")
     public LoadMembersResponseDto<LoadMembersResponseVo> loadFriendsRequest(@RequestBody @Valid OneMemberRequest request) {
         List<Member> members = friendsService.loadFriendsBySourceMember(request.getUserId(), FriendState.REQUEST);
         List<LoadMembersResponseVo> result = members.stream()

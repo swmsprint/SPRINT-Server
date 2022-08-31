@@ -23,6 +23,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/running/")
 public class RunningApiController {
 
     private final RunningService runningService;
@@ -31,7 +32,7 @@ public class RunningApiController {
     private final StatisticsService statisticsService;
 
     @ApiOperation(value="러닝 시작", notes = "성공시 저장된 runningId를 반환합니다")
-    @PostMapping("/api/running/start")
+    @PostMapping("start")
     public CreateRunningResponse createRunning(@RequestBody @Valid CreateRunningRequest request) {
         Member member = memberService.findById(request.getUserId());
         Long runningId = runningService.addRun(member,request.getStartTime());
@@ -39,7 +40,7 @@ public class RunningApiController {
     }
 
     @ApiOperation(value="러닝 종료", notes = "성공시 저장및 계산된 running 정보를 반환합니다")
-    @PostMapping("/api/running/finish")
+    @PostMapping("finish")
     public FinishRunningResponse finishRunning(@RequestBody @Valid FinishRunningRequest request) throws JsonProcessingException {
         Running running = runningService.finishRunning(request);
         statisticsService.updateStatistics(running, StatisticsType.Daily);
@@ -51,7 +52,7 @@ public class RunningApiController {
 
 
     @ApiOperation(value="러닝 정보 반환", notes = "성공시 저장된 running 정보의 자세한 정보들을 반환합니다")
-    @GetMapping("/api/running/detail")
+    @GetMapping("detail")
     public ViewRunningResponse viewRunningDetail(@RequestParam(value="runningId")Long runningId,
                                                  @RequestParam(value="userId")Long memberId )throws JsonProcessingException{
         Running running = runningService.findOne(runningId).get();
@@ -66,7 +67,7 @@ public class RunningApiController {
 
 
     @ApiOperation(value="유저의 최근 러닝 3개 리스트 반환", notes = "성공시 저장된 3개의 running 정보를 반환합니다")
-    @GetMapping("/api/running/personal")
+    @GetMapping("personal")
     public List<PersonalRunningInfoDTO> viewPersonalRecentRunningList(@RequestParam(value="userId")Long memberId,
                                                                       @RequestParam(value="pageNumber") Integer pageNumber){
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -77,7 +78,7 @@ public class RunningApiController {
 
 
     @ApiOperation(value="유저 및 친구의 최근 러닝 6개 리스트 반환", notes = "성공시 저장된 3개의 running 정보를 반환합니다")
-    @GetMapping("/api/running/public")
+    @GetMapping("public")
     public List<PublicRunningInfoDTO> viewPublicRecentRunningList(@RequestParam(value="userId")Long memberId,
                                                       @RequestParam(value="pageNumber") Integer pageNumber){
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");

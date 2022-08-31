@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/member/")
 public class MemberApiController {
     private final MemberService memberService;
 
@@ -25,7 +26,7 @@ public class MemberApiController {
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @PostMapping("/api/members")
+    @PostMapping("create")
     public CreateMemberResponse saveMember(@RequestBody @Valid CreateMemberRequest request){
         Member member = new Member(request.getNickname(), request.getGender(), request.getEmail(), request.getBirthDay(), request.getHeight(), request.getWeight(), request.getPicture());
         Long id = memberService.join(member);
@@ -38,7 +39,7 @@ public class MemberApiController {
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @GetMapping("/api/members/list")
+    @GetMapping("list")
     public LoadMembersResponseDto<LoadMembersResponseVo> loadMembersByNickname(@RequestBody @Valid LoadMembersByNicknameRequest request){
         List<Member> members = memberService.findByNicknameContaining(request.getNickname());
         List<LoadMembersResponseVo> result = members.stream()
@@ -55,7 +56,7 @@ public class MemberApiController {
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @PutMapping("/api/members/disable")
+    @PutMapping("disable")
     public BooleanResponse disableMember(@RequestBody @Valid OneMemberRequest request) {
         return new BooleanResponse(memberService.disableMember(request.getUserId()));
     }
@@ -66,7 +67,7 @@ public class MemberApiController {
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @PutMapping("/api/members/enable")
+    @PutMapping("enable")
     public BooleanResponse enableMember(@RequestBody @Valid OneMemberRequest request) {
         return new BooleanResponse(memberService.enableMember(request.getUserId()));
     }
@@ -77,7 +78,7 @@ public class MemberApiController {
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @PutMapping("/api/members/modify")
+    @PutMapping("modify")
     public BooleanResponse modifyMembers(@RequestBody @Valid ModifyMembersRequest request) {
         return new BooleanResponse(memberService.modifyMembers(request));
     }
@@ -88,7 +89,7 @@ public class MemberApiController {
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @GetMapping ("/api/members/validation_duplicate_name")
+    @GetMapping ("validation_duplicate_name")
     public BooleanResponse validationDuplicateNickname(@RequestBody @Valid ValidationDuplicateNicknameRequest request) {
         return new BooleanResponse(!memberService.existsByNickname(request.getNickname()));
     }
@@ -99,7 +100,7 @@ public class MemberApiController {
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @GetMapping ("/api/members/validation_duplicate_email")
+    @GetMapping ("validation_duplicate_email")
     public BooleanResponse validationDuplicateEmail(@RequestBody @Valid ValidationDuplicateEmailRequest request) {
         return new BooleanResponse(!memberService.existsByEmail(request.getEmail()));
     }
