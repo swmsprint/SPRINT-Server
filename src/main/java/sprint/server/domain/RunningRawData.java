@@ -26,4 +26,12 @@ public class RunningRawData {
     private double longitude;
     private double speed;
     private String timestamp;
+
+    public RunningRawData(Running running, double latitude, double longitude, double speed, String timestamp) {
+        this.running = running;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.speed = speed;
+        this.timestamp = timestamp;
+    }
 }
