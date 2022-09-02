@@ -45,11 +45,11 @@ class RunningServiceTest {
         Member member = memberRepository.findById(1L).orElse(null);
         long id = runningService.addRun(member,"2021-07-02 07:48:26.382");
         Running running = runningRepository.findByMember_IdAndAndStartTime(member.getId(), Timestamp.valueOf("2021-07-02 07:48:26.382"));
-        List<RunningRawData>  runningRawData= new ArrayList<>();
-        runningRawData.add(new RunningRawData(37.33028771,-122.02810514, 4.05,"2022-08-02 07:48:26.382Z"));
-        runningRawData.add(new RunningRawData(37.33028312,-122.02805328, 4.05,"2022-08-02 07:48:27.310Z"));
-        runningRawData.add(new RunningRawData(37.33028179,-122.02799851, 4.21,"2022-08-02 07:48:28.280Z"));
-        runningRawData.add(new RunningRawData(37.33027655,-122.02794361, 4.2,"2022-08-02 07:48:29.391Z"));
+        List<RunningRawData> runningRawData = new ArrayList<>();
+        runningRawData.add(new RunningRawData(running,37.33028771,-122.02810514,4.05,"2022-08-02 07:48:26.382Z"));
+        runningRawData.add(new RunningRawData(running,37.33028771,-122.02810514,4.05,"2022-08-02 07:48:26.382Z"));
+        runningRawData.add(new RunningRawData(running,37.33028771,-122.02810514,4.05,"2022-08-02 07:48:26.382Z"));
+        runningRawData.add(new RunningRawData(running,37.33028771,-122.02810514,4.05,"2022-08-02 07:48:26.382Z"));
 
         FinishRunningRequest tempRequest = new FinishRunningRequest(member.getId(), id, 3, runningRawData);
 
@@ -62,16 +62,17 @@ class RunningServiceTest {
 
 
     @Test
-    void fetchRunningPagesBy() throws JsonProcessingException {
+    void fetchRunningPages() throws JsonProcessingException {
         //Given
-        List<RunningRawData>  runningRawData= new ArrayList<>();
-        runningRawData.add(new RunningRawData(37.33028771,-122.02810514, 4.05,"2022-08-02 07:48:26.382Z"));
-        runningRawData.add(new RunningRawData(37.33028312,-122.02805328, 4.05,"2022-08-02 07:48:27.310Z"));
-        runningRawData.add(new RunningRawData(37.33028179,-122.02799851, 4.21,"2022-08-02 07:48:28.280Z"));
-        runningRawData.add(new RunningRawData(37.33027655,-122.02794361, 4.2,"2022-08-02 07:48:29.391Z"));
 
         Member member = memberRepository.findById(1L).orElse(null);
         long running1Id = runningService.addRun(member,"2021-07-02 07:48:26.382");
+        List<RunningRawData> runningRawData = new ArrayList<>();
+        runningRawData.add(new RunningRawData(runningRepository.findById(running1Id).get(),37.33028771,-122.02810514,4.05,"2022-08-02 07:48:26.382Z"));
+        runningRawData.add(new RunningRawData(runningRepository.findById(running1Id).get(),37.33028771,-122.02810514,4.05,"2022-08-02 07:48:26.382Z"));
+        runningRawData.add(new RunningRawData(runningRepository.findById(running1Id).get(),37.33028771,-122.02810514,4.05,"2022-08-02 07:48:26.382Z"));
+        runningRawData.add(new RunningRawData(runningRepository.findById(running1Id).get(),37.33028771,-122.02810514,4.05,"2022-08-02 07:48:26.382Z"));
+
         FinishRunningRequest tempRequest1 = new FinishRunningRequest(member.getId(), running1Id, 3, runningRawData);
         runningService.finishRunning(tempRequest1);
 
@@ -88,7 +89,9 @@ class RunningServiceTest {
         runningService.finishRunning(tempRequest4);
 
         //When
-        Page<Running>  runnings = runningService.fetchRunningPagesBy(0,member.getId());
+        List<Member> members = new ArrayList<>();
+        members.add(member);
+        Page<Running>  runnings = runningService.fetchRunningPages(0,members,3);
         //Then
 
         assertEquals(runnings.getContent().get(0).getId(),running4Id);
