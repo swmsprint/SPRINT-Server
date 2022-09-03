@@ -9,7 +9,6 @@ import sprint.server.controller.datatransferobject.request.*;
 import sprint.server.controller.datatransferobject.response.*;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.friends.FriendState;
-import sprint.server.domain.friends.Friends;
 import sprint.server.service.FriendsService;
 
 import javax.validation.Valid;
@@ -31,8 +30,7 @@ public class FriendsApiController {
     })
     @PostMapping("request")
     public BooleanResponse createFriends(@RequestBody @Valid TwoMemberRequest request) {
-        Friends friends = friendsService.requestFriends(request.getSourceUserId(), request.getTargetUserId());
-        return new BooleanResponse(friendsService.existsById(friends.getId()));
+        return new BooleanResponse(friendsService.requestFriends(request.getSourceUserId(), request.getTargetUserId()));
     }
 
     @ApiOperation(value="친구추가 요청 수락", notes =
@@ -92,7 +90,7 @@ public class FriendsApiController {
     })
     @GetMapping("list")
     public FindMembersResponseDto<FindMembersResponseVo> findFriends(@RequestParam Long userId) {
-        List<Member> members = friendsService.loadFriendsBySourceMember(userId, FriendState.ACCEPT);
+        List<Member> members = friendsService.findFriendsByMemberId(userId, FriendState.ACCEPT);
         List<FindMembersResponseVo> result = members.stream()
                 .map(FindMembersResponseVo::new)
                 .sorted(FindMembersResponseVo.COMPARE_BY_NICKNAME)
@@ -108,7 +106,7 @@ public class FriendsApiController {
     })
     @GetMapping("list/received")
     public FindMembersResponseDto<FindMembersResponseVo> findFriendsReceive(@RequestParam Long userId) {
-        List<Member> members = friendsService.loadFriendsByTargetMember(userId, FriendState.REQUEST);
+        List<Member> members = friendsService.findByTargetMemberIdAndFriendState(userId, FriendState.REQUEST);
         List<FindMembersResponseVo> result = members.stream()
                 .map(FindMembersResponseVo::new)
                 .collect(Collectors.toList());
@@ -123,7 +121,7 @@ public class FriendsApiController {
     })
     @GetMapping("list/requested")
     public FindMembersResponseDto<FindMembersResponseVo> findFriendsRequest(@RequestParam Long userId) {
-        List<Member> members = friendsService.loadFriendsBySourceMember(userId, FriendState.REQUEST);
+        List<Member> members = friendsService.findBySourceMemberIdAndFriendState(userId, FriendState.REQUEST);
         List<FindMembersResponseVo> result = members.stream()
                 .map(FindMembersResponseVo::new)
                 .collect(Collectors.toList());
