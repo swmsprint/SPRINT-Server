@@ -32,7 +32,12 @@ public class MemberServiceTest {
         /* 정상적인 요청 */
         Member member = new Member(testName, Gender.FEMALE, testName + "@sprint.com", LocalDate.of(2011, 2, 28), 180.0f, 70f, null);
         Long saveId = memberService.join(member);
-        assertEquals(testName, memberService.findById(saveId).getNickname());
+        Member foundMember1 = memberService.findById(saveId);
+        assertEquals(testName, foundMember1.getNickname());
+        assertEquals(testName+"@sprint.com", foundMember1.getEmail());
+        assertEquals(LocalDate.of(2011, 2, 28), foundMember1.getBirthday());
+        assertEquals(180.0F, foundMember1.getHeight());
+        assertEquals(70F,foundMember1.getWeight());
 
         /* 동일 닉네임이 이미 존재하는 경우 */
         Member member2 = new Member(testName, Gender.FEMALE, testName + "@sprint.com", LocalDate.of(2011, 2, 28), 180.0f, 70f, null);
