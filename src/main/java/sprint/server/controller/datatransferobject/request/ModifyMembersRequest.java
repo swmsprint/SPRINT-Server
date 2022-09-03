@@ -11,8 +11,6 @@ import java.time.LocalDate;
 @Data
 public class ModifyMembersRequest {
     @NotNull
-    private Long id;
-    @NotNull
     private String nickname;
     @NotNull
     private String email;

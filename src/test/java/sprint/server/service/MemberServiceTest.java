@@ -57,7 +57,6 @@ public class MemberServiceTest {
     public void modifyMembersTest(){
         /* 정상적인 요청 */
         ModifyMembersRequest modifyMembersRequest = new ModifyMembersRequest();
-        modifyMembersRequest.setId(1L);
         modifyMembersRequest.setNickname("Modify1");
         modifyMembersRequest.setEmail("Modify@test.com");
         modifyMembersRequest.setGender(Gender.MALE);
@@ -65,7 +64,7 @@ public class MemberServiceTest {
         modifyMembersRequest.setHeight(166.7F);
         modifyMembersRequest.setWeight(70F);
         modifyMembersRequest.setPicture("modify@mtest.com");
-        Boolean result = memberService.modifyMembers(modifyMembersRequest);
+        Boolean result = memberService.modifyMembers(1L, modifyMembersRequest);
         assertEquals(true, result);
         Optional<Member> member = memberRepository.findById(1L);
         if (member.isPresent()) {
@@ -81,8 +80,7 @@ public class MemberServiceTest {
 
 
         /* 해당 회원이 존재하지 않을 때 */
-        modifyMembersRequest.setId(0L);
-        ApiException thrown = assertThrows(ApiException.class, ()->memberService.modifyMembers(modifyMembersRequest));
+        ApiException thrown = assertThrows(ApiException.class, ()->memberService.modifyMembers(-1L, modifyMembersRequest));
         assertEquals("M0001", thrown.getErrorCode());
     }
 
