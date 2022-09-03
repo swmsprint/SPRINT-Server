@@ -20,7 +20,7 @@ public class ModifyMembersRequest {
     private Gender gender;
     @NotNull
     @DateTimeFormat(pattern ="yyyy-MM-dd")
-    private LocalDate birthDay;
+    private LocalDate birthday;
     @Positive
     private float height;
     @Positive

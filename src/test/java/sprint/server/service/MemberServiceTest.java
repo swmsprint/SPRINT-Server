@@ -56,7 +56,7 @@ public class MemberServiceTest {
         modifyMembersRequest.setNickname("Modify1");
         modifyMembersRequest.setEmail("Modify@test.com");
         modifyMembersRequest.setGender(Gender.MALE);
-        modifyMembersRequest.setBirthDay(LocalDate.of(2022, 3, 11));
+        modifyMembersRequest.setBirthday(LocalDate.of(2022, 3, 11));
         modifyMembersRequest.setHeight(166.7F);
         modifyMembersRequest.setWeight(70F);
         modifyMembersRequest.setPicture("modify@mtest.com");
@@ -68,7 +68,7 @@ public class MemberServiceTest {
             assertEquals("Modify1", member.get().getNickname());
             assertEquals("Modify@test.com", member.get().getEmail());
             assertEquals(Gender.MALE, member.get().getGender());
-            assertEquals(LocalDate.of(2022, 3, 11), member.get().getBirthDay());
+            assertEquals(LocalDate.of(2022, 3, 11), member.get().getBirthday());
             assertEquals(166.7F, member.get().getHeight());
             assertEquals(70F, member.get().getWeight());
             assertEquals("modify@mtest.com", member.get().getPicture());

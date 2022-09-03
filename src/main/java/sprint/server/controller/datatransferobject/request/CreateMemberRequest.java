@@ -31,7 +31,7 @@ public class CreateMemberRequest {
     @NotNull @DateTimeFormat(pattern ="yyyy-MM-dd")
     @ApiParam(value = "생일")
     @ApiModelProperty(example = "2000-04-07")
-    private LocalDate birthDay;
+    private LocalDate birthday;
 
     @Positive
     @ApiParam(value = "키")

@@ -8,7 +8,7 @@ import java.util.Comparator;
 @Data
 public class FindMembersResponseVo {
     private Long userId;
-    private String nickName;
+    private String nickname;
     private String email;
     private float height;
     private float weight;
@@ -17,7 +17,7 @@ public class FindMembersResponseVo {
 
     public FindMembersResponseVo(Member member){
         this.userId = member.getId();
-        this.nickName = member.getNickname();
+        this.nickname = member.getNickname();
         this.email = member.getEmail();
         this.height = member.getHeight();
         this.weight = member.getWeight();
@@ -25,7 +25,7 @@ public class FindMembersResponseVo {
         this.picture = member.getPicture();
     }
 
-    public static Comparator<FindMembersResponseVo> COMPARE_BY_NICKNAME = Comparator.comparing(o -> o.nickName);
+    public static Comparator<FindMembersResponseVo> COMPARE_BY_NICKNAME = Comparator.comparing(o -> o.nickname);
 }
 
 
