@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/user-management")
+@RequestMapping("/api/user-management/users")
 public class MemberApiController {
     private final MemberService memberService;
 
@@ -26,7 +26,7 @@ public class MemberApiController {
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @PostMapping("/users")
+    @PostMapping("")
     public CreateMemberResponse saveMember(@RequestBody @Valid CreateMemberRequest request){
         Member member = new Member(request.getNickname(), request.getGender(), request.getEmail(), request.getBirthday(), request.getHeight(), request.getWeight(), request.getPicture());
         Long id = memberService.join(member);
@@ -39,7 +39,7 @@ public class MemberApiController {
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @GetMapping("/users")
+    @GetMapping("")
     public FindMembersResponseDto<FindMembersResponseVo> FindMembersByNickname(@RequestParam String target){
         List<Member> members = memberService.findByNicknameContaining(target);
         List<FindMembersResponseVo> result = members.stream()
@@ -56,7 +56,7 @@ public class MemberApiController {
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @PutMapping("/users/{userId}/disable")
+    @PutMapping("/{userId}/disable")
     public BooleanResponse disableMember(@PathVariable Long userId) {
         return new BooleanResponse(memberService.disableMember(userId));
     }
@@ -67,7 +67,7 @@ public class MemberApiController {
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @PutMapping("/users/{userId}/enable")
+    @PutMapping("/{userId}/enable")
     public BooleanResponse enableMember(@PathVariable Long userId) {
         return new BooleanResponse(memberService.enableMember(userId));
     }
@@ -78,7 +78,7 @@ public class MemberApiController {
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @PutMapping("/users/{userId}")
+    @PutMapping("/{userId}")
     public BooleanResponse modifyMembers(@PathVariable Long userId, @RequestBody @Valid ModifyMembersRequest request) {
         return new BooleanResponse(memberService.modifyMembers(userId, request));
     }
