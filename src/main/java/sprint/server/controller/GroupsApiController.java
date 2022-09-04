@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import sprint.server.domain.Groups;
 import sprint.server.service.GroupsService;
@@ -12,10 +13,11 @@ import javax.validation.Valid;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/groups/")
 public class GroupsApiController {
     private final GroupsService groupsService;
 
-    @PostMapping("/api/groups")
+    @PostMapping("create")
     public CreateGroupsResponse saveGroup(@RequestBody @Valid CreateGroupRequest request){
         Groups groups = new Groups();
         groups.setGroupLeaderId(request.getGroupLeaderId());

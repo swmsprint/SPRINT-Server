@@ -70,7 +70,6 @@ public class StatisticsService {
             return StatisticsInfoVO.builder()
                     .distance(statistics.getDistance())
                     .totalSeconds(statistics.getTotalSeconds())
-                    .pace((1000/statistics.getDistance())*(statistics.getTotalSeconds()/3600.0))
                     .energy(statistics.getEnergy())
                     .build();
     }
@@ -92,7 +91,6 @@ public class StatisticsService {
             return StatisticsInfoVO.builder()
                 .distance(statistics.getDistance())
                 .totalSeconds(statistics.getTotalSeconds())
-                .pace((1000/statistics.getDistance())*(statistics.getTotalSeconds()/3600.0))
                 .energy(statistics.getEnergy())
                 .build();
     }
@@ -114,7 +112,6 @@ public class StatisticsService {
             return StatisticsInfoVO.builder()
                 .distance(statistics.getDistance())
                 .totalSeconds(statistics.getTotalSeconds())
-                .pace((1000/statistics.getDistance())*(statistics.getTotalSeconds()/3600.0))
                 .energy(statistics.getEnergy())
                 .build();
     }
@@ -137,14 +134,11 @@ public class StatisticsService {
         double distance = allStatistics.stream().mapToDouble(Statistics::getDistance).sum();
         double energy = allStatistics.stream().mapToDouble(Statistics::getEnergy).sum();
         double totalSeconds = allStatistics.stream().mapToDouble(Statistics::getTotalSeconds).sum();
-        double pace = (1000/distance)*(totalSeconds/3600.0);
 
         return StatisticsInfoVO.builder()
                 .distance(distance)
                 .totalSeconds(totalSeconds)
-                .pace((1000/distance)*(totalSeconds/3600.0))
                 .energy(energy)
-                .pace(pace)
                 .build();
 
     }
@@ -156,12 +150,10 @@ public class StatisticsService {
         double distance = allStatistics.stream().mapToDouble(Statistics::getDistance).sum();
         double energy = allStatistics.stream().mapToDouble(Statistics::getEnergy).sum();
         double totalSeconds = allStatistics.stream().mapToDouble(Statistics::getTotalSeconds).sum();
-        double pace = (1000/distance)*(totalSeconds/3600.0);
 
         return StatisticsInfoVO.builder()
                 .distance(distance)
                 .totalSeconds(totalSeconds)
-                .pace(pace)
                 .energy(energy)
                 .build();
     }

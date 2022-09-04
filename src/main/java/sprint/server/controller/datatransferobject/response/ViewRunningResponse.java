@@ -1,9 +1,9 @@
 package sprint.server.controller.datatransferobject.response;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import sprint.server.domain.RunningRawData;
 
 import java.util.List;
 
@@ -16,5 +16,5 @@ public class ViewRunningResponse {
     private double distance;
     private double duration;
     private double energy;
-    private List<RunningRawDataVO> runningData;
+    private List<RunningRawData> runningData;
 }

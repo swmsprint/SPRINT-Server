@@ -11,8 +11,6 @@ import java.time.LocalDate;
 @Data
 public class ModifyMembersRequest {
     @NotNull
-    private Long id;
-    @NotNull
     private String nickname;
     @NotNull
     private String email;
@@ -20,7 +18,7 @@ public class ModifyMembersRequest {
     private Gender gender;
     @NotNull
     @DateTimeFormat(pattern ="yyyy-MM-dd")
-    private LocalDate birthDay;
+    private LocalDate birthday;
     @Positive
     private float height;
     @Positive
