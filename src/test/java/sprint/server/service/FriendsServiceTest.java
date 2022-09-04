@@ -127,7 +127,7 @@ public class FriendsServiceTest {
         friendsService.requestFriends(1L, 2L);
         friendsService.acceptFriendsRequest(1L, 2L);
         friendsService.deleteFriends(1L, 2L);
-        assertEquals(true, friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(1L, 2L, FriendState.REJECT));
+        assertEquals(true, friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(1L, 2L, FriendState.DELETED));
         assertEquals(false, friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(1L, 2L, FriendState.ACCEPT));
     }
 

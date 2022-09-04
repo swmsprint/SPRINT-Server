@@ -100,10 +100,10 @@ public class FriendsService {
         if(friends.isEmpty()) {
             throw new ApiException(ExceptionEnum.FRIENDS_NOT_FOUND);
         }
-        friends.get().setEstablishState(FriendState.REJECT);
+        friends.get().setEstablishState(FriendState.DELETED);
         friends.get().setRegisteredDate(Timestamp.valueOf(LocalDateTime.now()));
 
-        return isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.REJECT);
+        return isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.DELETED);
     }
 
 
