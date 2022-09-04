@@ -7,9 +7,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import sprint.server.controller.datatransferobject.request.*;
 import sprint.server.controller.datatransferobject.response.*;
+import sprint.server.controller.exception.ApiException;
+import sprint.server.controller.exception.ExceptionEnum;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.friends.FriendState;
-import sprint.server.domain.friends.Friends;
 import sprint.server.service.FriendsService;
 
 import javax.validation.Valid;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/friends/")
+@RequestMapping("api/user-management/friends")
 public class FriendsApiController {
     private final FriendsService friendsService;
 
@@ -29,58 +30,32 @@ public class FriendsApiController {
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @PostMapping("request")
-    public BooleanResponse createFriends(@RequestBody @Valid TwoMemberRequest request) {
-        Friends friends = friendsService.requestFriends(request.getSourceUserId(), request.getTargetUserId());
-        return new BooleanResponse(friendsService.existsById(friends.getId()));
+    @PostMapping("")
+    public BooleanResponse createFriends(@RequestBody @Valid CreateFriendsRequest request) {
+        return new BooleanResponse(friendsService.requestFriends(request.getSourceUserId(), request.getTargetUserId()));
     }
 
-    @ApiOperation(value="친구추가 요청 수락", notes =
-            "sourceUserId -> 친구추가 요청을 수락하는 유저\ntargetUserId -> 친구추가 요청을 보낸 유저")
+    @ApiOperation(value="친구 수락/거절/취소/제거", notes =
+    "수락: ACCEPT\n거절: REJECT\n취소: CANCEL\n제거: DELETE")
     @ApiResponses({
             @ApiResponse(code = 200, message = "정상 작동"),
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @PostMapping("accept")
-    public BooleanResponse acceptFriends(@RequestBody @Valid TwoMemberRequest request) {
-        return new BooleanResponse(friendsService.acceptFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
-    }
-
-    @ApiOperation(value="친구추가 요청 거절", notes =
-            "sourceUserId -> 친구추가 요청을 거절하는 유저\ntargetUserId -> 친구추가 요청을 보낸 유저")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "정상 작동"),
-            @ApiResponse(code = 400, message = "요청 에러"),
-            @ApiResponse(code = 500, message = "서버 에러")
-    })
-    @PutMapping("reject")
-    public BooleanResponse rejectFriends(@RequestBody @Valid TwoMemberRequest request) {
-        return new BooleanResponse(friendsService.rejectFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
-    }
-
-    @ApiOperation(value="친구 제거", notes =
-            "sourceUserId -> 친구제거 요청을 보내는 유저\ntargetUserId -> 친구목록에서 제거될 유저")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "정상 작동"),
-            @ApiResponse(code = 400, message = "요청 에러"),
-            @ApiResponse(code = 500, message = "서버 에러")
-    })
-    @PutMapping("delete")
-    public BooleanResponse deleteFriends(@RequestBody @Valid TwoMemberRequest request) {
-        return new BooleanResponse(friendsService.deleteFriends(request.getSourceUserId(), request.getTargetUserId()));
-    }
-
-    @ApiOperation(value="친구 추가 요청 취소", notes =
-            "sourceUserId -> 친구추가 요청을 보낸 유저\ntargetUserId -> 친구추가 요청을 받은 유저")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "정상 작동"),
-            @ApiResponse(code = 400, message = "요청 에러"),
-            @ApiResponse(code = 500, message = "서버 에러")
-    })
-    @PutMapping("cancel")
-    public BooleanResponse cancelFriendsRequest(@RequestBody @Valid TwoMemberRequest request){
-        return new BooleanResponse(friendsService.cancelFriends(request.getSourceUserId(), request.getTargetUserId()));
+    @PutMapping("")
+    public BooleanResponse modifyFriendsState(@RequestBody @Valid ModifyFriendsRequest request) {
+        switch (request.getFriendState()) {
+            case ACCEPT:
+                return new BooleanResponse(friendsService.acceptFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
+            case REJECT:
+                return new BooleanResponse(friendsService.rejectFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
+            case CANCELED:
+                return new BooleanResponse(friendsService.cancelFriends(request.getSourceUserId(), request.getTargetUserId()));
+            case DELETED:
+                return new BooleanResponse(friendsService.deleteFriends(request.getSourceUserId(), request.getTargetUserId()));
+            default:
+                throw new ApiException(ExceptionEnum.FRIENDS_METHOD_NOT_FOUND);
+        }
     }
 
 
@@ -92,7 +67,7 @@ public class FriendsApiController {
     })
     @GetMapping("list")
     public FindMembersResponseDto<FindMembersResponseVo> findFriends(@RequestParam Long userId) {
-        List<Member> members = friendsService.loadFriendsBySourceMember(userId, FriendState.ACCEPT);
+        List<Member> members = friendsService.findFriendsByMemberId(userId, FriendState.ACCEPT);
         List<FindMembersResponseVo> result = members.stream()
                 .map(FindMembersResponseVo::new)
                 .sorted(FindMembersResponseVo.COMPARE_BY_NICKNAME)
@@ -108,7 +83,7 @@ public class FriendsApiController {
     })
     @GetMapping("list/received")
     public FindMembersResponseDto<FindMembersResponseVo> findFriendsReceive(@RequestParam Long userId) {
-        List<Member> members = friendsService.loadFriendsByTargetMember(userId, FriendState.REQUEST);
+        List<Member> members = friendsService.findByTargetMemberIdAndFriendState(userId, FriendState.REQUEST);
         List<FindMembersResponseVo> result = members.stream()
                 .map(FindMembersResponseVo::new)
                 .collect(Collectors.toList());
@@ -123,7 +98,7 @@ public class FriendsApiController {
     })
     @GetMapping("list/requested")
     public FindMembersResponseDto<FindMembersResponseVo> findFriendsRequest(@RequestParam Long userId) {
-        List<Member> members = friendsService.loadFriendsBySourceMember(userId, FriendState.REQUEST);
+        List<Member> members = friendsService.findBySourceMemberIdAndFriendState(userId, FriendState.REQUEST);
         List<FindMembersResponseVo> result = members.stream()
                 .map(FindMembersResponseVo::new)
                 .collect(Collectors.toList());
