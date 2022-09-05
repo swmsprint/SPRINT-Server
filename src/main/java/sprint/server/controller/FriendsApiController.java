@@ -59,7 +59,8 @@ public class FriendsApiController {
     }
 
 
-    @ApiOperation(value="친구 목록 요청", notes = "Example: http://localhost:8080/api/friends/list?userId=3")
+    @ApiOperation(value="친구 목록 요청",
+            notes = "Example: http://localhost:8080/api/user-management/friends/list?userId=3")
     @ApiResponses({
             @ApiResponse(code = 200, message = "정상 작동"),
             @ApiResponse(code = 400, message = "요청 에러"),
@@ -75,7 +76,8 @@ public class FriendsApiController {
         return new FindMembersResponseDto(result.size(), result);
     }
 
-    @ApiOperation(value="사용자가 받은 친구 추가 요청 목록", notes = "Example: http://localhost:8080/api/friends/list/received?userId=3")
+    @ApiOperation(value="사용자가 받은 친구 추가 요청 목록",
+            notes = "Example: http://localhost:8080/api/user-management/friends/list/received?userId=3")
     @ApiResponses({
             @ApiResponse(code = 200, message = "정상 작동"),
             @ApiResponse(code = 400, message = "요청 에러"),
@@ -90,7 +92,8 @@ public class FriendsApiController {
         return new FindMembersResponseDto(result.size(), result);
     }
 
-    @ApiOperation(value="사용자가 보낸 친구 추가 요청 목록", notes = "Example: http://localhost:8080/api/friends/list/requested?userId=3")
+    @ApiOperation(value="사용자가 보낸 친구 추가 요청 목록",
+            notes = "Example: http://localhost:8080/api/user-management/friends/list/requested?userId=3")
     @ApiResponses({
             @ApiResponse(code = 200, message = "정상 작동"),
             @ApiResponse(code = 400, message = "요청 에러"),
