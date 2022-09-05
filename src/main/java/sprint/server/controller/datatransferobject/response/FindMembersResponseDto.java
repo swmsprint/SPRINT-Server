@@ -7,5 +7,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class FindMembersResponseDto<T> {
     private int count;
-    private T userFriends;
+    private T userList;
 }

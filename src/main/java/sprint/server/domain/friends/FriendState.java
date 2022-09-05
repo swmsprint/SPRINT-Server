@@ -1,10 +1,9 @@
 package sprint.server.domain.friends;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import sprint.server.domain.member.Gender;
 
 public enum FriendState {
-    REQUEST, ACCEPT, REJECT, CANCELED, DELETED;
+    REQUEST, ACCEPT, REJECT, CANCELED, DELETED, NOT_FRIEND;
 
     @JsonCreator
     public static FriendState fromFriendState(String input) {
