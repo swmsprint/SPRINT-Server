@@ -42,9 +42,6 @@ public class RunningApiController {
     public FinishRunningResponse finishRunning(@RequestBody @Valid FinishRunningRequest request) throws JsonProcessingException {
         Running running = runningService.finishRunning(request);
         statisticsService.updateStatistics(running, StatisticsType.Daily);
-        statisticsService.updateStatistics(running, StatisticsType.Weekly);
-        statisticsService.updateStatistics(running, StatisticsType.Monthly);
-
         return new FinishRunningResponse(running.getId(),running.getDistance(),running.getDuration(),running.getEnergy());
     }
 

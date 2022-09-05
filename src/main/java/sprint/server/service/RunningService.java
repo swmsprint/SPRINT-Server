@@ -63,8 +63,6 @@ public class RunningService {
         for(RunningRawData data : request.getRunningData()){
             data.setRunning(running);
         }
-//        running.setRawData(mapper.writeValueAsString(request.getRunningData()));
-
         return running;
     }
 

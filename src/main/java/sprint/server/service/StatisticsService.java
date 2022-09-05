@@ -2,6 +2,8 @@ package sprint.server.service;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sprint.server.controller.datatransferobject.response.StatisticsInfoVO;
@@ -17,7 +19,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.logging.Logger;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StatisticsService {
@@ -86,6 +90,8 @@ public class StatisticsService {
     @Transactional
     public StatisticsInfoVO findDailyStatistics(Long memberID, Calendar calendar) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
+
         Calendar startTime = getCalendarStart(Timestamp.valueOf(dateFormat.format(calendar.getTime())),StatisticsType.Daily);
         Calendar endTime = getCalendarEnd(Timestamp.valueOf(dateFormat.format(calendar.getTime())),StatisticsType.Daily);
 
@@ -105,83 +111,96 @@ public class StatisticsService {
     public StatisticsInfoVO findWeeklyStatistics(Long memberID, Calendar calendar) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
-        calendar.set(Calendar.DAY_OF_WEEK, 1);
+
         Calendar startTime = getCalendarStart(Timestamp.valueOf(dateFormat.format(calendar.getTime())),StatisticsType.Weekly);
-        calendar.set(Calendar.DAY_OF_WEEK, 7);
         Calendar endTime = getCalendarEnd(Timestamp.valueOf(dateFormat.format(calendar.getTime())),StatisticsType.Weekly);
 
-        Statistics statistics = statisticsRepository.findByStatisticsTypeAndMemberIdAndTimeBetween(StatisticsType.Weekly, memberID,
+        List<Statistics> dailyStatistics = statisticsRepository.findAllByStatisticsTypeAndMemberIdAndTimeBetween(StatisticsType.Daily, memberID,
                 Timestamp.valueOf(dateFormat.format(startTime.getTime())), Timestamp.valueOf(dateFormat.format(endTime.getTime())));
-        if(statistics == null) {
-            return StatisticsInfoVO.builder().build();
-        }else
-            return StatisticsInfoVO.builder()
-                .distance(statistics.getDistance())
-                .totalSeconds(statistics.getTotalSeconds())
-                .energy(statistics.getEnergy())
+
+        double distance =dailyStatistics.stream().mapToDouble(Statistics::getDistance).sum();
+        double energy =dailyStatistics.stream().mapToDouble(Statistics::getEnergy).sum();
+        double totalSeconds = dailyStatistics.stream().mapToDouble(Statistics::getTotalSeconds).sum();
+
+        return StatisticsInfoVO.builder()
+                .distance(distance)
+                .totalSeconds(totalSeconds)
+                .energy(energy)
                 .build();
+
     }
 
     @Transactional
     public StatisticsInfoVO findMonthlyStatistics(Long memberID, Calendar calendar) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        StatisticsInfoVO lastWeekStatistics = findWeeklyStatistics(memberID,calendar);
 
-        calendar.set(Calendar.DAY_OF_MONTH, 1);
         Calendar startTime = getCalendarStart(Timestamp.valueOf(dateFormat.format(calendar.getTime())),StatisticsType.Monthly);
-        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
         Calendar endTime = getCalendarEnd(Timestamp.valueOf(dateFormat.format(calendar.getTime())),StatisticsType.Monthly);
 
-        Statistics statistics = statisticsRepository.findByStatisticsTypeAndMemberIdAndTimeBetween(StatisticsType.Monthly, memberID,
+        List<Statistics> weeklyStatistics = statisticsRepository.findAllByStatisticsTypeAndMemberIdAndTimeBetween(StatisticsType.Weekly, memberID,
                 Timestamp.valueOf(dateFormat.format(startTime.getTime())), Timestamp.valueOf(dateFormat.format(endTime.getTime())));
-        if(statistics == null) {
-            return StatisticsInfoVO.builder().build();
-        }else
-            return StatisticsInfoVO.builder()
-                .distance(statistics.getDistance())
-                .totalSeconds(statistics.getTotalSeconds())
-                .energy(statistics.getEnergy())
+
+
+        double distance = lastWeekStatistics.getDistance()
+                + weeklyStatistics.stream().mapToDouble(Statistics::getDistance).sum();
+        double energy = lastWeekStatistics.getEnergy()
+                + weeklyStatistics.stream().mapToDouble(Statistics::getEnergy).sum();
+        double totalSeconds = lastWeekStatistics.getTotalSeconds()
+                + weeklyStatistics.stream().mapToDouble(Statistics::getTotalSeconds).sum();
+
+        return StatisticsInfoVO.builder()
+                .distance(distance)
+                .totalSeconds(totalSeconds)
+                .energy(energy)
                 .build();
     }
 
     @Transactional
     public StatisticsInfoVO findYearlyStatistics(Long memberID, Calendar calendar) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        StatisticsInfoVO lastMonthStatistics = findMonthlyStatistics(memberID,calendar);
 
-        calendar.set(Calendar.DAY_OF_MONTH, 1);
-        calendar.set(Calendar.MONTH, 0);
-        Calendar startTime = getCalendarStart(Timestamp.valueOf(dateFormat.format(calendar.getTime())),StatisticsType.Monthly);
+        Calendar startTime = getCalendarStart(Timestamp.valueOf(dateFormat.format(calendar.getTime())),StatisticsType.Yearly);
+        Calendar endTime = getCalendarEnd(Timestamp.valueOf(dateFormat.format(calendar.getTime())),StatisticsType.Yearly);
 
-        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
-        calendar.set(Calendar.MONTH, 11);
-        Calendar endTime = getCalendarEnd(Timestamp.valueOf(dateFormat.format(calendar.getTime())),StatisticsType.Monthly);
-
-        Statistics statistics = statisticsRepository.findByStatisticsTypeAndMemberIdAndTimeBetween(StatisticsType.Yearly, memberID,
+        List<Statistics> allStatistics = statisticsRepository.findAllByStatisticsTypeAndMemberIdAndTimeBetween(StatisticsType.Monthly, memberID,
                 Timestamp.valueOf(dateFormat.format(startTime.getTime())), Timestamp.valueOf(dateFormat.format(endTime.getTime())));
 
-        if(statistics == null) {
-            return StatisticsInfoVO.builder().build();
-        }else
-            return StatisticsInfoVO.builder()
-                    .distance(statistics.getDistance())
-                    .totalSeconds(statistics.getTotalSeconds())
-                    .energy(statistics.getEnergy())
-                    .build();
+        double distance = allStatistics.stream().mapToDouble(Statistics::getDistance).sum()
+                +lastMonthStatistics.getDistance();
+        double energy = allStatistics.stream().mapToDouble(Statistics::getEnergy).sum()
+                +lastMonthStatistics.getEnergy();
+        double totalSeconds = allStatistics.stream().mapToDouble(Statistics::getTotalSeconds).sum()
+                +lastMonthStatistics.getTotalSeconds();
+
+        return StatisticsInfoVO.builder()
+                .distance(distance)
+                .totalSeconds(totalSeconds)
+                .energy(energy)
+                .build();
 
     }
 
     @Transactional
-    public StatisticsInfoVO findTotalStatistics(Long memberID) {
+    public StatisticsInfoVO findTotalStatistics(Long memberID,Calendar calendar) {
 
-        List<Statistics> statistics = statisticsRepository.findByStatisticsTypeAndMemberId(StatisticsType.Totally, memberID);
+        StatisticsInfoVO lastYearlyStatistics = findYearlyStatistics(memberID,calendar);
 
-        if(statistics.size() == 0) {
-            return StatisticsInfoVO.builder().build();
-        }else
-            return StatisticsInfoVO.builder()
-                    .distance(statistics.get(0).getDistance())
-                    .totalSeconds(statistics.get(0).getTotalSeconds())
-                    .energy(statistics.get(0).getEnergy())
-                    .build();
+        List<Statistics> allStatistics = statisticsRepository.findByStatisticsTypeAndMemberId(StatisticsType.Yearly, memberID);
+
+        double distance = allStatistics.stream().mapToDouble(Statistics::getDistance).sum()
+                +lastYearlyStatistics.getDistance();
+        double energy = allStatistics.stream().mapToDouble(Statistics::getEnergy).sum()
+                +lastYearlyStatistics.getEnergy();
+        double totalSeconds = allStatistics.stream().mapToDouble(Statistics::getTotalSeconds).sum()
+                +lastYearlyStatistics.getTotalSeconds();
+
+        return StatisticsInfoVO.builder()
+                .distance(distance)
+                .totalSeconds(totalSeconds)
+                .energy(energy)
+                .build();
 
     }
 
@@ -231,13 +250,21 @@ public class StatisticsService {
             calendarEnd.set(Calendar.DAY_OF_WEEK,Calendar.SUNDAY);
             calendarEnd.add(Calendar.DATE, 7);
         }
-        else if(statisticsType == StatisticsType.Monthly){calendarEnd.set(Calendar.DAY_OF_MONTH,calendarEnd.getActualMaximum(Calendar.DAY_OF_MONTH));}
+        else if(statisticsType == StatisticsType.Monthly){
+            calendarEnd.set(Calendar.DAY_OF_MONTH,calendarEnd.getActualMaximum(Calendar.DAY_OF_MONTH));
+        }else if(statisticsType == StatisticsType.Yearly){
+            calendarEnd.set(Calendar.DAY_OF_YEAR,calendarEnd.getActualMaximum(Calendar.DAY_OF_YEAR));
+        }
+
 
         calendarEnd.set(Calendar.AM_PM,Calendar.PM);
         calendarEnd.set(Calendar.HOUR,11);
         calendarEnd.set(Calendar.MINUTE,59);
         calendarEnd.set(Calendar.SECOND,59);
         calendarEnd.set(Calendar.MILLISECOND,999);
+
+        log.info(statisticsType+"statistics log - "+"calendarEnd:"+calendarEnd.getTime());
+
         return calendarEnd;
     }
 
@@ -253,12 +280,15 @@ public class StatisticsService {
         calendarStart.setTime(timestamp);
         if(statisticsType == StatisticsType.Weekly) calendarStart.set(Calendar.DAY_OF_WEEK,Calendar.MONDAY);
         else if(statisticsType == StatisticsType.Monthly) calendarStart.set(Calendar.DAY_OF_MONTH,1);
-
+        else if(statisticsType == statisticsType.Yearly) calendarStart.set(Calendar.DAY_OF_YEAR,1);
         calendarStart.set(Calendar.AM_PM,Calendar.AM);
         calendarStart.set(Calendar.HOUR,0);
         calendarStart.set(Calendar.MINUTE,0);
         calendarStart.set(Calendar.SECOND,0);
         calendarStart.set(Calendar.MILLISECOND,0);
+
+        log.info(statisticsType+"statistics log - "+"calendarStart:"+calendarStart.getTime());
+
         return calendarStart;
     }
 

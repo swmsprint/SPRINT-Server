@@ -25,7 +25,7 @@ public class StatisticsApiController {
                 statisticsService.findWeeklyStatistics(memberID,calendar),
                 statisticsService.findMonthlyStatistics(memberID,calendar),
                 statisticsService.findYearlyStatistics(memberID,calendar),
-                statisticsService.findTotalStatistics(memberID));
+                statisticsService.findTotalStatistics(memberID,calendar));
     }
 
 
