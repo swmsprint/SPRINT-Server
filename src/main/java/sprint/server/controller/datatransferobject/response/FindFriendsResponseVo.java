@@ -4,10 +4,9 @@ import lombok.Data;
 import sprint.server.domain.member.Member;
 
 import java.util.Comparator;
-import java.util.List;
 
 @Data
-public class FindMembersResponseVo {
+public class FindFriendsResponseVo {
     private Long userId;
     private String nickname;
     private String email;
@@ -15,9 +14,8 @@ public class FindMembersResponseVo {
     private float weight;
     private int tierId;
     private String picture;
-    private Boolean isFriend;
 
-    public FindMembersResponseVo(Member member, List<Long> friendsList){
+    public FindFriendsResponseVo(Member member){
         this.userId = member.getId();
         this.nickname = member.getNickname();
         this.email = member.getEmail();
@@ -25,10 +23,9 @@ public class FindMembersResponseVo {
         this.weight = member.getWeight();
         this.tierId = member.getTierId();
         this.picture = member.getPicture();
-        this.isFriend = friendsList.contains(member.getId()) ? true : false;
     }
 
-    public static Comparator<FindMembersResponseVo> COMPARE_BY_NICKNAME = Comparator.comparing(o -> o.nickname);
+    public static Comparator<FindFriendsResponseVo> COMPARE_BY_NICKNAME = Comparator.comparing(o -> o.nickname);
 }
 
 

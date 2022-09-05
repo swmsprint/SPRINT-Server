@@ -7,7 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import sprint.server.controller.datatransferobject.request.*;
 import sprint.server.controller.datatransferobject.response.*;
+import sprint.server.domain.friends.FriendState;
 import sprint.server.domain.member.Member;
+import sprint.server.service.FriendsService;
 import sprint.server.service.MemberService;
 
 import javax.validation.Valid;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/user-management/users")
 public class MemberApiController {
     private final MemberService memberService;
+    private final FriendsService friendsService;
 
     @ApiOperation(value="회원가입")
     @ApiResponses({
@@ -40,13 +43,16 @@ public class MemberApiController {
             @ApiResponse(code = 500, message = "서버 에러")
     })
     @GetMapping("")
-    public FindMembersResponseDto<FindMembersResponseVo> FindMembersByNickname(@RequestParam String target){
+    public FindMembersResponseDto<FindMembersResponseVo> FindMembersByNickname(@RequestParam Long userId, @RequestParam String target){
+        Member member = memberService.findById(userId);
+        List<Long> friendsId = friendsService.findFriendsByMemberId(userId, FriendState.ACCEPT).stream()
+                .map(m -> m.getId()).collect(Collectors.toList());
         List<Member> members = memberService.findByNicknameContaining(target);
         List<FindMembersResponseVo> result = members.stream()
-                .map(FindMembersResponseVo::new)
+                .map(m -> new FindMembersResponseVo(m, friendsId))
+                .filter(m -> !m.getUserId().equals(userId))
                 .sorted(FindMembersResponseVo.COMPARE_BY_NICKNAME)
                 .collect(Collectors.toList());
-
         return new FindMembersResponseDto(result.size(), result);
     }
 
