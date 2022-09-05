@@ -44,12 +44,13 @@ public class MemberApiController {
     })
     @GetMapping("")
     public FindMembersResponseDto<FindMembersResponseVo> FindMembersByNickname(@RequestParam Long userId, @RequestParam String target){
-        Member member = memberService.findById(userId);
-        List<Long> friendsId = friendsService.findFriendsByMemberId(userId, FriendState.ACCEPT).stream()
-                .map(m -> m.getId()).collect(Collectors.toList());
+        List<Long> friendsIdList = friendsService.findFriendsByMemberId(userId, FriendState.ACCEPT).stream()
+                .map(Member::getId).collect(Collectors.toList());
+        List<Long> requestedIdList = friendsService.findFriendsByMemberId(userId, FriendState.REQUEST).stream()
+                .map(Member::getId).collect(Collectors.toList());
         List<Member> members = memberService.findByNicknameContaining(target);
         List<FindMembersResponseVo> result = members.stream()
-                .map(m -> new FindMembersResponseVo(m, friendsId))
+                .map(m -> new FindMembersResponseVo(m, friendsIdList, requestedIdList))
                 .filter(m -> !m.getUserId().equals(userId))
                 .sorted(FindMembersResponseVo.COMPARE_BY_NICKNAME)
                 .collect(Collectors.toList());
