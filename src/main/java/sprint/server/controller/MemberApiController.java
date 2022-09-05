@@ -9,6 +9,7 @@ import sprint.server.controller.datatransferobject.request.*;
 import sprint.server.controller.datatransferobject.response.*;
 import sprint.server.domain.member.Member;
 import sprint.server.service.MemberService;
+import sprint.server.service.StatisticsService;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/user-management/users")
 public class MemberApiController {
     private final MemberService memberService;
+    private final StatisticsService statisticsService;
 
     @ApiOperation(value="회원가입")
     @ApiResponses({
@@ -30,6 +32,7 @@ public class MemberApiController {
     public CreateMemberResponse saveMember(@RequestBody @Valid CreateMemberRequest request){
         Member member = new Member(request.getNickname(), request.getGender(), request.getEmail(), request.getBirthday(), request.getHeight(), request.getWeight(), request.getPicture());
         Long id = memberService.join(member);
+        statisticsService.newMemberStatistics(id);
         return new CreateMemberResponse(id);
     }
 

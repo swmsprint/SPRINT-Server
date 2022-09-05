@@ -24,6 +24,33 @@ public class StatisticsService {
     private final MemberRepository memberRepository;
     private final StatisticsRepository statisticsRepository;
 
+    @Transactional
+    public void newMemberStatistics(Long memberId){
+
+        Member member = memberRepository.findById(memberId).get();
+
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        Timestamp time= Timestamp.valueOf(dateFormat.format(calendar.getTime()));
+
+        createStatistics(member,time,StatisticsType.Weekly);
+        createStatistics(member,time,StatisticsType.Monthly);
+        createStatistics(member,time,StatisticsType.Yearly);
+        createStatistics(member,time,StatisticsType.Totally);
+
+
+    }
+
+    @Transactional
+    public Long createStatistics(Member member,Timestamp timestamp, StatisticsType statisticsType) {
+        Statistics statistics = new Statistics();
+        statistics.setMember(member);
+        statistics.setTime(timestamp);
+        statistics.setStatisticsType(statisticsType);
+        statisticsRepository.save(statistics);
+
+        return statistics.getId();
+    }
 
     /**
      * 러닝 종료 후 통계를 업데이트 해준다
@@ -45,7 +72,7 @@ public class StatisticsService {
 
         //만약 존재하지 않으면
         if(findStatistics == null) {
-            long id = createStatistics(member,running,statisticsType);
+            long id = createStatistics(member,running.getStartTime(),statisticsType);
             findStatistics = statisticsRepository.findById(id).get();
         }
         findStatistics.setDistance(findStatistics.getDistance()+running.getDistance());
@@ -233,16 +260,6 @@ public class StatisticsService {
         calendarStart.set(Calendar.SECOND,0);
         calendarStart.set(Calendar.MILLISECOND,0);
         return calendarStart;
-    }
-
-    private Long createStatistics(Member member, Running running, StatisticsType statisticsType) {
-        Statistics statistics = new Statistics();
-        statistics.setMember(member);
-        statistics.setTime(running.getStartTime());
-        statistics.setStatisticsType(statisticsType);
-        statisticsRepository.save(statistics);
-
-        return statistics.getId();
     }
 
 
