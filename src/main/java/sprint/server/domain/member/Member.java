@@ -15,7 +15,7 @@ public class Member {
     @Id @GeneratedValue
     @NotNull
     @Column(name = "member_id")
-    private long id;
+    private Long id;
     @NotNull
     private String nickname;
     @NotNull
