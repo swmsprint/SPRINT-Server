@@ -128,34 +128,34 @@ public class StatisticsService {
         calendar.set(Calendar.MONTH, 11);
         Calendar endTime = getCalendarEnd(Timestamp.valueOf(dateFormat.format(calendar.getTime())),StatisticsType.Monthly);
 
-        List<Statistics> allStatistics = statisticsRepository.findAllByStatisticsTypeAndMemberIdAndTimeBetween(StatisticsType.Monthly, memberID,
+        Statistics statistics = statisticsRepository.findByStatisticsTypeAndMemberIdAndTimeBetween(StatisticsType.Yearly, memberID,
                 Timestamp.valueOf(dateFormat.format(startTime.getTime())), Timestamp.valueOf(dateFormat.format(endTime.getTime())));
 
-        double distance = allStatistics.stream().mapToDouble(Statistics::getDistance).sum();
-        double energy = allStatistics.stream().mapToDouble(Statistics::getEnergy).sum();
-        double totalSeconds = allStatistics.stream().mapToDouble(Statistics::getTotalSeconds).sum();
-
-        return StatisticsInfoVO.builder()
-                .distance(distance)
-                .totalSeconds(totalSeconds)
-                .energy(energy)
-                .build();
+        if(statistics == null) {
+            return StatisticsInfoVO.builder().build();
+        }else
+            return StatisticsInfoVO.builder()
+                    .distance(statistics.getDistance())
+                    .totalSeconds(statistics.getTotalSeconds())
+                    .energy(statistics.getEnergy())
+                    .build();
 
     }
 
     @Transactional
     public StatisticsInfoVO findTotalStatistics(Long memberID) {
-        List<Statistics> allStatistics = statisticsRepository.findAllByStatisticsTypeAndMemberId(StatisticsType.Monthly, memberID);
 
-        double distance = allStatistics.stream().mapToDouble(Statistics::getDistance).sum();
-        double energy = allStatistics.stream().mapToDouble(Statistics::getEnergy).sum();
-        double totalSeconds = allStatistics.stream().mapToDouble(Statistics::getTotalSeconds).sum();
+        List<Statistics> statistics = statisticsRepository.findByStatisticsTypeAndMemberId(StatisticsType.Totally, memberID);
 
-        return StatisticsInfoVO.builder()
-                .distance(distance)
-                .totalSeconds(totalSeconds)
-                .energy(energy)
-                .build();
+        if(statistics.size() == 0) {
+            return StatisticsInfoVO.builder().build();
+        }else
+            return StatisticsInfoVO.builder()
+                    .distance(statistics.get(0).getDistance())
+                    .totalSeconds(statistics.get(0).getTotalSeconds())
+                    .energy(statistics.get(0).getEnergy())
+                    .build();
+
     }
 
     /**

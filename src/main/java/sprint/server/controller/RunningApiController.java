@@ -9,7 +9,6 @@ import sprint.server.controller.datatransferobject.response.*;
 import sprint.server.controller.datatransferobject.request.CreateRunningRequest;
 import sprint.server.controller.datatransferobject.request.FinishRunningRequest;
 import sprint.server.domain.Running;
-import sprint.server.domain.RunningRawData;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.statistics.StatisticsType;
 import sprint.server.service.MemberService;
@@ -18,7 +17,6 @@ import sprint.server.service.StatisticsService;
 
 import javax.validation.Valid;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.List;
 
 @RestController
