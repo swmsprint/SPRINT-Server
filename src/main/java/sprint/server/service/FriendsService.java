@@ -34,16 +34,27 @@ public class FriendsService {
      */
     @Transactional
     public Boolean requestFriends(Long sourceMemberId, Long targetMemberId) {
+        /* sourceMemberId, targetMemberId의 존재여부, 이미 친구관계인지 여부, 해당 요청이 이미 전송되었는지 여부를 검사 */
         validationFriendsRequest(sourceMemberId, targetMemberId);
+
         /* 만약 이미 targetMemberId가 sourceMemberId에게 친구요청을 보낸적이 있다면 */
         if (friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(targetMemberId, sourceMemberId, FriendState.REQUEST)) {
             return acceptFriendsRequest(targetMemberId, sourceMemberId);
-        } else {
-            Friends friends = new Friends(sourceMemberId, targetMemberId);
-            friends.setRegisteredDate(Timestamp.valueOf(LocalDateTime.now()));
-            friendsRepository.save(friends);
-            return friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, FriendState.REQUEST);
         }
+
+        Optional<Friends> friends = findByTwoMemberId(sourceMemberId, targetMemberId);
+        if (friends.isPresent()) {
+            /* 만약 이미 DELETE, REJECT, CANCEL 관계라면 */
+            friends.get().setMemberIds(sourceMemberId, targetMemberId);
+            friends.get().setEstablishState(FriendState.REQUEST);
+            friends.get().setRegisteredDate(Timestamp.valueOf(LocalDateTime.now()));
+        } else {
+            /* 새로운 관계 생성 */
+            Friends newFriends = new Friends(sourceMemberId, targetMemberId);
+            newFriends.setRegisteredDate(Timestamp.valueOf(LocalDateTime.now()));
+            friendsRepository.save(newFriends);
+        }
+        return friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, FriendState.REQUEST);
     }
 
 
@@ -55,7 +66,7 @@ public class FriendsService {
      */
     @Transactional
     public Boolean rejectFriendsRequest(Long sourceMemberId, Long targetMemberId){
-        Optional<Friends> friends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.REQUEST);
+        Optional<Friends> friends = friendsRepository.findBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, FriendState.REQUEST);
         if (friends.isEmpty()){
             throw new ApiException(ExceptionEnum.FRIENDS_REQUEST_NOT_FOUND);
         }
@@ -95,15 +106,15 @@ public class FriendsService {
      */
     @Transactional
     public Boolean deleteFriends(Long sourceMemberId, Long targetMemberId) {
-        Optional<Friends> friends = findFriendsRequest(sourceMemberId, targetMemberId, FriendState.ACCEPT);
+        Optional<Friends> friends = findByTwoMemberIdAndEstablishState(sourceMemberId, targetMemberId, FriendState.ACCEPT);
         /* 해당 친구관계가 존재하지 않은 경우 */
         if(friends.isEmpty()) {
             throw new ApiException(ExceptionEnum.FRIENDS_NOT_FOUND);
         }
-        friends.get().setEstablishState(FriendState.DELETED);
+        friends.get().setEstablishState(FriendState.DELETE);
         friends.get().setRegisteredDate(Timestamp.valueOf(LocalDateTime.now()));
 
-        return isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.DELETED);
+        return friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, FriendState.DELETE);
     }
 
 
@@ -120,9 +131,9 @@ public class FriendsService {
             throw new ApiException(ExceptionEnum.FRIENDS_REQUEST_NOT_FOUND);
         }
         friends.get().setRegisteredDate(Timestamp.valueOf(LocalDateTime.now()));
-        friends.get().setEstablishState(FriendState.CANCELED);
+        friends.get().setEstablishState(FriendState.CANCEL);
 
-        return friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, FriendState.CANCELED);
+        return friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, FriendState.CANCEL);
     }
 
     /**
@@ -143,11 +154,16 @@ public class FriendsService {
     }
 
     private boolean isFriendsRequestExist(Long sourceMemberId, Long targetMemberId, FriendState friendState) {
-        return findFriendsRequest(sourceMemberId, targetMemberId, friendState).isPresent();
+        return findByTwoMemberIdAndEstablishState(sourceMemberId, targetMemberId, friendState).isPresent();
     }
 
-    private Optional<Friends> findFriendsRequest(Long sourceMemberId, Long targetMemberId, FriendState friendState){
-        return findByTwoMemberIdAndEstablishState(sourceMemberId, targetMemberId, friendState);
+    private Optional<Friends> findByTwoMemberId(Long sourceMemberId, Long targetMemberId) {
+        Optional <Friends> friends = friendsRepository.findBySourceMemberIdAndTargetMemberId(sourceMemberId, targetMemberId);
+        if (friends.isPresent()) {
+            return friends;
+        } else {
+            return friendsRepository.findBySourceMemberIdAndTargetMemberId(targetMemberId, sourceMemberId);
+        }
     }
 
     public Optional<Friends> findByTwoMemberIdAndEstablishState(Long sourceMemberId, Long targetMemberId, FriendState friendState) {

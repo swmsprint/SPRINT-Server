@@ -8,18 +8,18 @@ import java.sql.Timestamp;
 
 @Entity
 @Getter @ToString
-@IdClass(FriendsId.class)
 @Table(indexes = {
+        @Index(name = "composite_index", columnList = "sourceMemberId, targetMemberId"),
         @Index(name = "source_member_index", columnList = "sourceMemberId"),
         @Index(name = "target_member_index", columnList = "targetMemberId")
 })
 public class Friends {
 
-    @Id
+    @Id @GeneratedValue
+    private Long id;
     @NotNull
     private Long sourceMemberId;
 
-    @Id
     @NotNull
     private Long targetMemberId;
 
@@ -37,6 +37,10 @@ public class Friends {
         this.establishState = FriendState.REQUEST;
     }
 
+    public void setMemberIds(Long sourceMemberId, Long targetMemberId) {
+        this.sourceMemberId = sourceMemberId;
+        this.targetMemberId = targetMemberId;
+    }
     public void setRegisteredDate(Timestamp timestamp){
         this.registeredDate = timestamp;
     }

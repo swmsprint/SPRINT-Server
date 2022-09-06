@@ -127,7 +127,7 @@ public class FriendsServiceTest {
         friendsService.requestFriends(1L, 2L);
         friendsService.acceptFriendsRequest(1L, 2L);
         friendsService.deleteFriends(1L, 2L);
-        assertEquals(true, friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(1L, 2L, FriendState.DELETED));
+        assertEquals(true, friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(1L, 2L, FriendState.DELETE));
         assertEquals(false, friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(1L, 2L, FriendState.ACCEPT));
     }
 
@@ -140,7 +140,7 @@ public class FriendsServiceTest {
         /* 정상적인 요청 */
         friendsService.requestFriends(1L, 2L);
         Boolean result = friendsService.cancelFriends(1L, 2L);
-        assertEquals(true, friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(1L, 2L, FriendState.CANCELED));
+        assertEquals(true, friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(1L, 2L, FriendState.CANCEL));
         assertEquals(true, result);
     }
 
