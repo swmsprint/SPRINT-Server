@@ -49,9 +49,9 @@ public class FriendsApiController {
                 return new BooleanResponse(friendsService.acceptFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
             case REJECT:
                 return new BooleanResponse(friendsService.rejectFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
-            case CANCELED:
+            case CANCEL:
                 return new BooleanResponse(friendsService.cancelFriends(request.getSourceUserId(), request.getTargetUserId()));
-            case DELETED:
+            case DELETE:
                 return new BooleanResponse(friendsService.deleteFriends(request.getSourceUserId(), request.getTargetUserId()));
             default:
                 throw new ApiException(ExceptionEnum.FRIENDS_METHOD_NOT_FOUND);
