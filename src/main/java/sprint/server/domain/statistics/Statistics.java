@@ -1,5 +1,6 @@
 package sprint.server.domain.statistics;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import sprint.server.domain.member.Member;
@@ -30,4 +31,14 @@ public class Statistics {
 
     private Timestamp time;
 
+    @Builder
+    public Statistics(Member member, StatisticsType statisticsType, double distance, double totalSeconds, int count, double energy, Timestamp time) {
+        this.member = member;
+        this.statisticsType = statisticsType;
+        this.distance = distance;
+        this.totalSeconds = totalSeconds;
+        this.count = count;
+        this.energy = energy;
+        this.time = time;
+    }
 }

@@ -46,7 +46,7 @@ public class StatisticsService {
 
     @Transactional
     public Long createStatistics(Member member,Timestamp timestamp, StatisticsType statisticsType) {
-        Statistics statistics = new Statistics();
+        Statistics statistics = Statistics.builder().build();
         statistics.setMember(member);
         statistics.setTime(timestamp);
         statistics.setStatisticsType(statisticsType);
