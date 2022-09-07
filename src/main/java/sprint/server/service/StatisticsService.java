@@ -19,7 +19,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.logging.Logger;
 
 @Slf4j
 @Service
@@ -225,8 +224,8 @@ public class StatisticsService {
                     Timestamp.valueOf(dateFormat.format(startTime.getTime())),
                     Timestamp.valueOf(dateFormat.format(endTime.getTime())));
 
-            if(dailyStatistics == null){monthlyStreak.add(0.0);}
-            else{   monthlyStreak.add(dailyStatistics.getDistance());}
+            if(dailyStatistics == null)monthlyStreak.add(0.0);
+            else monthlyStreak.add(dailyStatistics.getDistance());
 
             startTime.roll(Calendar.DATE,1);
             endTime.roll(Calendar.DATE,1);

@@ -28,12 +28,9 @@ public class Scheduler {
     //매주 새벽 일요일에 그 다음주 통계 만듬
     @Scheduled(cron = "0 0 4 ? * SUN")
     public void createNextWeekStatistics(){
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.add(Calendar.DATE,1);
-//        calendar.set(Calendar.DAY_OF_WEEK,Calendar.MONDAY);
-//
-//        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-//        Timestamp nextTime= Timestamp.valueOf(dateFormat.format(calendar));
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        Timestamp nextTime= Timestamp.valueOf(dateFormat.format(calendar));
 
         log.info("test");
     }

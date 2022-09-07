@@ -28,6 +28,24 @@ public class RunningApiController {
     private final ObjectMapper objectMapper;
     private final MemberService memberService;
     private final StatisticsService statisticsService;
+    @ApiOperation(value="러닝 시작", notes = "성공시 저장된 runningId를 반환합니다")
+    @PostMapping("developer/start")
+    public CreateRunningResponse developerCreateRunning(@RequestBody @Valid CreateRunningRequest request) {
+        Member member = memberService.findById(request.getUserId());
+        Long runningId = runningService.addRun(member,request.getStartTime());
+        return new CreateRunningResponse(runningId);
+    }
+    @ApiOperation(value="러닝 종료", notes = "성공시 저장및 계산된 running 정보를 반환합니다")
+    @PostMapping("developer/finish")
+    public FinishRunningResponse developFinishRunning(@RequestBody @Valid FinishRunningRequest request) throws JsonProcessingException {
+        Running running = runningService.finishRunning(request);
+        statisticsService.updateStatistics(running, StatisticsType.Daily);
+        statisticsService.updateStatistics(running, StatisticsType.Weekly);
+        statisticsService.updateStatistics(running, StatisticsType.Monthly);
+        statisticsService.updateStatistics(running, StatisticsType.Yearly);
+        statisticsService.updateStatistics(running, StatisticsType.Totally);
+        return new FinishRunningResponse(running.getId(),running.getDistance(),running.getDuration(),running.getEnergy());
+    }
 
     @ApiOperation(value="러닝 시작", notes = "성공시 저장된 runningId를 반환합니다")
     @PostMapping("start")
