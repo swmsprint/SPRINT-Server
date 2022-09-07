@@ -25,17 +25,18 @@ import java.util.List;
 public class RunningApiController {
 
     private final RunningService runningService;
-    private final ObjectMapper objectMapper;
     private final MemberService memberService;
     private final StatisticsService statisticsService;
-    @ApiOperation(value="러닝 시작", notes = "성공시 저장된 runningId를 반환합니다")
+
+
+    @ApiOperation(value="개발자용/러닝 시작", notes = "성공시 저장된 runningId를 반환합니다")
     @PostMapping("developer/start")
     public CreateRunningResponse developerCreateRunning(@RequestBody @Valid CreateRunningRequest request) {
         Member member = memberService.findById(request.getUserId());
         Long runningId = runningService.addRun(member,request.getStartTime());
         return new CreateRunningResponse(runningId);
     }
-    @ApiOperation(value="러닝 종료", notes = "성공시 저장및 계산된 running 정보를 반환합니다")
+    @ApiOperation(value="개발자용/러닝 종료", notes = "성공시 저장및 계산된 running 정보를 반환합니다. 통계정보가 존재하지 않는다면 통계정보도 생성 및 업데이트 시켜줍니다")
     @PostMapping("developer/finish")
     public FinishRunningResponse developFinishRunning(@RequestBody @Valid FinishRunningRequest request) throws JsonProcessingException {
         Running running = runningService.finishRunning(request);

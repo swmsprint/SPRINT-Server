@@ -25,7 +25,7 @@ public class Scheduler {
         System.out.println(Thread.currentThread() + ": doing a cron job at "+ new Date() + ".");
     }
 
-    //매주 새벽 일요일에 그 다음주 통계 만듬
+    //매주 월요일 새벽 3시 에 전주 통계 저장
     @Scheduled(cron = "0 0 4 ? * SUN")
     public void createNextWeekStatistics(){
         Calendar calendar = Calendar.getInstance();
@@ -34,7 +34,7 @@ public class Scheduler {
 
         log.info("test");
     }
-    //매월 28 새벽 4시에 그 다음달 통계 만듬
+    //매월 1일 새벽 4시에 그 전달 통계 저장
     @Scheduled(cron = "0 0 4 28 1/1 ?")
     public void createNextMonthStatistics(){
         System.out.println("hi~");
@@ -42,7 +42,7 @@ public class Scheduler {
     }
 
 
-    //매년 마지막날 새벽 4시에 그 다음해 통계 만듬
+    //매년 1월 1일 새벽 5시에 그 전해 통계 저장
     @Scheduled(cron = "0 0 4 31 12 ?")
     public void createNextYearStatistics(){
         System.out.println("hi~");
