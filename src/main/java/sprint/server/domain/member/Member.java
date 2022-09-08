@@ -1,7 +1,6 @@
 package sprint.server.domain.member;
 
 import lombok.Getter;
-import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -24,7 +23,7 @@ public class Member {
     private Gender gender;
     @NotNull
     private String email;
-    private LocalDate birthDay;
+    private LocalDate birthday;
     @NotNull
     private Timestamp joinDay;
     @NotNull
@@ -41,11 +40,11 @@ public class Member {
     protected Member() {
     }
 
-    public Member(String nickname, Gender gender, String email, LocalDate birthDay, float height, float weight, String picture) {
+    public Member(String nickname, Gender gender, String email, LocalDate birthday, float height, float weight, String picture) {
         this.nickname = nickname;
         this.gender = gender;
         this.email = email;
-        this.birthDay = birthDay;
+        this.birthday = birthday;
         this.height = height;
         this.weight = weight;
         this.picture = picture;
@@ -57,7 +56,7 @@ public class Member {
         this.nickname = nickname;
         this.gender = gender;
         this.email = email;
-        this.birthDay = birthDay;
+        this.birthday = birthDay;
         this.height = height;
         this.weight = weight;
         this.picture = picture;

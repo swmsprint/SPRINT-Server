@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/groups/")
 public class GroupsApiController {
     private final GroupsService groupsService;
     private final MemberService memberService;

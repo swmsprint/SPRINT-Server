@@ -39,5 +39,5 @@ out/
 ### MacOS ###
 .DS_Store
 
-### Docker ###
+### Git ###
 jdbc.properties

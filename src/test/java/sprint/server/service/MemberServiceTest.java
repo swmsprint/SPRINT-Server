@@ -32,7 +32,12 @@ public class MemberServiceTest {
         /* 정상적인 요청 */
         Member member = new Member(testName, Gender.FEMALE, testName + "@sprint.com", LocalDate.of(2011, 2, 28), 180.0f, 70f, null);
         Long saveId = memberService.join(member);
-        assertEquals(testName, memberService.findById(saveId).getNickname());
+        Member foundMember1 = memberService.findById(saveId);
+        assertEquals(testName, foundMember1.getNickname());
+        assertEquals(testName+"@sprint.com", foundMember1.getEmail());
+        assertEquals(LocalDate.of(2011, 2, 28), foundMember1.getBirthday());
+        assertEquals(180.0F, foundMember1.getHeight());
+        assertEquals(70F,foundMember1.getWeight());
 
         /* 동일 닉네임이 이미 존재하는 경우 */
         Member member2 = new Member(testName, Gender.FEMALE, testName + "@sprint.com", LocalDate.of(2011, 2, 28), 180.0f, 70f, null);
@@ -52,15 +57,14 @@ public class MemberServiceTest {
     public void modifyMembersTest(){
         /* 정상적인 요청 */
         ModifyMembersRequest modifyMembersRequest = new ModifyMembersRequest();
-        modifyMembersRequest.setId(1L);
         modifyMembersRequest.setNickname("Modify1");
         modifyMembersRequest.setEmail("Modify@test.com");
         modifyMembersRequest.setGender(Gender.MALE);
-        modifyMembersRequest.setBirthDay(LocalDate.of(2022, 3, 11));
+        modifyMembersRequest.setBirthday(LocalDate.of(2022, 3, 11));
         modifyMembersRequest.setHeight(166.7F);
         modifyMembersRequest.setWeight(70F);
         modifyMembersRequest.setPicture("modify@mtest.com");
-        Boolean result = memberService.modifyMembers(modifyMembersRequest);
+        Boolean result = memberService.modifyMembers(1L, modifyMembersRequest);
         assertEquals(true, result);
         Optional<Member> member = memberRepository.findById(1L);
         if (member.isPresent()) {
@@ -68,7 +72,7 @@ public class MemberServiceTest {
             assertEquals("Modify1", member.get().getNickname());
             assertEquals("Modify@test.com", member.get().getEmail());
             assertEquals(Gender.MALE, member.get().getGender());
-            assertEquals(LocalDate.of(2022, 3, 11), member.get().getBirthDay());
+            assertEquals(LocalDate.of(2022, 3, 11), member.get().getBirthday());
             assertEquals(166.7F, member.get().getHeight());
             assertEquals(70F, member.get().getWeight());
             assertEquals("modify@mtest.com", member.get().getPicture());
@@ -76,8 +80,7 @@ public class MemberServiceTest {
 
 
         /* 해당 회원이 존재하지 않을 때 */
-        modifyMembersRequest.setId(0L);
-        ApiException thrown = assertThrows(ApiException.class, ()->memberService.modifyMembers(modifyMembersRequest));
+        ApiException thrown = assertThrows(ApiException.class, ()->memberService.modifyMembers(-1L, modifyMembersRequest));
         assertEquals("M0001", thrown.getErrorCode());
     }
 

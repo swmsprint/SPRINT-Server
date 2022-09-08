@@ -7,9 +7,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import sprint.server.controller.datatransferobject.request.*;
 import sprint.server.controller.datatransferobject.response.*;
+import sprint.server.controller.exception.ApiException;
+import sprint.server.controller.exception.ExceptionEnum;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.friends.FriendState;
-import sprint.server.domain.friends.Friends;
 import sprint.server.service.FriendsService;
 
 import javax.validation.Valid;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("api/user-management/friends")
 public class FriendsApiController {
     private final FriendsService friendsService;
 
@@ -28,104 +30,81 @@ public class FriendsApiController {
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @PostMapping("/api/friends")
-    public BooleanResponse createFriends(@RequestBody @Valid TwoMemberRequest request) {
-        Friends friends = friendsService.requestFriends(request.getSourceUserId(), request.getTargetUserId());
-        return new BooleanResponse(friendsService.existsById(friends.getId()));
+    @PostMapping("")
+    public BooleanResponse createFriends(@RequestBody @Valid CreateFriendsRequest request) {
+        return new BooleanResponse(friendsService.requestFriends(request.getSourceUserId(), request.getTargetUserId()));
     }
 
-    @ApiOperation(value="친구추가 요청 수락", notes =
-            "sourceUserId -> 친구추가 요청을 수락하는 유저\ntargetUserId -> 친구추가 요청을 보낸 유저")
+    @ApiOperation(value="친구 수락/거절/취소/제거", notes =
+    "수락: ACCEPT\n거절: REJECT\n취소: CANCEL\n제거: DELETE")
     @ApiResponses({
             @ApiResponse(code = 200, message = "정상 작동"),
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @PostMapping("/api/friends/accept")
-    public BooleanResponse acceptFriends(@RequestBody @Valid TwoMemberRequest request) {
-        return new BooleanResponse(friendsService.acceptFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
+    @PutMapping("")
+    public BooleanResponse modifyFriendsState(@RequestBody @Valid ModifyFriendsRequest request) {
+        switch (request.getFriendState()) {
+            case ACCEPT:
+                return new BooleanResponse(friendsService.acceptFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
+            case REJECT:
+                return new BooleanResponse(friendsService.rejectFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
+            case CANCEL:
+                return new BooleanResponse(friendsService.cancelFriends(request.getSourceUserId(), request.getTargetUserId()));
+            case DELETE:
+                return new BooleanResponse(friendsService.deleteFriends(request.getSourceUserId(), request.getTargetUserId()));
+            default:
+                throw new ApiException(ExceptionEnum.FRIENDS_METHOD_NOT_FOUND);
+        }
     }
 
-    @ApiOperation(value="친구추가 요청 거절", notes =
-            "sourceUserId -> 친구추가 요청을 거절하는 유저\ntargetUserId -> 친구추가 요청을 보낸 유저")
+
+    @ApiOperation(value="친구 목록 요청",
+            notes = "Example: http://localhost:8080/api/user-management/friends/list?userId=3")
     @ApiResponses({
             @ApiResponse(code = 200, message = "정상 작동"),
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @PutMapping("/api/friends/reject")
-    public BooleanResponse rejectFriends(@RequestBody @Valid TwoMemberRequest request) {
-        return new BooleanResponse(friendsService.rejectFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
-    }
-
-    @ApiOperation(value="친구 제거", notes =
-            "sourceUserId -> 친구제거 요청을 보내는 유저\ntargetUserId -> 친구목록에서 제거될 유저")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "정상 작동"),
-            @ApiResponse(code = 400, message = "요청 에러"),
-            @ApiResponse(code = 500, message = "서버 에러")
-    })
-    @PutMapping("/api/friends/delete")
-    public BooleanResponse deleteFriends(@RequestBody @Valid TwoMemberRequest request) {
-        return new BooleanResponse(friendsService.deleteFriends(request.getSourceUserId(), request.getTargetUserId()));
-    }
-
-    @ApiOperation(value="친구 추가 요청 취소", notes =
-            "sourceUserId -> 친구추가 요청을 보낸 유저\ntargetUserId -> 친구추가 요청을 받은 유저")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "정상 작동"),
-            @ApiResponse(code = 400, message = "요청 에러"),
-            @ApiResponse(code = 500, message = "서버 에러")
-    })
-    @PutMapping("api/friends/cancel")
-    public BooleanResponse cancelFriendsRequest(@RequestBody @Valid TwoMemberRequest request){
-        return new BooleanResponse(friendsService.cancelFriends(request.getSourceUserId(), request.getTargetUserId()));
-    }
-
-
-    @ApiOperation(value="친구 목록 요청", notes = "UserId -> 목록을 요청하는 유저")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "정상 작동"),
-            @ApiResponse(code = 400, message = "요청 에러"),
-            @ApiResponse(code = 500, message = "서버 에러")
-    })
-    @GetMapping("/api/friends/list/myfriends")
-    public LoadMembersResponse<LoadMembersResponseVo> loadFriendsFriends(@RequestBody @Valid OneMemberRequest request) {
-        List<Member> members = friendsService.loadFriendsBySourceMember(request.getUserId(), FriendState.ACCEPT);
-        List<LoadMembersResponseVo> result = members.stream()
-                .map(LoadMembersResponseVo::new)
-                .sorted(LoadMembersResponseVo.COMPARE_BY_NICKNAME)
+    @GetMapping("list")
+    public FindMembersResponseDto<FindFriendsResponseVo> findFriends(@RequestParam Long userId) {
+        List<Member> members = friendsService.findFriendsByMemberId(userId, FriendState.ACCEPT);
+        List<FindFriendsResponseVo> result = members.stream()
+                .map(FindFriendsResponseVo::new)
+                .sorted(FindFriendsResponseVo.COMPARE_BY_NICKNAME)
                 .collect(Collectors.toList());
-        return new LoadMembersResponse(result.size(), result);
+        return new FindMembersResponseDto(result.size(), result);
     }
 
-    @ApiOperation(value="사용자가 받은 친구 추가 요청 목록", notes = "UserId -> 목록을 요청하는 유저")
+    @ApiOperation(value="사용자가 받은 친구 추가 요청 목록",
+            notes = "Example: http://localhost:8080/api/user-management/friends/list/received?userId=3")
     @ApiResponses({
             @ApiResponse(code = 200, message = "정상 작동"),
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @GetMapping("/api/friends/list/receive")
-    public LoadMembersResponse<LoadMembersResponseVo> loadFriendsReceive(@RequestBody @Valid OneMemberRequest request) {
-        List<Member> members = friendsService.loadFriendsByTargetMember(request.getUserId(), FriendState.REQUEST);
-        List<LoadMembersResponseVo> result = members.stream()
-                .map(LoadMembersResponseVo::new)
+    @GetMapping("list/received")
+    public FindMembersResponseDto<FindFriendsResponseVo> findFriendsReceive(@RequestParam Long userId) {
+        List<Member> members = friendsService.findByTargetMemberIdAndFriendState(userId, FriendState.REQUEST);
+        List<FindFriendsResponseVo> result = members.stream()
+                .map(FindFriendsResponseVo::new)
                 .collect(Collectors.toList());
-        return new LoadMembersResponse(result.size(), result);
+        return new FindMembersResponseDto(result.size(), result);
     }
 
-    @ApiOperation(value="사용자가 보낸 친구 추가 요청 목록", notes = "UserId -> 목록을 요청하는 유저")
+    @ApiOperation(value="사용자가 보낸 친구 추가 요청 목록",
+            notes = "Example: http://localhost:8080/api/user-management/friends/list/requested?userId=3")
     @ApiResponses({
             @ApiResponse(code = 200, message = "정상 작동"),
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @GetMapping("/api/friends/list/request")
-    public LoadMembersResponse<LoadMembersResponseVo> loadFriendsRequest(@RequestBody @Valid OneMemberRequest request) {
-        List<Member> members = friendsService.loadFriendsBySourceMember(request.getUserId(), FriendState.REQUEST);
-        List<LoadMembersResponseVo> result = members.stream()
-                .map(LoadMembersResponseVo::new)
+    @GetMapping("list/requested")
+    public FindMembersResponseDto<FindFriendsResponseVo> findFriendsRequest(@RequestParam Long userId) {
+        List<Member> members = friendsService.findBySourceMemberIdAndFriendState(userId, FriendState.REQUEST);
+        List<FindFriendsResponseVo> result = members.stream()
+                .map(FindFriendsResponseVo::new)
                 .collect(Collectors.toList());
-        return new LoadMembersResponse(result.size(), result);
+        return new FindMembersResponseDto(result.size(), result);
     }
 }

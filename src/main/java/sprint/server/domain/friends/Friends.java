@@ -1,43 +1,46 @@
 package sprint.server.domain.friends;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.io.Serializable;
 import java.sql.Timestamp;
 
 @Entity
 @Getter @ToString
-public class Friends implements Serializable {
+@Table(indexes = {
+        @Index(name = "composite_index", columnList = "sourceMemberId, targetMemberId"),
+        @Index(name = "source_member_index", columnList = "sourceMemberId"),
+        @Index(name = "target_member_index", columnList = "targetMemberId")
+})
+public class Friends {
 
     @Id @GeneratedValue
-    @NotNull
-    private Long Id;
-
-    @Column(name = "source_user_id")
+    private Long id;
     @NotNull
     private Long sourceMemberId;
 
-    @Column(name = "target_user_id")
     @NotNull
     private Long targetMemberId;
-    private Timestamp registeredDate;
 
     @Enumerated(EnumType.STRING)
     @NotNull
     private FriendState establishState;
 
+    private Timestamp registeredDate;
+
     protected Friends(){}
 
     public Friends(Long sourceMemberId, Long targetMemberId) {
         this.sourceMemberId = sourceMemberId;
-        this.targetMemberId = targetMemberId;
+        this.targetMemberId =targetMemberId;
         this.establishState = FriendState.REQUEST;
     }
 
+    public void setMemberIds(Long sourceMemberId, Long targetMemberId) {
+        this.sourceMemberId = sourceMemberId;
+        this.targetMemberId = targetMemberId;
+    }
     public void setRegisteredDate(Timestamp timestamp){
         this.registeredDate = timestamp;
     }
