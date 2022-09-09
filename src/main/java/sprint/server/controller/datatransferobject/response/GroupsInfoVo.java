@@ -8,7 +8,7 @@ import java.util.Comparator;
 
 @Data
 @AllArgsConstructor
-public class LoadGroupsResponseVo {
+public class GroupsInfoVo {
     private int groupId;
     private String groupName;
     private String groupDescription;
@@ -16,7 +16,7 @@ public class LoadGroupsResponseVo {
     private int groupPersonnel;
     private int groupMaxPersonnel;
 
-    public LoadGroupsResponseVo(Groups groups) {
+    public GroupsInfoVo(Groups groups) {
         this.groupId = groups.getId();
         this.groupName = groups.getGroupName();
         this.groupDescription = groups.getGroupDescription();
@@ -25,5 +25,5 @@ public class LoadGroupsResponseVo {
         this.groupMaxPersonnel = groups.getGroupMaxPersonnel();
     }
 
-    public static Comparator<LoadGroupsResponseVo> COMPARE_BY_GROUPNAME = Comparator.comparing(o -> o.getGroupName());
+    public static Comparator<GroupsInfoVo> COMPARE_BY_GROUPNAME = Comparator.comparing(o -> o.getGroupName());
 }

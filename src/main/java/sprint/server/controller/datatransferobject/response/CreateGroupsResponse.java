@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class CreateGroupsResponse{
-    private int groupId;
+    private Integer groupId;
 }

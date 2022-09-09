@@ -7,7 +7,7 @@ import lombok.Data;
 import javax.validation.constraints.NotNull;
 
 @Data
-public class LoadGroupsByGroupNameRequest {
+public class FindGroupsByGroupNameRequest {
     @NotNull
     @ApiParam(value = "찾고자하는 그룹이름")
     @ApiModelProperty(example = "sprint", required = true)

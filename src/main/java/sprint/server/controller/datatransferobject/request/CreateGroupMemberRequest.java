@@ -15,5 +15,5 @@ public class CreateGroupMemberRequest {
     @NotNull
     @ApiParam(value = "회원 ID")
     @ApiModelProperty(example = "2", required = true)
-    private Long memberId;
+    private Long userId;
 }
