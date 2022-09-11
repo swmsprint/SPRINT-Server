@@ -3,6 +3,7 @@ package sprint.server.service;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import sprint.server.controller.exception.ApiException;
 import sprint.server.domain.Groups;
@@ -10,6 +11,8 @@ import sprint.server.domain.groupmember.GroupMember;
 import sprint.server.domain.groupmember.GroupMemberId;
 import sprint.server.domain.groupmember.GroupMemberState;
 import sprint.server.repository.GroupMemberRepository;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
