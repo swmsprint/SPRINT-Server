@@ -1,5 +1,6 @@
 package sprint.server.controller;
 
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import sprint.server.controller.datatransferobject.response.ViewStatisticsResponse;
@@ -15,7 +16,7 @@ public class StatisticsApiController {
 
     private final StatisticsService statisticsService;
 
-
+    @ApiOperation(value="통계 정보 반환", notes = "조회를 요청하는 날짜에 해당하는 전체 통계정보를 반환합니다")
     @GetMapping("{id}")
     public ViewStatisticsResponse viewStatisticsDetail(@PathVariable("id")Long memberID){
         Calendar calendar = Calendar.getInstance();
@@ -24,7 +25,7 @@ public class StatisticsApiController {
                 statisticsService.findWeeklyStatistics(memberID,calendar),
                 statisticsService.findMonthlyStatistics(memberID,calendar),
                 statisticsService.findYearlyStatistics(memberID,calendar),
-                statisticsService.findTotalStatistics(memberID));
+                statisticsService.findTotalStatistics(memberID,calendar));
     }
 
 
@@ -39,7 +40,6 @@ public class StatisticsApiController {
         calendar.set(Calendar.DAY_OF_MONTH,1);
         calendar.set(Calendar.MONTH,month-1);
         calendar.set(Calendar.YEAR,year);
-        System.out.println(calendar.getTime());
         return statisticsService.findMonthlyStreak(memberID, calendar);
     }
 

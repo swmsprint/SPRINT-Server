@@ -11,6 +11,7 @@ import sprint.server.domain.friends.FriendState;
 import sprint.server.domain.member.Member;
 import sprint.server.service.FriendsService;
 import sprint.server.service.MemberService;
+import sprint.server.service.StatisticsService;
 
 import javax.validation.Valid;
 import java.util.List;
