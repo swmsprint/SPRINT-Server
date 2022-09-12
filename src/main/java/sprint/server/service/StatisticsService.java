@@ -2,7 +2,6 @@ package sprint.server.service;
 
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +12,7 @@ import sprint.server.domain.statistics.Statistics;
 import sprint.server.domain.statistics.StatisticsType;
 import sprint.server.repository.MemberRepository;
 import sprint.server.repository.StatisticsRepository;
+import sprint.server.scheduler.Scheduler;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -26,23 +26,6 @@ import java.util.List;
 public class StatisticsService {
     private final MemberRepository memberRepository;
     private final StatisticsRepository statisticsRepository;
-
-    @Transactional
-    public void newMemberStatistics(Long memberId){
-
-        Member member = memberRepository.findById(memberId).get();
-
-        Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        Timestamp time= Timestamp.valueOf(dateFormat.format(calendar.getTime()));
-
-        createStatistics(member,time,StatisticsType.Weekly);
-        createStatistics(member,time,StatisticsType.Monthly);
-        createStatistics(member,time,StatisticsType.Yearly);
-        createStatistics(member,time,StatisticsType.Totally);
-
-
-    }
 
     @Transactional
     public Long createStatistics(Member member,Timestamp timestamp, StatisticsType statisticsType) {
@@ -67,6 +50,12 @@ public class StatisticsService {
 
         //러닝에 해당하는 주/월 마지막날 밤 11:59:59:999 설정
         Timestamp timeEnd= Timestamp.valueOf(dateFormat.format(getCalendarEnd(running.getStartTime(), statisticsType).getTime()));
+        Timestamp timeSection = Timestamp.valueOf(dateFormat.format(
+                getCalendarStart(new Timestamp(Calendar.getInstance().getTimeInMillis()),statisticsType).getTime()));
+
+        //만약 아직 업데이트 이전인 이번 주/월/년의 데이터가 들어왔다면 업데이트하지 않고 내버려둠
+        //이번 섹션지나고 나중에 한번에 업데이트 예정
+        if(statisticsType != StatisticsType.Daily && timeSection.getTime()<timeEnd.getTime()) return;
 
         //그 이후 생성된 statistics를 찾는다
         Statistics findStatistics = statisticsRepository.findByStatisticsTypeAndMemberIdAndTimeBetween(
@@ -78,6 +67,7 @@ public class StatisticsService {
             long id = createStatistics(member,running.getStartTime(),statisticsType);
             findStatistics = statisticsRepository.findById(id).get();
         }
+
         findStatistics.setDistance(findStatistics.getDistance()+running.getDistance());
         findStatistics.setCount(findStatistics.getCount()+1);
         findStatistics.setTotalSeconds(findStatistics.getTotalSeconds()+ running.getDuration());
@@ -291,5 +281,67 @@ public class StatisticsService {
         return calendarStart;
     }
 
+
+    /**주기적으로 통계 저장**/
+    public void savePreviousWeekStatistics(){
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, -1);
+        List<Member> members = memberRepository.findAll();
+
+        for(Member member: members) {
+            StatisticsInfoVO statisticsInfoVO = findWeeklyStatistics(member.getId(),calendar);
+            Statistics statistics = Statistics.builder()
+                    .distance(statisticsInfoVO.getDistance())
+                    .totalSeconds(statisticsInfoVO.getTotalSeconds())
+                    .energy(statisticsInfoVO.getEnergy())
+                    .time(new Timestamp(calendar.getTimeInMillis()))
+                    .build();
+            statisticsRepository.save(statistics);
+        }
+
+        log.info("Insert statistics Weekly finish");
+    }
+    public void savePreviousMonthStatistics(){
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, -1);
+        List<Member> members = memberRepository.findAll();
+
+        for(Member member: members) {
+            StatisticsInfoVO statisticsInfoVO = findMonthlyStatistics(member.getId(),calendar);
+            Statistics statistics = Statistics.builder()
+                    .distance(statisticsInfoVO.getDistance())
+                    .totalSeconds(statisticsInfoVO.getTotalSeconds())
+                    .energy(statisticsInfoVO.getEnergy())
+                    .time(new Timestamp(calendar.getTimeInMillis()))
+                    .build();
+            statisticsRepository.save(statistics);
+        }
+
+        log.info("Insert statistics Monthly finish");
+    }
+
+
+    public void savePreviousYearStatistics(){
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, -1);
+        List<Member> members = memberRepository.findAll();
+
+        for(Member member: members) {
+            StatisticsInfoVO statisticsInfoVO = findYearlyStatistics(member.getId(),calendar);
+            Statistics statistics = Statistics.builder()
+                    .distance(statisticsInfoVO.getDistance())
+                    .totalSeconds(statisticsInfoVO.getTotalSeconds())
+                    .energy(statisticsInfoVO.getEnergy())
+                    .time(new Timestamp(calendar.getTimeInMillis()))
+                    .build();
+            statisticsRepository.save(statistics);
+        }
+
+        log.info("Insert statistics Yearly finish");
+    }
+
+//    public void test(){
+//        log.info(Thread.currentThread() + ": doing a cron job at "+ new Date() + ".");
+//    }
 
 }
