@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import sprint.server.controller.datatransferobject.request.ModifyGroupMemberRequest;
 import sprint.server.controller.datatransferobject.request.CreateGroupMemberRequest;
 import sprint.server.controller.datatransferobject.request.CreateGroupRequest;
+import sprint.server.controller.datatransferobject.request.ModifyGroupLeaderRequest;
 import sprint.server.controller.datatransferobject.response.*;
 import sprint.server.controller.exception.ApiException;
 import sprint.server.controller.exception.ExceptionEnum;
@@ -100,6 +101,9 @@ public class GroupsApiController {
         return new GroupInfoResponse(groups.get(), groupWeeklyStatVo, groupWeeklyUserDataDto);
     }
 
+    @ApiOperation(value = "모든 그룹원 요청", notes="요청한 그룹의 모든 그룹원들의 정보를 출력합니다.\n" +
+            "아이디/이름/티어/사진\n" +
+            "+ 당일 통계 량(거리, 시간, 칼로리)")
     @GetMapping("/group-member/{groupId}")
     public FindMembersResponseDto getGroupMember(@PathVariable Integer groupId) {
         List<GroupMember> groupMemberList = groupMemberRepository.findGroupMemberByGroupId(groupId);
@@ -109,6 +113,15 @@ public class GroupsApiController {
         List<GroupUserDataVo> groupUserDataVoList = memberList.stream()
                 .map(m -> new GroupUserDataVo(m, statisticsService.findDailyStatistics(m.getId(), Calendar.getInstance())))
                 .collect(Collectors.toList());
-        return new FindMembersResponseDto(groupMemberList.size(), groupUserDataVoList);
+        return new FindMembersResponseDto(groupUserDataVoList.size(), groupUserDataVoList);
     }
+
+    @ApiOperation(value = "그룹장 위임", notes = "그룹장을 다른 그룹원에게 위임합니다.")
+    @PutMapping("group-member/leader")
+    public BooleanResponse modifyGroupLeader(@RequestBody @Valid ModifyGroupLeaderRequest request) {
+        return new BooleanResponse(groupService.changeGroupLeaderByGroupIdAndMemberID(request.getGroupId(), request.getTargetUserId()));
+    }
+
+//    @ApiOperation(value = "그룹 삭제", notes = "그룹을 삭제합니다. 그룹 삭제는 그룹장만이 할 수 있으며, 그룹원이 그룹장 혼자남아있어야 가능합니다.")
+//    @PutMapping("group")
 }

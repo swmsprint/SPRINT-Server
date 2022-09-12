@@ -133,4 +133,51 @@ public class GroupServiceTest {
         ApiException thrown3 = assertThrows(ApiException.class, () -> groupService.leaveGroupMember(new GroupMemberId(groups.getId(),  1L)));
         assertEquals("G0005", thrown3.getErrorCode());
     }
+
+    /**
+     * 그룹장 변경 테스트
+     */
+    @Test
+    public void changeGroupLeaderTest() {
+        Groups groups = new Groups("groups1", 1L, "Description", "picture");
+        groupService.join(groups);
+        GroupMemberId groupMemberId = new GroupMemberId(groups.getId(), 2L);
+        GroupMember groupMember = new GroupMember(groupMemberId);
+        groupService.requestJoinGroupMember(groupMember);
+        groupService.answerGroupMember(groupMemberId, true);
+
+        /* 정상적인 요청 */
+        Boolean result = groupService.changeGroupLeaderByGroupIdAndMemberID(groups.getId(), 2L);
+        GroupMember newLeader = groupService.findGroupLeaderByGroupId(groups.getId());
+        assertEquals(true, result);
+        assertEquals(memberService.findById(2L).getId(), newLeader.getGroupMemberId().getMemberId());
+        assertEquals(groups.getId(), newLeader.getGroupMemberId().getGroupId());
+        assertEquals(GroupMemberState.LEADER, newLeader.getMemberState());
+    }
+    /**
+     * 그룹장 조회 테스트
+     */
+    @Test
+    public void findGroupLeaderByGroupIdTest(){
+        Groups groups = new Groups("groups1", 1L, "Description", "picture");
+        groupService.join(groups);
+        GroupMember groupMember = groupService.findGroupLeaderByGroupId(groups.getId());
+        assertEquals(1L, groupMember.getGroupMemberId().getMemberId());
+        assertEquals(groups.getId(), groupMember.getGroupMemberId().getGroupId());
+        assertEquals(GroupMemberState.LEADER, groupMember.getMemberState());
+
+        /* 그룹장 변경 후 테스트 */
+        // 새로운 멤버 가입
+        GroupMemberId groupMemberId = new GroupMemberId(groups.getId(), 2L);
+        GroupMember groupMember2 = new GroupMember(groupMemberId);
+        groupService.requestJoinGroupMember(groupMember2);
+        groupService.answerGroupMember(groupMemberId, true);
+        // 그룹장 변경
+        Boolean result = groupService.changeGroupLeaderByGroupIdAndMemberID(groups.getId(), 2L);
+        GroupMember newLeader = groupService.findGroupLeaderByGroupId(groups.getId());
+        assertEquals(true, result);
+        assertEquals(2L, newLeader.getGroupMemberId().getMemberId());
+        assertEquals(groups.getId(), newLeader.getGroupMemberId().getGroupId());
+        assertEquals(GroupMemberState.LEADER, newLeader.getMemberState());
+    }
 }

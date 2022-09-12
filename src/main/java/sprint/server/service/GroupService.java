@@ -14,6 +14,7 @@ import sprint.server.repository.GroupRepository;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 
 @Service
@@ -28,7 +29,7 @@ public class GroupService {
     /**
      * 그룹 만들기
      * @param groups : Groups
-     * @return : group id
+     * @return : group ID
      */
     @Transactional
     public Integer join(Groups groups) {
@@ -44,7 +45,7 @@ public class GroupService {
     /**
      * 그룹 가입 요청
      * @param groupMember
-     * @return
+     * @return result(t/f)
      */
     @Transactional
     public Boolean requestJoinGroupMember(GroupMember groupMember) {
@@ -57,7 +58,7 @@ public class GroupService {
      * 그룹 가입 요청 응답
      * @param groupMemberId
      * @param acceptance
-     * @return
+     * @return result(t/f)
      */
     @Transactional
     public Boolean answerGroupMember(GroupMemberId groupMemberId, Boolean acceptance) {
@@ -72,7 +73,7 @@ public class GroupService {
     /**
      * 그룹 탈퇴 요청
      * @param groupMemberId
-     * @return
+     * @return result(t/f)
      */
     @Transactional
     public Boolean leaveGroupMember(GroupMemberId groupMemberId) {
@@ -82,6 +83,48 @@ public class GroupService {
         return groupMemberRepository.existsByGroupMemberIdAndMemberState(groupMemberId, GroupMemberState.LEAVE);
     }
 
+    /**
+     * 그룹장 변경 요청
+     * @param groupId 변경하고자 하는 그룹 ID
+     * @param memberId 그룹장이 될 그룹원 ID
+     * @return result(t/f)
+     */
+    @Transactional
+    public Boolean changeGroupLeaderByGroupIdAndMemberID(Integer groupId, Long memberId) {
+        GroupMember groupLeader = findGroupLeaderByGroupId(groupId);
+        GroupMember targetMember = findGroupMemberByGroupMemberId(new GroupMemberId(groupId, memberId));
+        groupLeader.setMemberState(GroupMemberState.ACCEPT);
+        targetMember.setMemberState(GroupMemberState.LEADER);
+        return findGroupLeaderByGroupId(groupId).equals(targetMember)
+                && groupLeader.getMemberState().equals(GroupMemberState.ACCEPT);
+    }
+
+    /**
+     * 그룹장 조회
+     * @param groupId 조회하고자 하는 그룹 ID
+     * @return GroupMember
+     */
+    public GroupMember findGroupLeaderByGroupId(Integer groupId) {
+        Optional<GroupMember> leader = groupMemberRepository.findGroupLeaderByGroupId(groupId);
+        if (leader.isEmpty()) {
+            throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
+        }
+        return leader.get();
+    }
+
+    /**
+     * 그룹원 조회
+     * @param groupMemberId 조회하고자 하는 GroupMemberId
+     * @return GroupMember
+     */
+    public GroupMember findGroupMemberByGroupMemberId(GroupMemberId groupMemberId) {
+        Optional<GroupMember> groupMember = groupMemberRepository.findByGroupMemberIdAndMemberState(
+                groupMemberId, GroupMemberState.ACCEPT);
+        if (groupMember.isEmpty()) {
+            throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
+        }
+        return groupMember.get();
+    }
 
     /**
      * validation exists group, user, group join request
