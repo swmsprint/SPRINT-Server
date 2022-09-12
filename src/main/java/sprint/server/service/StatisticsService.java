@@ -12,7 +12,6 @@ import sprint.server.domain.statistics.Statistics;
 import sprint.server.domain.statistics.StatisticsType;
 import sprint.server.repository.MemberRepository;
 import sprint.server.repository.StatisticsRepository;
-import sprint.server.scheduler.Scheduler;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -193,6 +192,23 @@ public class StatisticsService {
 
     }
 
+
+
+    public StatisticsInfoVO findStatistics(Long memberID, Calendar calendar, StatisticsType statisticsType) {
+        switch (statisticsType){
+            case Daily:
+                return findDailyStatistics(memberID,calendar);
+            case Weekly:
+                return findWeeklyStatistics(memberID,calendar);
+            case Monthly:
+                return findMonthlyStatistics(memberID,calendar);
+            case Yearly:
+                return findYearlyStatistics(memberID,calendar);
+            case Totally:
+                return findTotalStatistics(memberID,calendar);
+        }
+        return StatisticsInfoVO.builder().build();
+    }
     /**
      * @param memberID 특정 멤버의 아이디
      * @param calendar 특정 날짜
@@ -236,6 +252,9 @@ public class StatisticsService {
         Calendar calendarEnd = Calendar.getInstance();
         calendarEnd.setTime(timestamp);
         if(statisticsType == StatisticsType.Weekly) {
+            if(calendarEnd.get(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY){
+                calendarEnd.add(Calendar.DATE,-1);
+            }
             calendarEnd.set(Calendar.DAY_OF_WEEK,Calendar.SUNDAY);
             calendarEnd.add(Calendar.DATE, 7);
         }
@@ -252,7 +271,7 @@ public class StatisticsService {
         calendarEnd.set(Calendar.SECOND,59);
         calendarEnd.set(Calendar.MILLISECOND,999);
 
-        log.info(statisticsType+"statistics log - "+"calendarEnd:"+calendarEnd.getTime());
+//        log.info(statisticsType+"statistics log - "+"calendarEnd:"+calendarEnd.getTime());
 
         return calendarEnd;
     }
@@ -267,7 +286,12 @@ public class StatisticsService {
 
         Calendar calendarStart = Calendar.getInstance();
         calendarStart.setTime(timestamp);
-        if(statisticsType == StatisticsType.Weekly) calendarStart.set(Calendar.DAY_OF_WEEK,Calendar.MONDAY);
+        if(statisticsType == StatisticsType.Weekly) {
+            if(calendarStart.get(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY){
+                calendarStart.add(Calendar.DATE,-1);
+            }
+            calendarStart.set(Calendar.DAY_OF_WEEK,Calendar.MONDAY);
+        }
         else if(statisticsType == StatisticsType.Monthly) calendarStart.set(Calendar.DAY_OF_MONTH,1);
         else if(statisticsType == statisticsType.Yearly) calendarStart.set(Calendar.DAY_OF_YEAR,1);
         calendarStart.set(Calendar.AM_PM,Calendar.AM);
@@ -276,72 +300,58 @@ public class StatisticsService {
         calendarStart.set(Calendar.SECOND,0);
         calendarStart.set(Calendar.MILLISECOND,0);
 
-        log.info(statisticsType+"statistics log - "+"calendarStart:"+calendarStart.getTime());
+//        log.info(statisticsType+"statistics log - "+"calendarStart:"+calendarStart.getTime());
 
         return calendarStart;
     }
 
 
     /**주기적으로 통계 저장**/
-    public void savePreviousWeekStatistics(){
+    public void savePreviousStatistics(StatisticsType statisticsType) {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE, -1);
         List<Member> members = memberRepository.findAll();
 
-        for(Member member: members) {
-            StatisticsInfoVO statisticsInfoVO = findWeeklyStatistics(member.getId(),calendar);
+        //시작 시간 설정
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        Timestamp timeStart = Timestamp.valueOf(dateFormat.format(
+                getCalendarStart(new Timestamp(calendar.getTimeInMillis()), statisticsType).getTime()));
+
+        Timestamp timeEnd = Timestamp.valueOf(dateFormat.format(
+                getCalendarEnd(new Timestamp(calendar.getTimeInMillis()), statisticsType).getTime()));
+
+        Calendar start = Calendar.getInstance();
+        start.setTimeInMillis(timeStart.getTime());
+        Calendar end = Calendar.getInstance();
+        start.setTimeInMillis(timeEnd.getTime());
+        //전체 멤버에 대해서
+        for (Member member : members) {
+
+            StatisticsInfoVO statisticsInfoVO = findStatistics(member.getId(), calendar,statisticsType);
+            Statistics findStatistic = statisticsRepository.findByStatisticsTypeAndMemberIdAndTimeBetween(
+                    StatisticsType.Weekly, memberRepository.findById(member.getId()).get().getId(), timeStart, timeEnd);
+            log.info("calendarStart:"+start.getTime()+" calendarEnd"+end.getTime()+" memberId"+member.getId());
+            //만약 기존 통계가 있으면 그걸 업데이트
+            if (findStatistic != null) {
+                findStatistic.setDistance(statisticsInfoVO.getDistance());
+                findStatistic.setTotalSeconds(statisticsInfoVO.getTotalSeconds());
+                findStatistic.setEnergy(statisticsInfoVO.getEnergy());
+                findStatistic.setTime(new Timestamp(calendar.getTimeInMillis()));
+                continue;
+            }
+            //없으면 새로 만듬
             Statistics statistics = Statistics.builder()
+                    .member(member)
                     .distance(statisticsInfoVO.getDistance())
                     .totalSeconds(statisticsInfoVO.getTotalSeconds())
                     .energy(statisticsInfoVO.getEnergy())
                     .time(new Timestamp(calendar.getTimeInMillis()))
+                    .statisticsType(statisticsType)
                     .build();
             statisticsRepository.save(statistics);
         }
 
-        log.info("Insert statistics Weekly finish");
-    }
-    public void savePreviousMonthStatistics(){
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DATE, -1);
-        List<Member> members = memberRepository.findAll();
-
-        for(Member member: members) {
-            StatisticsInfoVO statisticsInfoVO = findMonthlyStatistics(member.getId(),calendar);
-            Statistics statistics = Statistics.builder()
-                    .distance(statisticsInfoVO.getDistance())
-                    .totalSeconds(statisticsInfoVO.getTotalSeconds())
-                    .energy(statisticsInfoVO.getEnergy())
-                    .time(new Timestamp(calendar.getTimeInMillis()))
-                    .build();
-            statisticsRepository.save(statistics);
-        }
-
-        log.info("Insert statistics Monthly finish");
     }
 
-
-    public void savePreviousYearStatistics(){
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DATE, -1);
-        List<Member> members = memberRepository.findAll();
-
-        for(Member member: members) {
-            StatisticsInfoVO statisticsInfoVO = findYearlyStatistics(member.getId(),calendar);
-            Statistics statistics = Statistics.builder()
-                    .distance(statisticsInfoVO.getDistance())
-                    .totalSeconds(statisticsInfoVO.getTotalSeconds())
-                    .energy(statisticsInfoVO.getEnergy())
-                    .time(new Timestamp(calendar.getTimeInMillis()))
-                    .build();
-            statisticsRepository.save(statistics);
-        }
-
-        log.info("Insert statistics Yearly finish");
-    }
-
-//    public void test(){
-//        log.info(Thread.currentThread() + ": doing a cron job at "+ new Date() + ".");
-//    }
 
 }
