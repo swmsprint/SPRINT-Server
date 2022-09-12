@@ -32,7 +32,6 @@ public class MemberApiController {
     public CreateMemberResponse saveMember(@RequestBody @Valid CreateMemberRequest request){
         Member member = new Member(request.getNickname(), request.getGender(), request.getEmail(), request.getBirthday(), request.getHeight(), request.getWeight(), request.getPicture());
         Long id = memberService.join(member);
-        statisticsService.newMemberStatistics(id);
         return new CreateMemberResponse(id);
     }
 
