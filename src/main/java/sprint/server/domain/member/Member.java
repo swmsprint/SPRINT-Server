@@ -66,4 +66,8 @@ public class Member {
     public void setDisableDay(LocalDate localDate){
         this.disableDay = localDate;
     }
+
+    public void changeMainGroupId(int mainGroupId) {
+        this.mainGroupId = mainGroupId;
+    }
 }
