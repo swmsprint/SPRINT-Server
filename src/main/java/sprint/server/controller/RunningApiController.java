@@ -46,7 +46,6 @@ public class RunningApiController {
         statisticsService.updateStatistics(running, StatisticsType.Weekly);
         statisticsService.updateStatistics(running, StatisticsType.Monthly);
         statisticsService.updateStatistics(running, StatisticsType.Yearly);
-        statisticsService.updateStatistics(running, StatisticsType.Totally);
         return new FinishRunningResponse(running.getId(),running.getDistance(),running.getDuration(),running.getEnergy());
     }
 

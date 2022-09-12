@@ -2,15 +2,18 @@ package sprint.server.domain.statistics;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import sprint.server.domain.member.Member;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Entity
 @Getter @Setter
+@NoArgsConstructor
 public class Statistics {
 
     @Id @GeneratedValue
