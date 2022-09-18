@@ -1,6 +1,7 @@
 package sprint.server.domain.friends;
 
 import lombok.*;
+import sprint.server.domain.BaseEntity;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -13,7 +14,7 @@ import java.sql.Timestamp;
         @Index(name = "source_member_index", columnList = "sourceMemberId"),
         @Index(name = "target_member_index", columnList = "targetMemberId")
 })
-public class Friends {
+public class Friends extends BaseEntity {
 
     @Id @GeneratedValue
     private Long id;
@@ -27,7 +28,6 @@ public class Friends {
     @NotNull
     private FriendState establishState;
 
-    private Timestamp registeredDate;
 
     protected Friends(){}
 
@@ -40,9 +40,6 @@ public class Friends {
     public void setMemberIds(Long sourceMemberId, Long targetMemberId) {
         this.sourceMemberId = sourceMemberId;
         this.targetMemberId = targetMemberId;
-    }
-    public void setRegisteredDate(Timestamp timestamp){
-        this.registeredDate = timestamp;
     }
 
     public void setEstablishState(FriendState establishState) {
