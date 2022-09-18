@@ -36,7 +36,7 @@ public class MemberApiController {
         return new CreateMemberResponse(id);
     }
 
-    @ApiOperation(value="회원 목록 검색", notes="닉네임 기준, LIKE 연산\nExample: http://localhost:8080/user-management/users?target=test")
+    @ApiOperation(value="회원 목록 검색", notes="닉네임 기준, LIKE 연산\nExample: http://localhost:8080/user-management/userId=1&target=test")
     @ApiResponses({
             @ApiResponse(code = 200, message = "정상 작동"),
             @ApiResponse(code = 400, message = "요청 에러"),
@@ -46,11 +46,13 @@ public class MemberApiController {
     public FindMembersResponseDto<FindMembersResponseVo> FindMembersByNickname(@RequestParam Long userId, @RequestParam String target){
         List<Long> friendsIdList = friendsService.findFriendsByMemberId(userId, FriendState.ACCEPT).stream()
                 .map(Member::getId).collect(Collectors.toList());
-        List<Long> requestedIdList = friendsService.findFriendsByMemberId(userId, FriendState.REQUEST).stream()
+        List<Long> requestIdList = friendsService.findBySourceMemberIdAndFriendState(userId, FriendState.REQUEST).stream()
+                .map(Member::getId).collect(Collectors.toList());
+        List<Long> receiveIdList = friendsService.findByTargetMemberIdAndFriendState(userId, FriendState.REQUEST).stream()
                 .map(Member::getId).collect(Collectors.toList());
         List<Member> members = memberService.findByNicknameContaining(target);
         List<FindMembersResponseVo> result = members.stream()
-                .map(m -> new FindMembersResponseVo(m, friendsIdList, requestedIdList))
+                .map(m -> new FindMembersResponseVo(m, friendsIdList, requestIdList, receiveIdList))
                 .filter(m -> !m.getUserId().equals(userId))
                 .sorted(FindMembersResponseVo.COMPARE_BY_NICKNAME)
                 .collect(Collectors.toList());

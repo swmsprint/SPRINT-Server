@@ -1,24 +1,42 @@
 package sprint.server.domain;
 
 import lombok.Getter;
-import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
-@Getter @Setter
-public class Groups {
+@Getter
+public class Groups extends BaseEntity {
 
     @Id @GeneratedValue
-    private int id;
+    @Column(name = "group_id")
+    private Integer id;
 
-    private long groupLeaderId;
     private String groupName;
-    private int groupPersonnel;
-    private int groupMaxPersonnel;
+
+    private Long groupLeaderId;
     private String groupDescription;
     private String groupPicture;
-    private long ongoingGroupMatchId;
+    private int groupPersonnel;
+    private int groupMaxPersonnel;
+    private Long ongoingGroupMatchId;
+    private Boolean isDeleted;
+    protected Groups() {
+    }
+
+    public Groups(String groupName, Long groupLeaderId, String groupDescription, String groupPicture) {
+        this.groupName = groupName;
+        this.groupLeaderId = groupLeaderId;
+        this.groupDescription = groupDescription;
+        this.groupPicture = groupPicture;
+        this.groupPersonnel = 1;
+        this.groupMaxPersonnel = 100;
+        this.isDeleted = false;
+    }
+
+    public void delete(){
+        this.isDeleted = true;
+    }
 }
