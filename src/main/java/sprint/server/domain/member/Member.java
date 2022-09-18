@@ -1,6 +1,7 @@
 package sprint.server.domain.member;
 
 import lombok.Getter;
+import sprint.server.domain.BaseEntity;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -10,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
-public class Member {
+public class Member extends BaseEntity {
 
     @Id @GeneratedValue
     @NotNull
@@ -24,8 +25,6 @@ public class Member {
     @NotNull
     private String email;
     private LocalDate birthday;
-    @NotNull
-    private Timestamp joinDay;
     @NotNull
     private float height;
     @NotNull
@@ -48,7 +47,6 @@ public class Member {
         this.height = height;
         this.weight = weight;
         this.picture = picture;
-        this.joinDay = Timestamp.valueOf(LocalDateTime.now());
         this.tierId = 0;
     }
 
@@ -60,7 +58,6 @@ public class Member {
         this.height = height;
         this.weight = weight;
         this.picture = picture;
-        this.joinDay = Timestamp.valueOf(LocalDateTime.now());
     }
 
     public void setDisableDay(LocalDate localDate){

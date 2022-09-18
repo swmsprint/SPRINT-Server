@@ -18,7 +18,7 @@ public class FindMembersResponseVo {
     private String picture;
     private FriendState isFriend;
 
-    public FindMembersResponseVo(Member member, List<Long> friendsList, List<Long> requestedFriendsList){
+    public FindMembersResponseVo(Member member, List<Long> friendsList, List<Long> requestedFriendsList, List<Long> receivedFriendsList){
         this.userId = member.getId();
         this.nickname = member.getNickname();
         this.email = member.getEmail();
@@ -26,7 +26,10 @@ public class FindMembersResponseVo {
         this.weight = member.getWeight();
         this.tierId = member.getTierId();
         this.picture = member.getPicture();
-        this.isFriend = friendsList.contains(member.getId()) ? FriendState.ACCEPT : requestedFriendsList.contains(member.getId()) ? FriendState.REQUEST: FriendState.NOT_FRIEND;
+        this.isFriend = friendsList.contains(member.getId()) ? FriendState.ACCEPT :
+                requestedFriendsList.contains(member.getId()) ? FriendState.REQUEST:
+                receivedFriendsList.contains(member.getId()) ? FriendState.RECEIVE :
+                FriendState.NOT_FRIEND;
     }
 
     public static Comparator<FindMembersResponseVo> COMPARE_BY_NICKNAME = Comparator.comparing(o -> o.nickname);

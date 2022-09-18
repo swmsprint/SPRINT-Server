@@ -13,14 +13,14 @@ import java.util.Optional;
 
 @Repository
 public interface GroupMemberRepository extends JpaRepository<GroupMember, GroupMemberId> {
-    Boolean existsByGroupMemberIdAndMemberState(GroupMemberId groupMemberId, GroupMemberState groupMemberState);
-    Optional<GroupMember> findByGroupMemberIdAndMemberState(GroupMemberId groupMemberId, GroupMemberState groupMemberState);
+    Boolean existsByGroupMemberIdAndGroupMemberState(GroupMemberId groupMemberId, GroupMemberState groupMemberState);
+    Optional<GroupMember> findByGroupMemberIdAndGroupMemberState(GroupMemberId groupMemberId, GroupMemberState groupMemberState);
 
     @Query("select gm from GroupMember gm where gm.groupMemberId.groupId = :groupId and " +
-            "(gm.memberState = sprint.server.domain.groupmember.GroupMemberState.ACCEPT or " +
-            "gm.memberState = sprint.server.domain.groupmember.GroupMemberState.LEADER)")
+            "(gm.groupMemberState = sprint.server.domain.groupmember.GroupMemberState.ACCEPT or " +
+            "gm.groupMemberState = sprint.server.domain.groupmember.GroupMemberState.LEADER)")
     List<GroupMember> findGroupMemberByGroupId(@Param("groupId") Integer groupId);
     @Query("select gm from GroupMember gm where gm.groupMemberId.groupId = :groupId and " +
-            "gm.memberState = sprint.server.domain.groupmember.GroupMemberState.LEADER")
+            "gm.groupMemberState = sprint.server.domain.groupmember.GroupMemberState.LEADER")
     Optional<GroupMember> findGroupLeaderByGroupId(@Param("groupId") Integer groupId);
 }

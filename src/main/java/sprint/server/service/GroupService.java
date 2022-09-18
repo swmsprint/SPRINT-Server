@@ -14,6 +14,7 @@ import sprint.server.repository.GroupRepository;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -36,8 +37,7 @@ public class GroupService {
         validationBeforeCreateGroup(groups);
         groupRepository.save(groups);
         GroupMember groupMember = new GroupMember(new GroupMemberId(groups.getId(), groups.getGroupLeaderId()));
-        groupMember.setMemberState(GroupMemberState.LEADER);
-        groupMember.setRegisteredDate(Timestamp.valueOf(LocalDateTime.now()));
+        groupMember.setGroupMemberState(GroupMemberState.LEADER);
         groupMemberRepository.save(groupMember);
         return groups.getId();
     }
@@ -51,7 +51,7 @@ public class GroupService {
     public Boolean requestJoinGroupMember(GroupMember groupMember) {
         validationBeforeJoinGroup(groupMember.getGroupMemberId());
         groupMemberRepository.save(groupMember);
-        return groupMemberRepository.existsByGroupMemberIdAndMemberState(groupMember.getGroupMemberId(), GroupMemberState.REQUEST);
+        return groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember.getGroupMemberId(), GroupMemberState.REQUEST);
     }
 
     /**
@@ -65,9 +65,8 @@ public class GroupService {
         validationBeforeAnswerGroupMember(groupMemberId);
         GroupMember groupMember = groupMemberRepository.findById(groupMemberId).get();
         GroupMemberState groupMemberState = acceptance ? GroupMemberState.ACCEPT: GroupMemberState.REJECT;
-        groupMember.setMemberState(groupMemberState);
-        groupMember.setRegisteredDate(Timestamp.valueOf(LocalDateTime.now()));
-        return groupMemberRepository.existsByGroupMemberIdAndMemberState(groupMemberId, groupMemberState);
+        groupMember.setGroupMemberState(groupMemberState);
+        return groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMemberId, groupMemberState);
     }
 
     /**
@@ -78,9 +77,9 @@ public class GroupService {
     @Transactional
     public Boolean leaveGroupMember(GroupMemberId groupMemberId) {
         validationBeforeLeaveGroup(groupMemberId);
-        GroupMember groupMember = groupMemberRepository.findByGroupMemberIdAndMemberState(groupMemberId, GroupMemberState.ACCEPT).get();
-        groupMember.setMemberState(GroupMemberState.LEAVE);
-        return groupMemberRepository.existsByGroupMemberIdAndMemberState(groupMemberId, GroupMemberState.LEAVE);
+        GroupMember groupMember = groupMemberRepository.findByGroupMemberIdAndGroupMemberState(groupMemberId, GroupMemberState.ACCEPT).get();
+        groupMember.setGroupMemberState(GroupMemberState.LEAVE);
+        return groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMemberId, GroupMemberState.LEAVE);
     }
 
     /**
@@ -91,12 +90,38 @@ public class GroupService {
      */
     @Transactional
     public Boolean changeGroupLeaderByGroupIdAndMemberID(Integer groupId, Long memberId) {
-        GroupMember groupLeader = findGroupLeaderByGroupId(groupId);
-        GroupMember targetMember = findGroupMemberByGroupMemberId(new GroupMemberId(groupId, memberId));
-        groupLeader.setMemberState(GroupMemberState.ACCEPT);
-        targetMember.setMemberState(GroupMemberState.LEADER);
-        return findGroupLeaderByGroupId(groupId).equals(targetMember)
-                && groupLeader.getMemberState().equals(GroupMemberState.ACCEPT);
+        validationGroup(groupId);
+        validationMember(memberId);
+        GroupMember groupLeader = getGroupLeader(groupId);
+        GroupMember targetMember = getGroupMemberByGroupMemberId(new GroupMemberId(groupId, memberId));
+        groupLeader.setGroupMemberState(GroupMemberState.ACCEPT);
+        targetMember.setGroupMemberState(GroupMemberState.LEADER);
+        return getGroupLeader(groupId).equals(targetMember)
+                && groupLeader.getGroupMemberState().equals(GroupMemberState.ACCEPT);
+    }
+
+    /**
+     * 그룹 삭제
+     */
+    @Transactional
+    public Boolean deleteGroup(Integer groupId) {
+        validationGroup(groupId);
+        List<GroupMember> groupMemberList = groupMemberRepository.findGroupMemberByGroupId(groupId);
+        Groups group = getGroup(groupId);
+
+        groupMemberList.forEach(groupMember -> groupMember.setGroupMemberState(GroupMemberState.LEAVE));
+        group.delete();
+        return group.getIsDeleted().equals(true) && groupMemberRepository.findGroupMemberByGroupId(groupId).size() == 0;
+    }
+
+    /**
+     * 그룹 조회
+     */
+    public Groups getGroup(Integer groupId) {
+        validationGroup(groupId);
+        Optional<Groups> group = groupRepository.findById(groupId);
+        if (group.isEmpty()) throw new ApiException(ExceptionEnum.GROUPS_NOT_FOUND);
+        return group.get();
     }
 
     /**
@@ -104,11 +129,10 @@ public class GroupService {
      * @param groupId 조회하고자 하는 그룹 ID
      * @return GroupMember
      */
-    public GroupMember findGroupLeaderByGroupId(Integer groupId) {
+    public GroupMember getGroupLeader(Integer groupId) {
+        validationGroup(groupId);
         Optional<GroupMember> leader = groupMemberRepository.findGroupLeaderByGroupId(groupId);
-        if (leader.isEmpty()) {
-            throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
-        }
+        if (leader.isEmpty()) throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
         return leader.get();
     }
 
@@ -117,51 +141,80 @@ public class GroupService {
      * @param groupMemberId 조회하고자 하는 GroupMemberId
      * @return GroupMember
      */
-    public GroupMember findGroupMemberByGroupMemberId(GroupMemberId groupMemberId) {
-        Optional<GroupMember> groupMember = groupMemberRepository.findByGroupMemberIdAndMemberState(
+    public GroupMember getGroupMemberByGroupMemberId(GroupMemberId groupMemberId) {
+        validationGroup(groupMemberId.getGroupId());
+        Optional<GroupMember> groupMember = groupMemberRepository.findByGroupMemberIdAndGroupMemberState(
                 groupMemberId, GroupMemberState.ACCEPT);
-        if (groupMember.isEmpty()) {
-            throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
-        }
+        if (groupMember.isEmpty()) throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
         return groupMember.get();
     }
 
+
     /**
-     * validation exists group, user, group join request
+     * validation available group
+     * @param groupId -> group id
      */
-    private void existsGroupAndMemberByGroupMemberId(GroupMemberId groupMemberId){
-        if (!groupRepository.existsById(groupMemberId.getGroupId())) {throw new ApiException(ExceptionEnum.GROUPS_NOT_FOUND);}
-        if (!memberService.existById(groupMemberId.getMemberId())) {throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);}
+    private void validationGroup(Integer groupId){
+        Optional<Groups> group = groupRepository.findById(groupId);
+        if (group.isEmpty()) throw new ApiException(ExceptionEnum.GROUPS_NOT_FOUND);
+        if (group.get().getIsDeleted()) throw new ApiException(ExceptionEnum.GROUPS_DELETED);
     }
 
+    /**
+     * validation available group, exist user
+     */
+    private void validationMember(Long memberId){
+        if (!memberService.existById(memberId)) throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
+    }
+
+
+    /**
+     * validation available group, exist user
+     */
+    private void validationGroupAndUser(GroupMemberId groupMemberId){
+        validationGroup(groupMemberId.getGroupId());
+        validationMember(groupMemberId.getMemberId());
+    }
+
+    /**
+     * validation available group, exists user, join request
+     * @param groupMemberId -> groupMemberId
+     */
     private void validationBeforeAnswerGroupMember(GroupMemberId groupMemberId) {
-        existsGroupAndMemberByGroupMemberId(groupMemberId);
-        if (!groupMemberRepository.existsByGroupMemberIdAndMemberState(groupMemberId, GroupMemberState.REQUEST)) {
-            throw new ApiException(ExceptionEnum.GROUPS_REQUEST_NOT_FOUND);}
+        validationGroupAndUser(groupMemberId);
+        if (!groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMemberId, GroupMemberState.REQUEST))
+            throw new ApiException(ExceptionEnum.GROUPS_REQUEST_NOT_FOUND);
     }
 
+    /**
+     * validation available group, exists user, groupmember
+     * @param groupMemberId -> groupMemberId
+     */
     private void validationBeforeLeaveGroup(GroupMemberId groupMemberId) {
-        existsGroupAndMemberByGroupMemberId(groupMemberId);
-        if (groupMemberRepository.existsByGroupMemberIdAndMemberState(groupMemberId, GroupMemberState.LEADER)) {
-            throw new ApiException(ExceptionEnum.GROUPS_LEADER_CANT_LEAVE);}
-        if (!groupMemberRepository.existsByGroupMemberIdAndMemberState(groupMemberId, GroupMemberState.ACCEPT)) {
+        validationGroupAndUser(groupMemberId);
+        if (groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMemberId, GroupMemberState.LEADER))
+            throw new ApiException(ExceptionEnum.GROUPS_LEADER_CANT_LEAVE);
+        if (!groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMemberId, GroupMemberState.ACCEPT))
             throw new ApiException(ExceptionEnum.GROUPS_MEMBER_NOT_FOUND);
-        }
     }
 
-    private void validationBeforeCreateGroup(Groups groups) {
-        if (existsByGroupName(groups.getGroupName())) {throw new ApiException(ExceptionEnum.GROUPS_NAME_ALREADY_EXISTS);}
-        if (!memberService.existById(groups.getGroupLeaderId())) {throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);}
+    /**
+     * validation new group name, exists user,
+     * @param group -> group
+     */
+    private void validationBeforeCreateGroup(Groups group) {
+        if (groupRepository.existsByGroupName(group.getGroupName())) throw new ApiException(ExceptionEnum.GROUPS_NAME_ALREADY_EXISTS);
+        if (!memberService.existById(group.getGroupLeaderId())) throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
     }
 
+    /**
+     * validation available group, exists user, not groupmember;
+     * @param groupMemberId -> groupMemberId
+     */
     private void validationBeforeJoinGroup(GroupMemberId groupMemberId) {
-        existsGroupAndMemberByGroupMemberId(groupMemberId);
-        if (groupMemberRepository.existsByGroupMemberIdAndMemberState(groupMemberId, GroupMemberState.LEADER) ||
-                groupMemberRepository.existsByGroupMemberIdAndMemberState(groupMemberId, GroupMemberState.ACCEPT)) {
-            throw new ApiException(ExceptionEnum.GROUPS_ALREADY_JOINED);}
-    }
-
-    public Boolean existsByGroupName(String groupName){
-        return groupRepository.existsByGroupName(groupName);
+        validationGroupAndUser(groupMemberId);
+        if (groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMemberId, GroupMemberState.LEADER) ||
+                groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMemberId, GroupMemberState.ACCEPT))
+            throw new ApiException(ExceptionEnum.GROUPS_ALREADY_JOINED);
     }
 }

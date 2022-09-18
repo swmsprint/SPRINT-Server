@@ -47,11 +47,9 @@ public class FriendsService {
             /* 만약 이미 DELETE, REJECT, CANCEL 관계라면 */
             friends.get().setMemberIds(sourceMemberId, targetMemberId);
             friends.get().setEstablishState(FriendState.REQUEST);
-            friends.get().setRegisteredDate(Timestamp.valueOf(LocalDateTime.now()));
         } else {
             /* 새로운 관계 생성 */
             Friends newFriends = new Friends(sourceMemberId, targetMemberId);
-            newFriends.setRegisteredDate(Timestamp.valueOf(LocalDateTime.now()));
             friendsRepository.save(newFriends);
         }
         return friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, FriendState.REQUEST);
@@ -70,7 +68,6 @@ public class FriendsService {
         if (friends.isEmpty()){
             throw new ApiException(ExceptionEnum.FRIENDS_REQUEST_NOT_FOUND);
         }
-        friends.get().setRegisteredDate(Timestamp.valueOf(LocalDateTime.now()));
         friends.get().setEstablishState(FriendState.REJECT);
         return friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, FriendState.REJECT);
     }
@@ -93,7 +90,6 @@ public class FriendsService {
             throw new ApiException(ExceptionEnum.FRIENDS_REQUEST_NOT_FOUND);
         }
         friends.get().setEstablishState(FriendState.ACCEPT);
-        friends.get().setRegisteredDate(Timestamp.valueOf(LocalDateTime.now()));
 
         return isFriendsRequestExist(sourceMemberId, targetMemberId, FriendState.ACCEPT);
     }
@@ -112,7 +108,6 @@ public class FriendsService {
             throw new ApiException(ExceptionEnum.FRIENDS_NOT_FOUND);
         }
         friends.get().setEstablishState(FriendState.DELETE);
-        friends.get().setRegisteredDate(Timestamp.valueOf(LocalDateTime.now()));
 
         return friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, FriendState.DELETE);
     }
@@ -130,7 +125,6 @@ public class FriendsService {
         if (friends.isEmpty()) {
             throw new ApiException(ExceptionEnum.FRIENDS_REQUEST_NOT_FOUND);
         }
-        friends.get().setRegisteredDate(Timestamp.valueOf(LocalDateTime.now()));
         friends.get().setEstablishState(FriendState.CANCEL);
 
         return friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, FriendState.CANCEL);
