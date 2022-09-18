@@ -27,7 +27,9 @@ public enum ExceptionEnum {
     GROUPS_ALREADY_JOINED(HttpStatus.BAD_REQUEST, "G0004",  "이미 가입된 그룹입니다."),
     GROUPS_LEADER_CANT_LEAVE(HttpStatus.BAD_REQUEST, "G0005", "그룹 리더는 탈퇴할 수 없습니다."),
     GROUPS_MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "G0006", "해당 유저는 그룹 멤버가 아닙니다."),
-    GROUPS_METHOD_NOT_FOUND(HttpStatus.BAD_REQUEST, "G0007", "요청 메서드가 잘못 되었습니다.");
+    GROUPS_METHOD_NOT_FOUND(HttpStatus.BAD_REQUEST, "G0007", "요청 메서드가 잘못 되었습니다."),
+    GROUPS_NOT_LEADER(HttpStatus.BAD_REQUEST, "G0008", "그룹장이 아닙니다."),
+    GROUPS_DELETED(HttpStatus.BAD_REQUEST,"G0009", "삭제된 그룹입니다.");
 
     private final HttpStatus status;
     private final String code;

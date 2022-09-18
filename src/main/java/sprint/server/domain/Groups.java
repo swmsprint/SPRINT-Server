@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
-public class Groups {
+public class Groups extends BaseEntity {
 
     @Id @GeneratedValue
     @Column(name = "group_id")
@@ -22,7 +22,7 @@ public class Groups {
     private int groupPersonnel;
     private int groupMaxPersonnel;
     private Long ongoingGroupMatchId;
-    private Timestamp groupJoinday;
+    private Boolean isDeleted;
     protected Groups() {
     }
 
@@ -33,6 +33,10 @@ public class Groups {
         this.groupPicture = groupPicture;
         this.groupPersonnel = 1;
         this.groupMaxPersonnel = 100;
-        this.groupJoinday = Timestamp.valueOf(LocalDateTime.now());
+        this.isDeleted = false;
+    }
+
+    public void delete(){
+        this.isDeleted = true;
     }
 }

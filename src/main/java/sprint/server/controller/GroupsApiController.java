@@ -122,6 +122,12 @@ public class GroupsApiController {
         return new BooleanResponse(groupService.changeGroupLeaderByGroupIdAndMemberID(request.getGroupId(), request.getTargetUserId()));
     }
 
-//    @ApiOperation(value = "그룹 삭제", notes = "그룹을 삭제합니다. 그룹 삭제는 그룹장만이 할 수 있으며, 그룹원이 그룹장 혼자남아있어야 가능합니다.")
-//    @PutMapping("group")
+    @ApiOperation(value = "그룹 삭제", notes = "그룹을 삭제합니다. 그룹 삭제는 그룹장만이 할 수 있다.")
+    @DeleteMapping("{groupId}")
+    public BooleanResponse deleteGroup(@PathVariable Integer groupId, @RequestParam Long LeaderId) {
+        if (!groupService.getGroupLeader(groupId).equals(LeaderId)){
+            throw new ApiException(ExceptionEnum.GROUPS_NOT_LEADER);
+        }
+        return new BooleanResponse(groupService.deleteGroup(groupId));
+    }
 }
