@@ -1,6 +1,5 @@
 package sprint.server.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -8,6 +7,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sprint.server.controller.datatransferobject.request.FinishRunningRequest;
+import sprint.server.controller.exception.ApiException;
+import sprint.server.controller.exception.ExceptionEnum;
 import sprint.server.domain.friends.FriendState;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.Running;
@@ -18,6 +19,7 @@ import sprint.server.repository.RunningRepository;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +31,9 @@ public class RunningService {
 
 
     public Optional<Running> findOne(Long runningId){
-        return runningRepository.findById(runningId);
+        Optional<Running> running = runningRepository.findById(runningId);
+        if(!running.isPresent()) throw new ApiException(ExceptionEnum.RUNNING_NOT_FOUND);
+        return running;
     }
     @Transactional
     public Long addRun(Member member, String startTime){
@@ -44,26 +48,32 @@ public class RunningService {
 
 
     @Transactional
-    public Running finishRunning(FinishRunningRequest request) throws JsonProcessingException {
+    public Running finishRunning(FinishRunningRequest request) {
 
-        Running running = runningRepository.findById(request.getRunningId()).get();
-        Member member = memberRepository.findById(request.getUserId()).get();
+        Optional<Running> running = runningRepository.findById(request.getRunningId());
+        Optional<Member> member = memberRepository.findByIdAndDisableDayIsNull(request.getUserId());
+
+        //러닝이 존재하지 않으면 존재하지 않는다는 오류 메세지
+        if(!running.isPresent()) throw new ApiException(ExceptionEnum.RUNNING_NOT_FOUND);
+        //멤버 존재하지 않으면 멤버가 존재하지 않는다는 오류 메세지
+        if (!member.isPresent()) throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
+
 
         double distance = calculateTotalDistance(request.getRunningData());
-        float weight = member.getWeight();
+        float weight = member.get().getWeight();
         double energy = calculateEnergy(weight, request.getDuration(), distance);
         ObjectMapper mapper = new ObjectMapper();
 
-        running.setEnergy(energy);
-        running.setWeight(weight);
-        running.setDuration(request.getDuration());
-        running.setDistance(distance);
-        running.setRunningRawDataList(request.getRunningData());
+        running.get().setEnergy(energy);
+        running.get().setWeight(weight);
+        running.get().setDuration(request.getDuration());
+        running.get().setDistance(distance);
+        running.get().setRunningRawDataList(request.getRunningData());
 
         for(RunningRawData data : request.getRunningData()){
-            data.setRunning(running);
+            data.setRunning(running.get());
         }
-        return running;
+        return running.get();
     }
 
     public Running createRunning(Member member){
@@ -74,13 +84,20 @@ public class RunningService {
 
 
     public Page<Running> fetchPersonalRunningPages(Integer pageNumber, Long memberId){
-        Member loginMember = memberRepository.findById(memberId).get();
-        List<Member> allMembers = new ArrayList<>(Arrays.asList(loginMember));
+        Optional<Member> loginMember = memberRepository.findByIdAndDisableDayIsNull(memberId);
+        //멤버 존재하지 않으면 멤버가 존재하지 않는다는 오류 메세지
+        if (!loginMember.isPresent()) throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
+
+        List<Member> allMembers = new ArrayList<>(Arrays.asList(loginMember.get()));
         return fetchRunningPages(pageNumber,allMembers,3);
     }
     public Page<Running> fetchPublicRunningPages(Integer pageNumber, Long memberId){
-        Member loginMember = memberRepository.findById(memberId).get();
-        List<Member> allMembers = findFriendsAndLoginMemberList(memberId,loginMember);
+        Optional<Member> loginMember = memberRepository.findByIdAndDisableDayIsNull(memberId);
+        //멤버 존재하지 않으면 멤버가 존재하지 않는다는 오류 메세지
+        if (!loginMember.isPresent()) throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
+
+        List<Member> allMembers = findFriendsAndLoginMemberList(memberId,loginMember.get());
+
         return fetchRunningPages(pageNumber,allMembers,6);
     }
 
@@ -90,15 +107,15 @@ public class RunningService {
     }
 
     public List<Member> findFriendsAndLoginMemberList(Long memberId, Member loginMember) {
-        List<Member> allMembers = memberRepository.findAllById(friendsRepository.findBySourceMemberIdAndEstablishState(memberId, FriendState.ACCEPT)
+        List<Member> allMembers = memberRepository.findALLByIdInAndDisableDayIsNull(friendsRepository.findBySourceMemberIdAndEstablishState(memberId, FriendState.ACCEPT)
                 .stream()
                 .map(friends -> friends.getTargetMemberId())
-                .collect(java.util.stream.Collectors.toList()));
+                .collect(Collectors.toList()));
         allMembers.add(loginMember);
         return allMembers;
     }
+
     /**
-     *
      * @param rowData 경도, 위도, 고도, 시간 등의 데이터가 저장되어있음
      * @return
      */
@@ -180,6 +197,10 @@ public class RunningService {
      */
     private static double degreeToRadians(double degree){
         return (degree * Math.PI/180.0);
+    }
+
+    private void validationStartRunning(){
+
     }
 
 }

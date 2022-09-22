@@ -1,7 +1,6 @@
 package sprint.server.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +16,7 @@ import sprint.server.service.StatisticsService;
 
 import javax.validation.Valid;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
+
 import java.util.List;
 
 @RestController
@@ -34,18 +32,21 @@ public class RunningApiController {
     @ApiOperation(value="개발자용/러닝 시작", notes = "성공시 저장된 runningId를 반환합니다")
     @PostMapping("developer/start")
     public CreateRunningResponse developerCreateRunning(@RequestBody @Valid CreateRunningRequest request) {
-        Member member = memberService.findById(request.getUserId());
+
+        Member member = memberService.findById(request.getUserId()); //이미 예외처리
         Long runningId = runningService.addRun(member,request.getStartTime());
         return new CreateRunningResponse(runningId);
     }
     @ApiOperation(value="개발자용/러닝 종료", notes = "성공시 저장및 계산된 running 정보를 반환합니다. 통계정보가 존재하지 않는다면 통계정보도 생성 및 업데이트 시켜줍니다")
     @PostMapping("developer/finish")
     public FinishRunningResponse developFinishRunning(@RequestBody @Valid FinishRunningRequest request) throws JsonProcessingException {
+
         Running running = runningService.finishRunning(request);
         statisticsService.updateStatistics(running, StatisticsType.Daily);
         statisticsService.updateStatistics(running, StatisticsType.Weekly);
         statisticsService.updateStatistics(running, StatisticsType.Monthly);
         statisticsService.updateStatistics(running, StatisticsType.Yearly);
+
         return new FinishRunningResponse(running.getId(),running.getDistance(),running.getDuration(),running.getEnergy());
     }
 

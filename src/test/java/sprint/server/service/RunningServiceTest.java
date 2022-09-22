@@ -51,7 +51,7 @@ class RunningServiceTest {
         runningRawData.add(new RunningRawData(running,37.33028771,-122.02810514,4.05,"2022-08-02 07:48:26.382Z"));
         runningRawData.add(new RunningRawData(running,37.33028771,-122.02810514,4.05,"2022-08-02 07:48:26.382Z"));
 
-        FinishRunningRequest tempRequest = new FinishRunningRequest(member.getId(), id, 3, runningRawData);
+        FinishRunningRequest tempRequest = new FinishRunningRequest(member.getId(), id, 3, 10.2,runningRawData);
 
         //When
         runningService.finishRunning(tempRequest);
@@ -73,19 +73,19 @@ class RunningServiceTest {
         runningRawData.add(new RunningRawData(runningRepository.findById(running1Id).get(),37.33028771,-122.02810514,4.05,"2022-08-02 07:48:26.382Z"));
         runningRawData.add(new RunningRawData(runningRepository.findById(running1Id).get(),37.33028771,-122.02810514,4.05,"2022-08-02 07:48:26.382Z"));
 
-        FinishRunningRequest tempRequest1 = new FinishRunningRequest(member.getId(), running1Id, 3, runningRawData);
+        FinishRunningRequest tempRequest1 = new FinishRunningRequest(member.getId(), running1Id, 3, 10.2,runningRawData);
         runningService.finishRunning(tempRequest1);
 
         long running2Id = runningService.addRun(member,"2021-08-03 07:48:26.382");
-        FinishRunningRequest tempRequest2 = new FinishRunningRequest(member.getId(), running2Id, 3, runningRawData);
+        FinishRunningRequest tempRequest2 = new FinishRunningRequest(member.getId(), running2Id, 3,10.2, runningRawData);
         runningService.finishRunning(tempRequest2);
 
         long running3Id = runningService.addRun(member,"2022-08-01 07:48:26.382");
-        FinishRunningRequest tempRequest3 = new FinishRunningRequest(member.getId(), running3Id, 3, runningRawData);
+        FinishRunningRequest tempRequest3 = new FinishRunningRequest(member.getId(), running3Id, 3,10.2, runningRawData);
         runningService.finishRunning(tempRequest3);
 
         long running4Id = runningService.addRun(member,"2022-08-13 07:48:26.382");
-        FinishRunningRequest tempRequest4 = new FinishRunningRequest(member.getId(), running4Id, 3, runningRawData);
+        FinishRunningRequest tempRequest4 = new FinishRunningRequest(member.getId(), running4Id, 3, 10.2,runningRawData);
         runningService.finishRunning(tempRequest4);
 
         //When
