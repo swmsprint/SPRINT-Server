@@ -182,4 +182,8 @@ public class RunningService {
         return (degree * Math.PI/180.0);
     }
 
+    private void validationStartRunning(){
+
+    }
+
 }

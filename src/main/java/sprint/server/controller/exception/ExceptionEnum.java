@@ -30,7 +30,6 @@ public enum ExceptionEnum {
     GROUPS_METHOD_NOT_FOUND(HttpStatus.BAD_REQUEST, "G0007", "요청 메서드가 잘못 되었습니다."),
     GROUPS_NOT_LEADER(HttpStatus.BAD_REQUEST, "G0008", "그룹장이 아닙니다."),
     GROUPS_DELETED(HttpStatus.BAD_REQUEST,"G0009", "삭제된 그룹입니다.");
-
     private final HttpStatus status;
     private final String code;
     private String messages;

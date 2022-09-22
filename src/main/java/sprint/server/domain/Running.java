@@ -7,6 +7,7 @@ import lombok.Setter;
 import sprint.server.domain.member.Member;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,10 +20,12 @@ public class Running {
     @Column(name = "running_id")
     private Long id;
 
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @NotNull
     @Column(name = "start_time")
     private Timestamp startTime;
 
