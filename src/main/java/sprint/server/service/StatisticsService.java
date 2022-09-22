@@ -75,7 +75,7 @@ public class StatisticsService {
 
     }
 
-    @Transactional
+
     public StatisticsInfoVO findDailyStatistics(Long memberID, Calendar calendar) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
@@ -95,7 +95,7 @@ public class StatisticsService {
                     .build();
     }
 
-    @Transactional
+
     public StatisticsInfoVO findWeeklyStatistics(Long memberID, Calendar calendar) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
@@ -118,7 +118,7 @@ public class StatisticsService {
 
     }
 
-    @Transactional
+
     public StatisticsInfoVO findMonthlyStatistics(Long memberID, Calendar calendar) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         StatisticsInfoVO lastWeekStatistics = findWeeklyStatistics(memberID,calendar);
@@ -144,7 +144,7 @@ public class StatisticsService {
                 .build();
     }
 
-    @Transactional
+
     public StatisticsInfoVO findYearlyStatistics(Long memberID, Calendar calendar) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         StatisticsInfoVO lastMonthStatistics = findMonthlyStatistics(memberID,calendar);
@@ -170,7 +170,7 @@ public class StatisticsService {
 
     }
 
-    @Transactional
+
     public StatisticsInfoVO findTotalStatistics(Long memberID,Calendar calendar) {
 
         StatisticsInfoVO lastYearlyStatistics = findYearlyStatistics(memberID,calendar);
