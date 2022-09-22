@@ -14,6 +14,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 public class CreateRunningRequest {
 
+    @NotNull
     @JsonProperty("userId")
     private Long userId;
 
