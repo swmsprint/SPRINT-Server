@@ -8,6 +8,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sprint.server.controller.datatransferobject.request.FinishRunningRequest;
+import sprint.server.controller.exception.ApiException;
+import sprint.server.controller.exception.ExceptionEnum;
 import sprint.server.domain.friends.FriendState;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.Running;
@@ -44,26 +46,32 @@ public class RunningService {
 
 
     @Transactional
-    public Running finishRunning(FinishRunningRequest request) throws JsonProcessingException {
+    public Running finishRunning(FinishRunningRequest request) {
 
-        Running running = runningRepository.findById(request.getRunningId()).get();
-        Member member = memberRepository.findById(request.getUserId()).get();
+        Optional<Running> running = runningRepository.findById(request.getRunningId());
+        Optional<Member> member = memberRepository.findByIdAndDisableDayIsNull(request.getUserId());
+
+        //러닝이 존재하지 않으면 존재하지 않는다는 오류 메세지
+        if(!running.isPresent()) throw new ApiException(ExceptionEnum.RUNNING_NOT_FOUND);
+        //멤버 존재하지 않으면 멤버가 존재하지 않는다는 오류 메세지
+        if (!member.isPresent()) throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
+
 
         double distance = calculateTotalDistance(request.getRunningData());
-        float weight = member.getWeight();
+        float weight = member.get().getWeight();
         double energy = calculateEnergy(weight, request.getDuration(), distance);
         ObjectMapper mapper = new ObjectMapper();
 
-        running.setEnergy(energy);
-        running.setWeight(weight);
-        running.setDuration(request.getDuration());
-        running.setDistance(distance);
-        running.setRunningRawDataList(request.getRunningData());
+        running.get().setEnergy(energy);
+        running.get().setWeight(weight);
+        running.get().setDuration(request.getDuration());
+        running.get().setDistance(distance);
+        running.get().setRunningRawDataList(request.getRunningData());
 
         for(RunningRawData data : request.getRunningData()){
-            data.setRunning(running);
+            data.setRunning(running.get());
         }
-        return running;
+        return running.get();
     }
 
     public Running createRunning(Member member){
