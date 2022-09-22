@@ -34,7 +34,8 @@ public class RunningApiController {
     @ApiOperation(value="개발자용/러닝 시작", notes = "성공시 저장된 runningId를 반환합니다")
     @PostMapping("developer/start")
     public CreateRunningResponse developerCreateRunning(@RequestBody @Valid CreateRunningRequest request) {
-        Member member = memberService.findById(request.getUserId());
+
+        Member member = memberService.findById(request.getUserId()); //이미 예외처리
         Long runningId = runningService.addRun(member,request.getStartTime());
         return new CreateRunningResponse(runningId);
     }

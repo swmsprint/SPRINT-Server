@@ -20,6 +20,7 @@ import sprint.server.repository.RunningRepository;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +32,9 @@ public class RunningService {
 
 
     public Optional<Running> findOne(Long runningId){
-        return runningRepository.findById(runningId);
+        Optional<Running> running = runningRepository.findById(runningId);
+        if(!running.isPresent()) throw new ApiException(ExceptionEnum.RUNNING_NOT_FOUND);
+        return running;
     }
     @Transactional
     public Long addRun(Member member, String startTime){
@@ -82,13 +85,20 @@ public class RunningService {
 
 
     public Page<Running> fetchPersonalRunningPages(Integer pageNumber, Long memberId){
-        Member loginMember = memberRepository.findById(memberId).get();
-        List<Member> allMembers = new ArrayList<>(Arrays.asList(loginMember));
+        Optional<Member> loginMember = memberRepository.findByIdAndDisableDayIsNull(memberId);
+        //멤버 존재하지 않으면 멤버가 존재하지 않는다는 오류 메세지
+        if (!loginMember.isPresent()) throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
+
+        List<Member> allMembers = new ArrayList<>(Arrays.asList(loginMember.get()));
         return fetchRunningPages(pageNumber,allMembers,3);
     }
     public Page<Running> fetchPublicRunningPages(Integer pageNumber, Long memberId){
-        Member loginMember = memberRepository.findById(memberId).get();
-        List<Member> allMembers = findFriendsAndLoginMemberList(memberId,loginMember);
+        Optional<Member> loginMember = memberRepository.findByIdAndDisableDayIsNull(memberId);
+        //멤버 존재하지 않으면 멤버가 존재하지 않는다는 오류 메세지
+        if (!loginMember.isPresent()) throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
+
+        List<Member> allMembers = findFriendsAndLoginMemberList(memberId,loginMember.get());
+
         return fetchRunningPages(pageNumber,allMembers,6);
     }
 
@@ -98,15 +108,15 @@ public class RunningService {
     }
 
     public List<Member> findFriendsAndLoginMemberList(Long memberId, Member loginMember) {
-        List<Member> allMembers = memberRepository.findAllById(friendsRepository.findBySourceMemberIdAndEstablishState(memberId, FriendState.ACCEPT)
+        List<Member> allMembers = memberRepository.findALLByIdInAndDisableDayIsNull(friendsRepository.findBySourceMemberIdAndEstablishState(memberId, FriendState.ACCEPT)
                 .stream()
                 .map(friends -> friends.getTargetMemberId())
-                .collect(java.util.stream.Collectors.toList()));
+                .collect(Collectors.toList()));
         allMembers.add(loginMember);
         return allMembers;
     }
+
     /**
-     *
      * @param rowData 경도, 위도, 고도, 시간 등의 데이터가 저장되어있음
      * @return
      */
