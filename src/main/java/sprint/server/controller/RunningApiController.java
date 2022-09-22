@@ -42,11 +42,13 @@ public class RunningApiController {
     @ApiOperation(value="개발자용/러닝 종료", notes = "성공시 저장및 계산된 running 정보를 반환합니다. 통계정보가 존재하지 않는다면 통계정보도 생성 및 업데이트 시켜줍니다")
     @PostMapping("developer/finish")
     public FinishRunningResponse developFinishRunning(@RequestBody @Valid FinishRunningRequest request) throws JsonProcessingException {
+
         Running running = runningService.finishRunning(request);
         statisticsService.updateStatistics(running, StatisticsType.Daily);
         statisticsService.updateStatistics(running, StatisticsType.Weekly);
         statisticsService.updateStatistics(running, StatisticsType.Monthly);
         statisticsService.updateStatistics(running, StatisticsType.Yearly);
+
         return new FinishRunningResponse(running.getId(),running.getDistance(),running.getDuration(),running.getEnergy());
     }
 
