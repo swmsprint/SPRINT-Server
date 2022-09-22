@@ -32,6 +32,7 @@ public class StatisticsService {
         statistics.setMember(member);
         statistics.setTime(timestamp);
         statistics.setStatisticsType(statisticsType);
+        statistics.setCount(0);
         statisticsRepository.save(statistics);
 
         return statistics.getId();
@@ -48,10 +49,12 @@ public class StatisticsService {
         Timestamp timeStart= Timestamp.valueOf(dateFormat.format(getCalendarStart(running.getStartTime(), statisticsType).getTime()));
 
         //러닝에 해당하는 주/월 마지막날 밤 11:59:59:999 설정
-        Timestamp timeEnd= Timestamp.valueOf(dateFormat.format(getCalendarEnd(running.getStartTime(), statisticsType).getTime()));
+        Timestamp timeEnd= Timestamp.valueOf(dateFormat.format(
+                getCalendarEnd(running.getStartTime(), statisticsType).getTime()));
         Timestamp timeSection = Timestamp.valueOf(dateFormat.format(
                 getCalendarStart(new Timestamp(Calendar.getInstance().getTimeInMillis()),statisticsType).getTime()));
 
+        log.info("timeStart : "+timeStart + " timeEnd : "+timeEnd + " timeSection : "+timeSection);
         //만약 아직 업데이트 이전인 이번 주/월/년의 데이터가 들어왔다면 업데이트하지 않고 내버려둠
         //이번 섹션지나고 나중에 한번에 업데이트 예정
         if(statisticsType != StatisticsType.Daily && timeSection.getTime()<timeEnd.getTime()) return;
@@ -92,6 +95,7 @@ public class StatisticsService {
                     .distance(statistics.getDistance())
                     .totalSeconds(statistics.getTotalSeconds())
                     .energy(statistics.getEnergy())
+                    .count(statistics.getCount())
                     .build();
     }
 
@@ -109,11 +113,13 @@ public class StatisticsService {
         double distance =dailyStatistics.stream().mapToDouble(Statistics::getDistance).sum();
         double energy =dailyStatistics.stream().mapToDouble(Statistics::getEnergy).sum();
         double totalSeconds = dailyStatistics.stream().mapToDouble(Statistics::getTotalSeconds).sum();
+        int count = dailyStatistics.stream().mapToInt(Statistics::getCount).sum();
 
         return StatisticsInfoVO.builder()
                 .distance(distance)
                 .totalSeconds(totalSeconds)
                 .energy(energy)
+                .count(count)
                 .build();
 
     }
@@ -161,11 +167,14 @@ public class StatisticsService {
                 +lastMonthStatistics.getEnergy();
         double totalSeconds = allStatistics.stream().mapToDouble(Statistics::getTotalSeconds).sum()
                 +lastMonthStatistics.getTotalSeconds();
+        int count = allStatistics.stream().mapToInt(Statistics::getCount).sum()
+                +lastMonthStatistics.getCount();
 
         return StatisticsInfoVO.builder()
                 .distance(distance)
                 .totalSeconds(totalSeconds)
                 .energy(energy)
+                .count(count)
                 .build();
 
     }
@@ -183,11 +192,14 @@ public class StatisticsService {
                 +lastYearlyStatistics.getEnergy();
         double totalSeconds = allStatistics.stream().mapToDouble(Statistics::getTotalSeconds).sum()
                 +lastYearlyStatistics.getTotalSeconds();
+        int count = allStatistics.stream().mapToInt(Statistics::getCount).sum()
+                +lastYearlyStatistics.getCount();
 
         return StatisticsInfoVO.builder()
                 .distance(distance)
                 .totalSeconds(totalSeconds)
                 .energy(energy)
+                .count(count)
                 .build();
 
     }
@@ -330,7 +342,9 @@ public class StatisticsService {
             StatisticsInfoVO statisticsInfoVO = findStatistics(member.getId(), calendar,statisticsType);
             Statistics findStatistic = statisticsRepository.findByStatisticsTypeAndMemberIdAndTimeBetween(
                     StatisticsType.Weekly, memberRepository.findById(member.getId()).get().getId(), timeStart, timeEnd);
+
             log.info("calendarStart:"+start.getTime()+" calendarEnd"+end.getTime()+" memberId"+member.getId());
+
             //만약 기존 통계가 있으면 그걸 업데이트
             if (findStatistic != null) {
                 findStatistic.setDistance(statisticsInfoVO.getDistance());
