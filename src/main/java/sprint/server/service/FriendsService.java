@@ -11,8 +11,6 @@ import sprint.server.domain.friends.Friends;
 import sprint.server.repository.FriendsRepository;
 import sprint.server.repository.MemberRepository;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;

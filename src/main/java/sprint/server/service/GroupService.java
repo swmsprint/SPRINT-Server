@@ -12,8 +12,6 @@ import sprint.server.domain.groupmember.GroupMemberState;
 import sprint.server.repository.GroupMemberRepository;
 import sprint.server.repository.GroupRepository;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 

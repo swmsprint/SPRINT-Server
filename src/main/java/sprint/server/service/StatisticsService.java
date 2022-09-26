@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -59,6 +60,7 @@ public class StatisticsService {
         //이번 섹션지나고 나중에 한번에 업데이트 예정
         if(statisticsType != StatisticsType.Daily && timeSection.getTime()<timeEnd.getTime()) return;
 
+
         //그 이후 생성된 statistics를 찾는다
         Statistics findStatistics = statisticsRepository.findByStatisticsTypeAndMemberIdAndTimeBetween(
                 statisticsType, memberRepository.findById(member.getId()).get().getId(), timeStart, timeEnd);
@@ -77,7 +79,6 @@ public class StatisticsService {
 
 
     }
-
 
     public StatisticsInfoVO findDailyStatistics(Long memberID, Calendar calendar) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -98,7 +99,6 @@ public class StatisticsService {
                     .count(statistics.getCount())
                     .build();
     }
-
 
     public StatisticsInfoVO findWeeklyStatistics(Long memberID, Calendar calendar) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -123,7 +123,6 @@ public class StatisticsService {
                 .build();
 
     }
-
 
     public StatisticsInfoVO findMonthlyStatistics(Long memberID, Calendar calendar) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -229,6 +228,8 @@ public class StatisticsService {
     @Transactional
     public List<Double> findMonthlyStreak(Long memberID, Calendar calendar) {
 
+        Optional<Member> member = memberRepository.findById(memberID);
+
         List<Double> monthlyStreak = new ArrayList<>();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
@@ -283,8 +284,6 @@ public class StatisticsService {
         calendarEnd.set(Calendar.SECOND,59);
         calendarEnd.set(Calendar.MILLISECOND,999);
 
-//        log.info(statisticsType+"statistics log - "+"calendarEnd:"+calendarEnd.getTime());
-
         return calendarEnd;
     }
 
@@ -311,8 +310,6 @@ public class StatisticsService {
         calendarStart.set(Calendar.MINUTE,0);
         calendarStart.set(Calendar.SECOND,0);
         calendarStart.set(Calendar.MILLISECOND,0);
-
-//        log.info(statisticsType+"statistics log - "+"calendarStart:"+calendarStart.getTime());
 
         return calendarStart;
     }

@@ -1,14 +1,20 @@
 package sprint.server.controller;
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import sprint.server.controller.datatransferobject.response.ViewStatisticsResponse;
+import sprint.server.controller.exception.ApiException;
+import sprint.server.controller.exception.ExceptionEnum;
+import sprint.server.domain.member.Member;
+import sprint.server.service.MemberService;
 import sprint.server.domain.member.Member;
 import sprint.server.repository.MemberRepository;
 import sprint.server.service.MemberService;
 import sprint.server.service.StatisticsService;
 
+import java.time.LocalDate;
 import javax.validation.Valid;
 import java.util.Calendar;
 import java.util.List;
@@ -24,7 +30,7 @@ public class StatisticsApiController {
 
     @ApiOperation(value="통계 정보 반환", notes = "조회를 요청하는 날짜에 해당하는 전체 통계정보를 반환합니다")
     @GetMapping("{id}")
-    public ViewStatisticsResponse viewStatisticsDetail(@PathVariable("id") @Valid Long memberID){
+    public ViewStatisticsResponse viewStatisticsDetail(@PathVariable("id")Long memberID){
 
         Member member = memberService.findById(memberID);
 
@@ -44,7 +50,11 @@ public class StatisticsApiController {
      * @return List 형식의 스트릭
      */
     @GetMapping("streak/{id}")
-    public List<Double> viewStreakDetail(@Valid @PathVariable("id")Long memberID, @RequestParam("year")int year, @RequestParam("month")int month){
+    public List<Double> viewStreakDetail(@PathVariable("id")Long memberID, @RequestParam("year")int year, @RequestParam("month")int month){
+
+        if(year<0 || month<0 || month>12){
+            throw new ApiException(ExceptionEnum.DATE_FORMAT_ERROR);
+        }
 
         Member member = memberService.findById(memberID);
 

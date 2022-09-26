@@ -32,6 +32,8 @@ public enum ExceptionEnum {
     GROUPS_DELETED(HttpStatus.BAD_REQUEST,"G0009", "삭제된 그룹입니다."),
     RUNNING_NOT_FOUND(HttpStatus.BAD_REQUEST,"R0001","존재하지 않는 러닝 ID 입니다");
 
+    DATE_FORMAT_ERROR(HttpStatus.BAD_REQUEST, "D0001", "날짜 형식이 잘못 되었습니다.");
+
     private final HttpStatus status;
     private final String code;
     private String messages;
