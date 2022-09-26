@@ -1,6 +1,6 @@
 package sprint.server.controller;
 
-import io.swagger.annotations.Api;
+
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -9,16 +9,13 @@ import sprint.server.controller.exception.ApiException;
 import sprint.server.controller.exception.ExceptionEnum;
 import sprint.server.domain.member.Member;
 import sprint.server.service.MemberService;
-import sprint.server.domain.member.Member;
-import sprint.server.repository.MemberRepository;
-import sprint.server.service.MemberService;
+
 import sprint.server.service.StatisticsService;
 
-import java.time.LocalDate;
-import javax.validation.Valid;
+
 import java.util.Calendar;
 import java.util.List;
-import java.util.Optional;
+
 
 @RestController
 @RequiredArgsConstructor
