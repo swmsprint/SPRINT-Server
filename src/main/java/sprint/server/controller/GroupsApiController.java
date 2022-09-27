@@ -49,7 +49,7 @@ public class GroupsApiController {
         List<GroupMember> groupMemberList = groupService.findJoinedGroupByMemberId(userId);
         List<MyGroupsInfoVo> result = groupMemberList.stream()
                 .map(groupMember -> new MyGroupsInfoVo(
-                        groupService.findGroupById(groupMember.getGroupMemberId().getGroupId()), groupMember.getGroupMemberState()))
+                        groupService.findGroupByGroupId(groupMember.getGroupMemberId().getGroupId()), groupMember.getGroupMemberState()))
                 .sorted(MyGroupsInfoVo.COMPARE_BY_ISLEADER)
                 .collect(Collectors.toList());
         return new GroupListResponse(result.size(), result);
@@ -113,7 +113,7 @@ public class GroupsApiController {
         if (groups.isEmpty()) {
             throw new ApiException(ExceptionEnum.GROUPS_NOT_FOUND);
         }
-        List<Member> memberList = groupMemberRepository.findGroupMemberByGroupId(groupId).stream()
+        List<Member> memberList = groupMemberRepository.findAllMemberByGroupId(groupId).stream()
                 .map(m -> memberService.findById(m.getGroupMemberId().getMemberId()))
                 .collect(Collectors.toList());
         List<GroupUserDataVo> groupWeeklyUserDataVoList = memberList.stream()
@@ -131,7 +131,7 @@ public class GroupsApiController {
             "+ 당일 통계 량(거리, 시간, 칼로리)")
     @GetMapping("/group-member/{groupId}")
     public FindMembersResponseDto getGroupMember(@PathVariable Integer groupId) {
-        List<GroupMember> groupMemberList = groupMemberRepository.findGroupMemberByGroupId(groupId);
+        List<GroupMember> groupMemberList = groupMemberRepository.findAllMemberByGroupId(groupId);
         List<Member> memberList = groupMemberList.stream()
                 .map(gm -> memberService.findById(gm.getGroupMemberId().getMemberId()))
                 .collect(Collectors.toList());
@@ -149,8 +149,10 @@ public class GroupsApiController {
 
     @ApiOperation(value = "그룹 삭제", notes = "그룹을 삭제합니다. 그룹 삭제는 그룹장만이 할 수 있다.")
     @DeleteMapping("{groupId}")
-    public BooleanResponse deleteGroup(@PathVariable Integer groupId, @RequestParam Long LeaderId) {
-        if (groupService.getGroupLeader(groupId).equals(LeaderId)){
+    public BooleanResponse deleteGroup(@PathVariable Integer groupId, @RequestParam Long userId) {
+        memberService.existById(userId);
+        GroupMember groupMember = groupService.getGroupLeader(groupId);
+        if (!groupMember.getGroupMemberId().getMemberId().equals(userId)){
             throw new ApiException(ExceptionEnum.GROUPS_NOT_LEADER);
         }
         return new BooleanResponse(groupService.deleteGroup(groupId));
@@ -159,7 +161,7 @@ public class GroupsApiController {
     @ApiOperation(value = "그룹 정보 변경", notes = "그룹의 정보를 변경합니다.")
     @PutMapping("{groupId}")
     public BooleanResponse modifyGroupInfo(@PathVariable Integer groupId, @RequestBody @Valid ModifyGroupInfoRequest request) {
-        Groups groups = groupService.findGroupById(groupId);
+        Groups groups = groupService.findGroupByGroupId(groupId);
         return new BooleanResponse(groupService.modifyGroupInfo(groups, request));
     }
 }

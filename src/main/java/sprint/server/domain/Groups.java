@@ -32,7 +32,7 @@ public class Groups extends BaseEntity {
         this.groupDescription = groupDescription;
         this.groupPicture = groupPicture;
         this.groupPersonnel = 1;
-        this.groupMaxPersonnel = 100;
+        this.groupMaxPersonnel = 20;
         this.isDeleted = false;
     }
 
@@ -40,7 +40,15 @@ public class Groups extends BaseEntity {
         this.groupDescription = groupDescription;
         this.groupPicture = groupPicture;
     }
+    public void addMember(){
+        this.groupPersonnel +=1;
+    }
+    public void leaveMember(){
+        this.groupPersonnel -=1;
+    }
     public void delete(){
+        this.groupName = "DELETED_GROUP" + this.id;
+        this.groupPersonnel = 0;
         this.isDeleted = true;
     }
 }

@@ -64,7 +64,11 @@ public class GroupService {
     public Boolean answerGroupMember(GroupMemberId groupMemberId, GroupMemberState groupMemberState) {
         validationBeforeAnswerGroupMember(groupMemberId);
         GroupMember groupMember = groupMemberRepository.findById(groupMemberId).get();
+        Groups groups = findGroupByGroupId(groupMemberId.getGroupId());
         groupMember.setGroupMemberState(groupMemberState);
+        if (groupMemberState.equals(GroupMemberState.ACCEPT)) {
+            groups.addMember();
+        }
         return groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMemberId, groupMemberState);
     }
 
@@ -91,6 +95,8 @@ public class GroupService {
         validationBeforeLeaveGroup(groupMemberId);
         GroupMember groupMember = groupMemberRepository.findByGroupMemberIdAndGroupMemberState(groupMemberId, GroupMemberState.ACCEPT).get();
         groupMember.setGroupMemberState(GroupMemberState.LEAVE);
+        Groups group = findGroupByGroupId(groupMemberId.getGroupId());
+        group.leaveMember();
         return groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMemberId, GroupMemberState.LEAVE);
     }
 
@@ -118,12 +124,14 @@ public class GroupService {
     @Transactional
     public Boolean deleteGroup(Integer groupId) {
         validationGroup(groupId);
-        List<GroupMember> groupMemberList = groupMemberRepository.findGroupMemberByGroupId(groupId);
-        Groups group = getGroup(groupId);
+        List<GroupMember> groupMemberList = groupMemberRepository.findAllMemberByGroupId(groupId);
+        List<GroupMember> requestGroupMemberList = groupMemberRepository.findRequestGroupMemberByGroupId(groupId);
+        Groups group = findGroupByGroupId(groupId);
 
         groupMemberList.forEach(groupMember -> groupMember.setGroupMemberState(GroupMemberState.LEAVE));
+        requestGroupMemberList.forEach(groupMember -> groupMember.setGroupMemberState(GroupMemberState.REJECT));
         group.delete();
-        return group.getIsDeleted().equals(true) && groupMemberRepository.findGroupMemberByGroupId(groupId).size() == 0;
+        return group.getIsDeleted().equals(true) && groupMemberRepository.findAllMemberByGroupId(groupId).size() == 0;
     }
 
     @Transactional
@@ -133,15 +141,6 @@ public class GroupService {
                 group.getGroupPicture().equals(request.getGroupPicture());
     }
 
-    /**
-     * 그룹 조회
-     */
-    public Groups getGroup(Integer groupId) {
-        validationGroup(groupId);
-        Optional<Groups> group = groupRepository.findById(groupId);
-        if (group.isEmpty()) throw new ApiException(ExceptionEnum.GROUPS_NOT_FOUND);
-        return group.get();
-    }
 
     /**
      * 그룹장 조회
@@ -171,7 +170,7 @@ public class GroupService {
     public List<GroupMember> findJoinedGroupByMemberId(Long userId) {
         List<GroupMember> groupMemberList = groupMemberRepository.findJoinedGroupByMemberId(userId);
         return groupMemberList.stream()
-                .filter(groupMember -> findGroupById(groupMember.getGroupMemberId().getGroupId()).getIsDeleted().equals(false))
+                .filter(groupMember -> findGroupByGroupId(groupMember.getGroupMemberId().getGroupId()).getIsDeleted().equals(false))
                 .collect(Collectors.toList());
     }
 
@@ -179,7 +178,7 @@ public class GroupService {
         List<GroupMember> groupMemberList = groupMemberRepository.findJoinedGroupByMemberId(userId);
         return groupMemberList.stream()
                 .filter(groupMember -> groupMember.getGroupMemberState() == GroupMemberState.ACCEPT)
-                .map(groupMember -> findGroupById(groupMember.getGroupMemberId().getGroupId()))
+                .map(groupMember -> findGroupByGroupId(groupMember.getGroupMemberId().getGroupId()))
                 .collect(Collectors.toList());
     }
 
@@ -254,7 +253,7 @@ public class GroupService {
         }
     }
 
-    public Groups findGroupById(Integer groupId) {
+    public Groups findGroupByGroupId(Integer groupId) {
         Optional<Groups> group = groupRepository.findById(groupId);
         if (group.isEmpty()) throw new ApiException(ExceptionEnum.GROUPS_NOT_FOUND);
         if (group.get().getIsDeleted().equals(true)) throw new ApiException(ExceptionEnum.GROUPS_DELETED);

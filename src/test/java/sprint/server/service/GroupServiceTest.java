@@ -210,7 +210,7 @@ public class GroupServiceTest {
         /* 정상적인 요청 */
         Boolean result = groupService.deleteGroup(groups.getId());
         ApiException thrown2 = assertThrows(ApiException.class , () -> groupService.getGroupLeader(groups.getId()));
-        List<GroupMember> groupMemberList = groupMemberRepository.findGroupMemberByGroupId(1);
+        List<GroupMember> groupMemberList = groupMemberRepository.findAllMemberByGroupId(1);
         assertEquals(true, result);
         assertEquals("G0009", thrown2.getErrorCode());
         assertEquals(0, groupMemberList.size());
