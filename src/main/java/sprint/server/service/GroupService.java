@@ -3,6 +3,7 @@ package sprint.server.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sprint.server.controller.datatransferobject.request.ModifyGroupInfoRequest;
 import sprint.server.controller.exception.ApiException;
 import sprint.server.controller.exception.ExceptionEnum;
 import sprint.server.domain.Groups;
@@ -12,10 +13,9 @@ import sprint.server.domain.groupmember.GroupMemberState;
 import sprint.server.repository.GroupMemberRepository;
 import sprint.server.repository.GroupRepository;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -126,6 +126,13 @@ public class GroupService {
         return group.getIsDeleted().equals(true) && groupMemberRepository.findGroupMemberByGroupId(groupId).size() == 0;
     }
 
+    @Transactional
+    public Boolean modifyGroupInfo(Groups group, ModifyGroupInfoRequest request) {
+        group.changeDescriptionAndPicture(request.getGroupDescription(), request.getGroupPicture());
+        return group.getGroupDescription().equals(request.getGroupDescription()) &&
+                group.getGroupPicture().equals(request.getGroupPicture());
+    }
+
     /**
      * 그룹 조회
      */
@@ -161,6 +168,20 @@ public class GroupService {
         return groupMember.get();
     }
 
+    public List<GroupMember> findLeaderGroupByMemberId(Long userId) {
+        List<GroupMember> groupMemberList = groupMemberRepository.findGroupMemberByMemberId(userId);
+        return groupMemberList.stream()
+                .filter(groupMember -> findGroupById(groupMember.getGroupMemberId().getGroupId()).getIsDeleted().equals(false))
+                .collect(Collectors.toList());
+    }
+
+    public List<Groups> findNotLeaderGroupByMemberId(Long userId) {
+        List<GroupMember> groupMemberList = groupMemberRepository.findGroupMemberByMemberId(userId);
+        return groupMemberList.stream()
+                .filter(groupMember -> groupMember.getGroupMemberState() == GroupMemberState.ACCEPT)
+                .map(groupMember -> findGroupById(groupMember.getGroupMemberId().getGroupId()))
+                .collect(Collectors.toList());
+    }
 
     /**
      * validation available group
@@ -233,4 +254,10 @@ public class GroupService {
         }
     }
 
+    public Groups findGroupById(Integer groupId) {
+        Optional<Groups> group = groupRepository.findById(groupId);
+        if (group.isEmpty()) throw new ApiException(ExceptionEnum.GROUPS_NOT_FOUND);
+        if (group.get().getIsDeleted().equals(true)) throw new ApiException(ExceptionEnum.GROUPS_DELETED);
+        return group.get();
+    }
 }

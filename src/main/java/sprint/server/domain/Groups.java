@@ -36,6 +36,10 @@ public class Groups extends BaseEntity {
         this.isDeleted = false;
     }
 
+    public void changeDescriptionAndPicture(String groupDescription, String groupPicture){
+        this.groupDescription = groupDescription;
+        this.groupPicture = groupPicture;
+    }
     public void delete(){
         this.isDeleted = true;
     }

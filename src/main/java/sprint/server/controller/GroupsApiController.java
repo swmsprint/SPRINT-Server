@@ -3,10 +3,7 @@ package sprint.server.controller;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import sprint.server.controller.datatransferobject.request.ModifyGroupMemberRequest;
-import sprint.server.controller.datatransferobject.request.CreateGroupMemberRequest;
-import sprint.server.controller.datatransferobject.request.CreateGroupRequest;
-import sprint.server.controller.datatransferobject.request.ModifyGroupLeaderRequest;
+import sprint.server.controller.datatransferobject.request.*;
 import sprint.server.controller.datatransferobject.response.*;
 import sprint.server.controller.exception.ApiException;
 import sprint.server.controller.exception.ExceptionEnum;
@@ -25,6 +22,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestController
 @RequiredArgsConstructor
@@ -45,9 +43,21 @@ public class GroupsApiController {
 
     }
 
-    @ApiOperation(value="그룹 목록 검색", notes="닉네임 기준, LIKE연산")
-    @GetMapping("/find/{userId}")
-    public GroupListResponse<GroupsInfoVo> findGroupsByGroupName(@PathVariable Long userId, @RequestParam String target) {
+    @ApiOperation(value="내가 가입한 그룹 목록 검색", notes = "그룹장인 그룹이 더 우선으로 존재")
+    @GetMapping("/list/{userId}")
+    public GroupListResponse<MyGroupsInfoVo> findGroupsByUserId(@PathVariable Long userId) {
+        Member member = memberService.findById(userId);
+        List<GroupMember> groupMemberList = groupService.findLeaderGroupByMemberId(userId);
+        List<MyGroupsInfoVo> result = groupMemberList.stream()
+                .map(groupMember -> new MyGroupsInfoVo(
+                        groupService.findGroupById(groupMember.getGroupMemberId().getGroupId()), groupMember.getGroupMemberState()))
+                .sorted(MyGroupsInfoVo.COMPARE_BY_ISLEADER)
+                .collect(Collectors.toList());
+        return new GroupListResponse(result.size(), result);
+    }
+    @ApiOperation(value="전체 그룹 목록 검색", notes="닉네임 기준, LIKE연산")
+    @GetMapping("/list")
+    public GroupListResponse<GroupsInfoVo> findGroupsByGroupName(@RequestParam Long userId, @RequestParam String target) {
         if (!memberService.existById(userId)) {
             throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
         }
@@ -131,9 +141,16 @@ public class GroupsApiController {
     @ApiOperation(value = "그룹 삭제", notes = "그룹을 삭제합니다. 그룹 삭제는 그룹장만이 할 수 있다.")
     @DeleteMapping("{groupId}")
     public BooleanResponse deleteGroup(@PathVariable Integer groupId, @RequestParam Long LeaderId) {
-        if (!groupService.getGroupLeader(groupId).equals(LeaderId)){
+        if (groupService.getGroupLeader(groupId).equals(LeaderId)){
             throw new ApiException(ExceptionEnum.GROUPS_NOT_LEADER);
         }
         return new BooleanResponse(groupService.deleteGroup(groupId));
+    }
+
+    @ApiOperation(value = "그룹 정보 변경", notes = "그룹의 정보를 변경합니다.")
+    @PutMapping("{groupId}")
+    public BooleanResponse modifyGroupInfo(@PathVariable Integer groupId, @RequestBody @Valid ModifyGroupInfoRequest request) {
+        Groups groups = groupService.findGroupById(groupId);
+        return new BooleanResponse(groupService.modifyGroupInfo(groups, request));
     }
 }
