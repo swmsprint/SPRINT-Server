@@ -22,7 +22,6 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @RestController
 @RequiredArgsConstructor
@@ -55,6 +54,7 @@ public class GroupsApiController {
                 .collect(Collectors.toList());
         return new GroupListResponse(result.size(), result);
     }
+
     @ApiOperation(value="전체 그룹 목록 검색", notes="닉네임 기준, LIKE연산")
     @GetMapping("/list")
     public GroupListResponse<GroupsInfoVo> findGroupsByGroupName(@RequestParam Long userId, @RequestParam String target) {
@@ -74,12 +74,12 @@ public class GroupsApiController {
 
     @ApiOperation(value="그룹 가입 요청", notes = "groupId : NotNull\nuserId : NotNull")
     @PostMapping("/group-member")
-    public BooleanResponse createGroupMember(@RequestBody @Valid CreateGroupMemberRequest request){
+    public BooleanResponse createGroupMember(@RequestBody @Valid GroupIdMemberIdRequest request){
         GroupMember groupMember = new GroupMember(new GroupMemberId(request.getGroupId(), request.getUserId()));
         return new BooleanResponse(groupService.requestJoinGroupMember(groupMember));
     }
 
-    @ApiOperation(value="그룹 가입 승인/거절/탈퇴", notes="groupUserState는 \"ACCEPT\", \"LEAVE\", \"REJECT\", \"CANCEL\" 중 하나\n" +
+    @ApiOperation(value="그룹 가입 승인/거절/취소", notes="groupMemberState는 \"ACCEPT\", \"REJECT\", \"CANCEL\" 중 하나\n" +
             "* LEAVE: 그룹장은 탈퇴할 수 없음.")
     @PutMapping("/group-member")
     public BooleanResponse modifyGroupMember(@RequestBody @Valid ModifyGroupMemberRequest request) {
@@ -89,11 +89,16 @@ public class GroupsApiController {
             case REJECT:
             case CANCEL:
                 return new BooleanResponse(groupService.answerGroupMember(groupMemberId, request.getGroupMemberState()));
-            case LEAVE:
-                return new BooleanResponse(groupService.leaveGroupMember(groupMemberId));
             default:
                 throw new ApiException(ExceptionEnum.GROUPS_METHOD_NOT_FOUND);
         }
+    }
+
+    @ApiOperation(value="그룹 탈퇴")
+    @DeleteMapping("/group-member")
+    public BooleanResponse deleteGroupMember(@RequestBody @Valid GroupIdMemberIdRequest request) {
+        GroupMemberId groupMemberId = new GroupMemberId(request.getGroupId(), request.getUserId());
+        return new BooleanResponse(groupService.leaveGroupMember(groupMemberId));
     }
 
     @ApiOperation(value="그룹 정보", notes="요청한 그룹의 정보를 출력합니다.\n" +
@@ -135,7 +140,7 @@ public class GroupsApiController {
     @ApiOperation(value = "그룹장 위임", notes = "그룹장을 다른 그룹원에게 위임합니다.")
     @PutMapping("group-member/leader")
     public BooleanResponse modifyGroupLeader(@RequestBody @Valid ModifyGroupLeaderRequest request) {
-        return new BooleanResponse(groupService.changeGroupLeaderByGroupIdAndMemberID(request.getGroupId(), request.getTargetUserId()));
+        return new BooleanResponse(groupService.changeGroupLeaderByGroupIdAndMemberID(request.getGroupId(), request.getNewGroupLeaderUserId()));
     }
 
     @ApiOperation(value = "그룹 삭제", notes = "그룹을 삭제합니다. 그룹 삭제는 그룹장만이 할 수 있다.")

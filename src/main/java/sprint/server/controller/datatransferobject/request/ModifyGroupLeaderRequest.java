@@ -12,5 +12,5 @@ public class ModifyGroupLeaderRequest {
     private Integer groupId;
     @NotNull
     @ApiParam(value = "그룹장이 될 그룹원 ID")
-    private Long targetUserId;
+    private Long newGroupLeaderUserId;
 }
