@@ -3,8 +3,11 @@ package sprint.server.controller.datatransferobject.response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import sprint.server.domain.Groups;
+import sprint.server.domain.groupmember.GroupMember;
+import sprint.server.domain.groupmember.GroupMemberState;
 
 import java.util.Comparator;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -15,14 +18,16 @@ public class GroupsInfoVo {
     private String groupPicture;
     private int groupPersonnel;
     private int groupMaxPersonnel;
+    private Boolean isJoin;
 
-    public GroupsInfoVo(Groups groups) {
+    public GroupsInfoVo(Groups groups, List<Integer> myGroupList) {
         this.groupId = groups.getId();
         this.groupName = groups.getGroupName();
         this.groupDescription = groups.getGroupDescription();
         this.groupPicture = groups.getGroupPicture();
         this.groupPersonnel = groups.getGroupPersonnel();
         this.groupMaxPersonnel = groups.getGroupMaxPersonnel();
+        this.isJoin = myGroupList.contains(groups.getId()) ? true : false;
     }
 
     public static Comparator<GroupsInfoVo> COMPARE_BY_GROUPNAME = Comparator.comparing(o -> o.getGroupName());

@@ -46,11 +46,17 @@ public class GroupsApiController {
     }
 
     @ApiOperation(value="그룹 목록 검색", notes="닉네임 기준, LIKE연산")
-    @GetMapping("")
-    public GroupListResponse<GroupsInfoVo> findGroupsByGroupName(@RequestParam String target) {
+    @GetMapping("/find/{userId}")
+    public GroupListResponse<GroupsInfoVo> findGroupsByGroupName(@PathVariable Long userId, @RequestParam String target) {
+        if (!memberService.existById(userId)) {
+            throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
+        }
         List<Groups> groups = groupRepository.findByGroupNameContaining(target);
+        List<Integer> myGroup = groupMemberRepository.findGroupMemberByMemberId(userId).stream()
+                .map(groupMember -> groupMember.getGroupMemberId().getGroupId())
+                .collect(Collectors.toList());
         List<GroupsInfoVo> result = groups.stream()
-                .map(GroupsInfoVo::new)
+                .map(g -> new GroupsInfoVo(g, myGroup))
                 .sorted(GroupsInfoVo.COMPARE_BY_GROUPNAME)
                 .collect(Collectors.toList());
         return new GroupListResponse(result.size(), result);
