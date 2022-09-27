@@ -62,7 +62,7 @@ public class GroupServiceTest {
         assertEquals("G0004", thrown.getErrorCode());
 
         /* 이미 해당 그룹에 가입해 있을 때 (일반 그룹원) */
-        Boolean result2 = groupService.answerGroupMember(groupMember.getGroupMemberId(), true);
+        Boolean result2 = groupService.acceptGroupMember(groupMember.getGroupMemberId());
 
         assertEquals(true, result2);
         ApiException thrown2 = assertThrows(ApiException.class, () -> groupService.requestJoinGroupMember(groupMember2));
@@ -73,36 +73,43 @@ public class GroupServiceTest {
      * 그룹 가입 요청 승인 테스트
      */
     @Test
-    public void answerGroupMemberTest() {
+    public void acceptGroupMemberTest() {
         Groups groups = new Groups("groups1", 1L, "Description", "picture");
         groupService.join(groups);
         GroupMember groupMember = new GroupMember(new GroupMemberId(groups.getId(), 2L));
         GroupMember groupMember2 = new GroupMember(new GroupMemberId(groups.getId(), 3L));
+        GroupMember groupMember3 = new GroupMember(new GroupMemberId(groups.getId(), 4L));
         groupService.requestJoinGroupMember(groupMember);
         groupService.requestJoinGroupMember(groupMember2);
+        groupService.requestJoinGroupMember(groupMember3);
 
         /* ACCEPT TEST */
         /* 정상적인 요청 */
-        Boolean result = groupService.answerGroupMember(groupMember.getGroupMemberId(), true);
+        Boolean result = groupService.acceptGroupMember(groupMember.getGroupMemberId());
         assertEquals(true, result);
         assertEquals(true, groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember.getGroupMemberId(), GroupMemberState.ACCEPT));
 
         /* REJECT TEST */
         /*정상적인 요청 */
-        Boolean result2 = groupService.answerGroupMember(groupMember2.getGroupMemberId(), false);
+        Boolean result2 = groupService.rejectGroupMember(groupMember2.getGroupMemberId());
         assertEquals(true, result2);
         assertEquals(true, groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember2.getGroupMemberId(), GroupMemberState.REJECT));
 
+        /* CANCEL TEST */
+        Boolean result3 = groupService.cancelGroupMember(groupMember3.getGroupMemberId());
+        assertEquals(true, result3);
+        assertEquals(true, groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember3.getGroupMemberId(), GroupMemberState.CANCEL));
+
         /* 해당 그룹이 없을 때 */
-        ApiException thrown = assertThrows(ApiException.class,() -> groupService.answerGroupMember(new GroupMemberId(-1, 2L), true));
+        ApiException thrown = assertThrows(ApiException.class,() -> groupService.acceptGroupMember(new GroupMemberId(-1, 2L)));
         assertEquals("G0002", thrown.getErrorCode());
 
         /* 해당 멤버가 없을 때*/
-        ApiException thrown2 = assertThrows(ApiException.class, () -> groupService.answerGroupMember(new GroupMemberId(groups.getId(), -1L), true));
+        ApiException thrown2 = assertThrows(ApiException.class, () -> groupService.acceptGroupMember(new GroupMemberId(groups.getId(), -1L)));
         assertEquals("M0001", thrown2.getErrorCode());
 
         /* 수락/거절할 요청이 존재하지 않을 때 */
-        ApiException thrown3 = assertThrows(ApiException.class, () -> groupService.answerGroupMember(new GroupMemberId(groups.getId(),  3L), true));
+        ApiException thrown3 = assertThrows(ApiException.class, () -> groupService.acceptGroupMember(new GroupMemberId(groups.getId(),  3L)));
         assertEquals("G0003", thrown3.getErrorCode());
     }
 
@@ -122,7 +129,7 @@ public class GroupServiceTest {
         ApiException thrown1 = assertThrows(ApiException.class, () -> groupService.leaveGroupMember(groupMemberId));
         assertEquals("G0006", thrown1.getErrorCode());
 
-        groupService.answerGroupMember(groupMemberId, true);
+        groupService.acceptGroupMember(groupMemberId);
         /* 정상적인 요청 */
         Boolean result = groupService.leaveGroupMember(groupMemberId);
         assertEquals(true, result);
@@ -143,7 +150,7 @@ public class GroupServiceTest {
         GroupMemberId groupMemberId = new GroupMemberId(groups.getId(), 2L);
         GroupMember groupMember = new GroupMember(groupMemberId);
         groupService.requestJoinGroupMember(groupMember);
-        groupService.answerGroupMember(groupMemberId, true);
+        groupService.acceptGroupMember(groupMemberId);
 
         /* 정상적인 요청 */
         Boolean result = groupService.changeGroupLeaderByGroupIdAndMemberID(groups.getId(), 2L);
@@ -171,7 +178,7 @@ public class GroupServiceTest {
         GroupMemberId groupMemberId = new GroupMemberId(groups.getId(), 2L);
         GroupMember groupMember2 = new GroupMember(groupMemberId);
         groupService.requestJoinGroupMember(groupMember2);
-        groupService.answerGroupMember(groupMemberId, true);
+        groupService.acceptGroupMember(groupMemberId);
         // 그룹장 변경
         Boolean result = groupService.changeGroupLeaderByGroupIdAndMemberID(groups.getId(), 2L);
         GroupMember newLeader = groupService.getGroupLeader(groups.getId());
@@ -193,7 +200,7 @@ public class GroupServiceTest {
             GroupMemberId groupMemberId = new GroupMemberId(groups.getId(), i);
             GroupMember groupMember = new GroupMember(groupMemberId);
             groupService.requestJoinGroupMember(groupMember);
-            groupService.answerGroupMember(groupMemberId, true);
+            groupService.acceptGroupMember(groupMemberId);
         }
 
         /* 해당 그룹이 존재하지 않을 때 */
@@ -203,7 +210,7 @@ public class GroupServiceTest {
         /* 정상적인 요청 */
         Boolean result = groupService.deleteGroup(groups.getId());
         ApiException thrown2 = assertThrows(ApiException.class , () -> groupService.getGroupLeader(groups.getId()));
-        List<GroupMember> groupMemberList = groupMemberRepository.findGroupMemberByGroupId(1);
+        List<GroupMember> groupMemberList = groupMemberRepository.findAllMemberByGroupId(1);
         assertEquals(true, result);
         assertEquals("G0009", thrown2.getErrorCode());
         assertEquals(0, groupMemberList.size());

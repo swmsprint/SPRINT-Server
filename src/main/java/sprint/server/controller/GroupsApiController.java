@@ -3,10 +3,7 @@ package sprint.server.controller;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import sprint.server.controller.datatransferobject.request.ModifyGroupMemberRequest;
-import sprint.server.controller.datatransferobject.request.CreateGroupMemberRequest;
-import sprint.server.controller.datatransferobject.request.CreateGroupRequest;
-import sprint.server.controller.datatransferobject.request.ModifyGroupLeaderRequest;
+import sprint.server.controller.datatransferobject.request.*;
 import sprint.server.controller.datatransferobject.response.*;
 import sprint.server.controller.exception.ApiException;
 import sprint.server.controller.exception.ExceptionEnum;
@@ -45,12 +42,35 @@ public class GroupsApiController {
 
     }
 
-    @ApiOperation(value="그룹 목록 검색", notes="닉네임 기준, LIKE연산")
-    @GetMapping("")
-    public GroupListResponse<GroupsInfoVo> findGroupsByGroupName(@RequestParam String target) {
-        List<Groups> groups = groupRepository.findByGroupNameContaining(target);
-        List<GroupsInfoVo> result = groups.stream()
-                .map(GroupsInfoVo::new)
+    @ApiOperation(value="내가 가입한 그룹 목록 검색", notes = "그룹장인 그룹이 더 우선으로 존재")
+    @GetMapping("/list/{userId}")
+    public GroupListResponse<MyGroupsInfoVo> findGroupsByUserId(@PathVariable Long userId) {
+        Member member = memberService.findById(userId);
+        List<GroupMember> groupMemberList = groupService.findJoinedGroupByMemberId(userId);
+        List<MyGroupsInfoVo> result = groupMemberList.stream()
+                .map(groupMember -> new MyGroupsInfoVo(
+                        groupService.findGroupByGroupId(groupMember.getGroupMemberId().getGroupId()), groupMember.getGroupMemberState()))
+                .sorted(MyGroupsInfoVo.COMPARE_BY_ISLEADER)
+                .collect(Collectors.toList());
+        return new GroupListResponse(result.size(), result);
+    }
+
+    @ApiOperation(value="전체 그룹 목록 검색", notes="그룹 이름 기준, LIKE연산\nstate는 \"MEMBER\", \"NON_MEMBER\", \"REQUEST\" 중 하나로 응답.")
+    @GetMapping("/list")
+    public GroupListResponse<GroupsInfoVo> findGroupsByGroupName(@RequestParam Long userId, @RequestParam String target) {
+        if (!memberService.existById(userId)) {
+            throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
+        }
+        List<Groups> groupList = groupRepository.findByGroupNameContaining(target);
+        List<Integer> myGroupList = groupMemberRepository.findJoinedGroupByMemberId(userId).stream()
+                .map(groupMember -> groupMember.getGroupMemberId().getGroupId())
+                .collect(Collectors.toList());
+        List<Integer> requestGroupList =groupMemberRepository.findRequestGroupMemberByMemberId(userId)
+                .stream()
+                .map(groupMember -> groupMember.getGroupMemberId().getGroupId())
+                .collect(Collectors.toList());
+        List<GroupsInfoVo> result = groupList.stream()
+                .map(g -> new GroupsInfoVo(g, myGroupList, requestGroupList))
                 .sorted(GroupsInfoVo.COMPARE_BY_GROUPNAME)
                 .collect(Collectors.toList());
         return new GroupListResponse(result.size(), result);
@@ -58,26 +78,31 @@ public class GroupsApiController {
 
     @ApiOperation(value="그룹 가입 요청", notes = "groupId : NotNull\nuserId : NotNull")
     @PostMapping("/group-member")
-    public BooleanResponse createGroupMember(@RequestBody @Valid CreateGroupMemberRequest request){
+    public BooleanResponse createGroupMember(@RequestBody @Valid GroupIdMemberIdRequest request){
         GroupMember groupMember = new GroupMember(new GroupMemberId(request.getGroupId(), request.getUserId()));
         return new BooleanResponse(groupService.requestJoinGroupMember(groupMember));
     }
 
-    @ApiOperation(value="그룹 가입 승인/거절/탈퇴", notes="groupUserState는 \"ACCEPT\", \"LEAVE\", \"REJECT\" 중 하나\n" +
+    @ApiOperation(value="그룹 가입 승인/거절/취소", notes="groupMemberState는 \"ACCEPT\", \"REJECT\", \"CANCEL\" 중 하나\n" +
             "* LEAVE: 그룹장은 탈퇴할 수 없음.")
     @PutMapping("/group-member")
     public BooleanResponse modifyGroupMember(@RequestBody @Valid ModifyGroupMemberRequest request) {
         GroupMemberId groupMemberId = new GroupMemberId(request.getGroupId(), request.getUserId());
         switch (request.getGroupMemberState()){
             case ACCEPT:
-                return new BooleanResponse(groupService.answerGroupMember(groupMemberId, true));
             case REJECT:
-                return new BooleanResponse(groupService.answerGroupMember(groupMemberId, false));
-            case LEAVE:
-                return new BooleanResponse(groupService.leaveGroupMember(groupMemberId));
+            case CANCEL:
+                return new BooleanResponse(groupService.answerGroupMember(groupMemberId, request.getGroupMemberState()));
             default:
                 throw new ApiException(ExceptionEnum.GROUPS_METHOD_NOT_FOUND);
         }
+    }
+
+    @ApiOperation(value="그룹 탈퇴")
+    @DeleteMapping("/group-member")
+    public BooleanResponse deleteGroupMember(@RequestBody @Valid GroupIdMemberIdRequest request) {
+        GroupMemberId groupMemberId = new GroupMemberId(request.getGroupId(), request.getUserId());
+        return new BooleanResponse(groupService.leaveGroupMember(groupMemberId));
     }
 
     @ApiOperation(value="그룹 정보", notes="요청한 그룹의 정보를 출력합니다.\n" +
@@ -88,7 +113,7 @@ public class GroupsApiController {
         if (groups.isEmpty()) {
             throw new ApiException(ExceptionEnum.GROUPS_NOT_FOUND);
         }
-        List<Member> memberList = groupMemberRepository.findGroupMemberByGroupId(groupId).stream()
+        List<Member> memberList = groupMemberRepository.findAllMemberByGroupId(groupId).stream()
                 .map(m -> memberService.findById(m.getGroupMemberId().getMemberId()))
                 .collect(Collectors.toList());
         List<GroupUserDataVo> groupWeeklyUserDataVoList = memberList.stream()
@@ -106,7 +131,7 @@ public class GroupsApiController {
             "+ 당일 통계 량(거리, 시간, 칼로리)")
     @GetMapping("/group-member/{groupId}")
     public FindMembersResponseDto getGroupMember(@PathVariable Integer groupId) {
-        List<GroupMember> groupMemberList = groupMemberRepository.findGroupMemberByGroupId(groupId);
+        List<GroupMember> groupMemberList = groupMemberRepository.findAllMemberByGroupId(groupId);
         List<Member> memberList = groupMemberList.stream()
                 .map(gm -> memberService.findById(gm.getGroupMemberId().getMemberId()))
                 .collect(Collectors.toList());
@@ -119,15 +144,24 @@ public class GroupsApiController {
     @ApiOperation(value = "그룹장 위임", notes = "그룹장을 다른 그룹원에게 위임합니다.")
     @PutMapping("group-member/leader")
     public BooleanResponse modifyGroupLeader(@RequestBody @Valid ModifyGroupLeaderRequest request) {
-        return new BooleanResponse(groupService.changeGroupLeaderByGroupIdAndMemberID(request.getGroupId(), request.getTargetUserId()));
+        return new BooleanResponse(groupService.changeGroupLeaderByGroupIdAndMemberID(request.getGroupId(), request.getNewGroupLeaderUserId()));
     }
 
     @ApiOperation(value = "그룹 삭제", notes = "그룹을 삭제합니다. 그룹 삭제는 그룹장만이 할 수 있다.")
     @DeleteMapping("{groupId}")
-    public BooleanResponse deleteGroup(@PathVariable Integer groupId, @RequestParam Long LeaderId) {
-        if (!groupService.getGroupLeader(groupId).equals(LeaderId)){
+    public BooleanResponse deleteGroup(@PathVariable Integer groupId, @RequestParam Long userId) {
+        memberService.existById(userId);
+        GroupMember groupMember = groupService.getGroupLeader(groupId);
+        if (!groupMember.getGroupMemberId().getMemberId().equals(userId)){
             throw new ApiException(ExceptionEnum.GROUPS_NOT_LEADER);
         }
         return new BooleanResponse(groupService.deleteGroup(groupId));
+    }
+
+    @ApiOperation(value = "그룹 정보 변경", notes = "그룹의 정보를 변경합니다.")
+    @PutMapping("{groupId}")
+    public BooleanResponse modifyGroupInfo(@PathVariable Integer groupId, @RequestBody @Valid ModifyGroupInfoRequest request) {
+        Groups groups = groupService.findGroupByGroupId(groupId);
+        return new BooleanResponse(groupService.modifyGroupInfo(groups, request));
     }
 }
