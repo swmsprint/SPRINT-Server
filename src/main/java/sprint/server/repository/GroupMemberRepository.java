@@ -24,8 +24,11 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, GroupM
     @Query("select gm from GroupMember gm where gm.groupMemberId.memberId = :memberId and " +
             "(gm.groupMemberState = sprint.server.domain.groupmember.GroupMemberState.ACCEPT or " +
             "gm.groupMemberState = sprint.server.domain.groupmember.GroupMemberState.LEADER)")
-    List<GroupMember> findGroupMemberByMemberId(@Param("memberId") Long memberId);
+    List<GroupMember> findJoinedGroupByMemberId(@Param("memberId") Long memberId);
 
+    @Query("select gm from GroupMember gm where gm.groupMemberId.memberId = :memberId and "+
+            "gm.groupMemberState = sprint.server.domain.groupmember.GroupMemberState.REQUEST")
+    List<GroupMember> findRequestGroupMemberByMemberId(@Param("memberId") Long memberId);
     @Query("select gm from GroupMember gm where gm.groupMemberId.groupId = :groupId and " +
             "gm.groupMemberState = sprint.server.domain.groupmember.GroupMemberState.LEADER")
     Optional<GroupMember> findGroupLeaderByGroupId(@Param("groupId") Integer groupId);

@@ -168,15 +168,15 @@ public class GroupService {
         return groupMember.get();
     }
 
-    public List<GroupMember> findLeaderGroupByMemberId(Long userId) {
-        List<GroupMember> groupMemberList = groupMemberRepository.findGroupMemberByMemberId(userId);
+    public List<GroupMember> findJoinedGroupByMemberId(Long userId) {
+        List<GroupMember> groupMemberList = groupMemberRepository.findJoinedGroupByMemberId(userId);
         return groupMemberList.stream()
                 .filter(groupMember -> findGroupById(groupMember.getGroupMemberId().getGroupId()).getIsDeleted().equals(false))
                 .collect(Collectors.toList());
     }
 
     public List<Groups> findNotLeaderGroupByMemberId(Long userId) {
-        List<GroupMember> groupMemberList = groupMemberRepository.findGroupMemberByMemberId(userId);
+        List<GroupMember> groupMemberList = groupMemberRepository.findJoinedGroupByMemberId(userId);
         return groupMemberList.stream()
                 .filter(groupMember -> groupMember.getGroupMemberState() == GroupMemberState.ACCEPT)
                 .map(groupMember -> findGroupById(groupMember.getGroupMemberId().getGroupId()))

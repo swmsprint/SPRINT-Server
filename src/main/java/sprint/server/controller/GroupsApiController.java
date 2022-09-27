@@ -46,7 +46,7 @@ public class GroupsApiController {
     @GetMapping("/list/{userId}")
     public GroupListResponse<MyGroupsInfoVo> findGroupsByUserId(@PathVariable Long userId) {
         Member member = memberService.findById(userId);
-        List<GroupMember> groupMemberList = groupService.findLeaderGroupByMemberId(userId);
+        List<GroupMember> groupMemberList = groupService.findJoinedGroupByMemberId(userId);
         List<MyGroupsInfoVo> result = groupMemberList.stream()
                 .map(groupMember -> new MyGroupsInfoVo(
                         groupService.findGroupById(groupMember.getGroupMemberId().getGroupId()), groupMember.getGroupMemberState()))
@@ -55,18 +55,22 @@ public class GroupsApiController {
         return new GroupListResponse(result.size(), result);
     }
 
-    @ApiOperation(value="전체 그룹 목록 검색", notes="닉네임 기준, LIKE연산")
+    @ApiOperation(value="전체 그룹 목록 검색", notes="그룹 이름 기준, LIKE연산\nstate는 \"MEMBER\", \"NON_MEMBER\", \"REQUEST\" 중 하나로 응답.")
     @GetMapping("/list")
     public GroupListResponse<GroupsInfoVo> findGroupsByGroupName(@RequestParam Long userId, @RequestParam String target) {
         if (!memberService.existById(userId)) {
             throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
         }
-        List<Groups> groups = groupRepository.findByGroupNameContaining(target);
-        List<Integer> myGroup = groupMemberRepository.findGroupMemberByMemberId(userId).stream()
+        List<Groups> groupList = groupRepository.findByGroupNameContaining(target);
+        List<Integer> myGroupList = groupMemberRepository.findJoinedGroupByMemberId(userId).stream()
                 .map(groupMember -> groupMember.getGroupMemberId().getGroupId())
                 .collect(Collectors.toList());
-        List<GroupsInfoVo> result = groups.stream()
-                .map(g -> new GroupsInfoVo(g, myGroup))
+        List<Integer> requestGroupList =groupMemberRepository.findRequestGroupMemberByMemberId(userId)
+                .stream()
+                .map(groupMember -> groupMember.getGroupMemberId().getGroupId())
+                .collect(Collectors.toList());
+        List<GroupsInfoVo> result = groupList.stream()
+                .map(g -> new GroupsInfoVo(g, myGroupList, requestGroupList))
                 .sorted(GroupsInfoVo.COMPARE_BY_GROUPNAME)
                 .collect(Collectors.toList());
         return new GroupListResponse(result.size(), result);

@@ -1,5 +1,6 @@
 package sprint.server.controller.datatransferobject.response;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import sprint.server.domain.Groups;
@@ -18,16 +19,19 @@ public class GroupsInfoVo {
     private String groupPicture;
     private int groupPersonnel;
     private int groupMaxPersonnel;
-    private Boolean isJoin;
+    @ApiModelProperty(example = "MEMBER")
+    private GroupMemberState state;
 
-    public GroupsInfoVo(Groups groups, List<Integer> myGroupList) {
+    public GroupsInfoVo(Groups groups, List<Integer> myGroupList, List<Integer> requestedGroupList) {
         this.groupId = groups.getId();
         this.groupName = groups.getGroupName();
         this.groupDescription = groups.getGroupDescription();
         this.groupPicture = groups.getGroupPicture();
         this.groupPersonnel = groups.getGroupPersonnel();
         this.groupMaxPersonnel = groups.getGroupMaxPersonnel();
-        this.isJoin = myGroupList.contains(groups.getId()) ? true : false;
+        this.state = myGroupList.contains(groups.getId()) ? GroupMemberState.MEMBER :
+                requestedGroupList.contains(groups.getId()) ? GroupMemberState.REQUEST :
+                GroupMemberState.NOT_MEMBER;
     }
 
     public static Comparator<GroupsInfoVo> COMPARE_BY_GROUPNAME = Comparator.comparing(o -> o.getGroupName());
