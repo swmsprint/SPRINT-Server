@@ -69,16 +69,16 @@ public class GroupsApiController {
         return new BooleanResponse(groupService.requestJoinGroupMember(groupMember));
     }
 
-    @ApiOperation(value="그룹 가입 승인/거절/탈퇴", notes="groupUserState는 \"ACCEPT\", \"LEAVE\", \"REJECT\" 중 하나\n" +
+    @ApiOperation(value="그룹 가입 승인/거절/탈퇴", notes="groupUserState는 \"ACCEPT\", \"LEAVE\", \"REJECT\", \"CANCEL\" 중 하나\n" +
             "* LEAVE: 그룹장은 탈퇴할 수 없음.")
     @PutMapping("/group-member")
     public BooleanResponse modifyGroupMember(@RequestBody @Valid ModifyGroupMemberRequest request) {
         GroupMemberId groupMemberId = new GroupMemberId(request.getGroupId(), request.getUserId());
         switch (request.getGroupMemberState()){
             case ACCEPT:
-                return new BooleanResponse(groupService.answerGroupMember(groupMemberId, true));
             case REJECT:
-                return new BooleanResponse(groupService.answerGroupMember(groupMemberId, false));
+            case CANCEL:
+                return new BooleanResponse(groupService.answerGroupMember(groupMemberId, request.getGroupMemberState()));
             case LEAVE:
                 return new BooleanResponse(groupService.leaveGroupMember(groupMemberId));
             default:

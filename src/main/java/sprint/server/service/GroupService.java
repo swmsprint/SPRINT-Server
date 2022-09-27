@@ -57,17 +57,29 @@ public class GroupService {
     /**
      * 그룹 가입 요청 응답
      * @param groupMemberId
-     * @param acceptance
+     * @param groupMemberState (Only for ACCEPT, REJECT, CANCEL)
      * @return result(t/f)
      */
     @Transactional
-    public Boolean answerGroupMember(GroupMemberId groupMemberId, Boolean acceptance) {
+    public Boolean answerGroupMember(GroupMemberId groupMemberId, GroupMemberState groupMemberState) {
         validationBeforeAnswerGroupMember(groupMemberId);
         GroupMember groupMember = groupMemberRepository.findById(groupMemberId).get();
-        GroupMemberState groupMemberState = acceptance ? GroupMemberState.ACCEPT: GroupMemberState.REJECT;
         groupMember.setGroupMemberState(groupMemberState);
         return groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMemberId, groupMemberState);
     }
+
+    public Boolean acceptGroupMember(GroupMemberId groupMemberId){
+        return answerGroupMember(groupMemberId, GroupMemberState.ACCEPT);
+    }
+
+    public Boolean rejectGroupMember(GroupMemberId groupMemberId){
+        return answerGroupMember(groupMemberId, GroupMemberState.REJECT);
+    }
+
+    public Boolean cancelGroupMember(GroupMemberId groupMemberId){
+        return answerGroupMember(groupMemberId, GroupMemberState.CANCEL);
+    }
+
 
     /**
      * 그룹 탈퇴 요청
@@ -216,5 +228,9 @@ public class GroupService {
         if (groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMemberId, GroupMemberState.LEADER) ||
                 groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMemberId, GroupMemberState.ACCEPT))
             throw new ApiException(ExceptionEnum.GROUPS_ALREADY_JOINED);
+        if (groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMemberId, GroupMemberState.REQUEST)) {
+            throw new ApiException(ExceptionEnum.GROUPS_ALREADY_REQUESTED);
+        }
     }
+
 }
