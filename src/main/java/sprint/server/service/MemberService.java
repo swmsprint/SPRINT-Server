@@ -76,8 +76,8 @@ public class MemberService {
             throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
         }
     }
-    public Boolean existById(Long sourceMemberId) {
-        return memberRepository.existsByIdAndDisableDayIsNull(sourceMemberId);
+    public Boolean existById(Long memberId) {
+        return memberRepository.existsByIdAndDisableDayIsNull(memberId);
     }
     public List<Member> findByNicknameContaining(String nickname) {
         return memberRepository.findByNicknameContainingAndDisableDayIsNull(nickname);

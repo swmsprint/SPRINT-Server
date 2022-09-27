@@ -71,7 +71,7 @@ class RunningApiControllerTest {
 //        runningRawData.add(new RunningRawData(37.33028179,-122.02799851, 4.21,"2022-08-02 07:48:28.280Z"));
 //        runningRawData.add(new RunningRawData(37.33027655,-122.02794361, 4.2,"2022-08-02 07:48:29.391Z"));
 //
-//        Member member = memberRepository.findById(1L).orElse(null);
+//        Member member = memberRepository.findGroupById(1L).orElse(null);
 //        long runningId = runningService.addRun(member,"2021-07-02 07:48:26.382");
 //        FinishRunningRequest request = new FinishRunningRequest(member.getId(), runningId, 3, runningRawData);
 //        String url = "/api/running/finish";
@@ -97,7 +97,7 @@ class RunningApiControllerTest {
 //        runningRawData.add(new RunningRawData(37.33028179,-122.02799851, 4.21,"2022-08-02 07:48:28.280Z"));
 //        runningRawData.add(new RunningRawData(37.33027655,-122.02794361, 4.2,"2022-08-02 07:48:29.391Z"));
 //
-//        Member member = memberRepository.findById(1L).orElse(null);
+//        Member member = memberRepository.findGroupById(1L).orElse(null);
 //        long runningId = runningService.addRun(member,"2021-07-02 07:48:26.382");
 //        FinishRunningRequest request = new FinishRunningRequest(member.getId(), runningId, 3, runningRawData);
 //        Running running = runningService.finishRunning(request);
@@ -121,7 +121,7 @@ class RunningApiControllerTest {
 //        runningRawData.add(new RunningRawData(37.33028179,-122.02799851, 4.21,"2022-08-02 07:48:28.280Z"));
 //        runningRawData.add(new RunningRawData(37.33027655,-122.02794361, 4.2,"2022-08-02 07:48:29.391Z"));
 //
-//        Member member = memberRepository.findById(1L).orElse(null);
+//        Member member = memberRepository.findGroupById(1L).orElse(null);
 //        long running1Id = runningService.addRun(member,"2021-07-02 07:48:26.382");
 //        FinishRunningRequest tempRequest1 = new FinishRunningRequest(member.getId(), running1Id, 3, runningRawData);
 //        Running running1 = runningService.finishRunning(tempRequest1);

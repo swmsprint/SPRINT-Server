@@ -19,8 +19,8 @@ public class ModifyGroupMemberRequest {
     private Integer groupId;
     @NotNull
     @ApiParam(value = "ACCEPT : 수락, 이전의 가입요청 상태이어야 함." +
-            ", LEAVE : 탈퇴, 이전에 가입완료 상태이어야 함." +
-            ", REJECT : 거절, 이전에 가입요청 상태이어야 함.;")
-    @ApiModelProperty(example = "(ACCEPT/LEAVE/REJECT)", required = true)
+            ", REJECT : 거절, 이전에 가입요청 상태이어야 함." +
+            ", CANCEL : 취소, 이전에 가입요청 상태이어야 함,")
+    @ApiModelProperty(example = "(ACCEPT/REJECT/CANCEL)", required = true)
     private GroupMemberState groupMemberState;
 }
