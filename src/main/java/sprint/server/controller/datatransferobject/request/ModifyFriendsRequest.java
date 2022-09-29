@@ -3,7 +3,7 @@ package sprint.server.controller.datatransferobject.request;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiParam;
 import lombok.Data;
-import sprint.server.domain.friends.FriendState;
+import sprint.server.domain.friend.FriendState;
 
 import javax.validation.constraints.NotNull;
 

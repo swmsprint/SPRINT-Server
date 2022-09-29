@@ -1,4 +1,4 @@
-package sprint.server.domain.friends;
+package sprint.server.domain.friend;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 

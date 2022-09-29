@@ -8,11 +8,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sprint.server.controller.datatransferobject.request.FinishRunningRequest;
-import sprint.server.domain.friends.FriendState;
+import sprint.server.domain.friend.FriendState;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.Running;
 import sprint.server.domain.RunningRawData;
-import sprint.server.repository.FriendsRepository;
+import sprint.server.repository.FriendRepository;
 import sprint.server.repository.MemberRepository;
 import sprint.server.repository.RunningRepository;
 
@@ -25,7 +25,7 @@ public class RunningService {
 
     private final MemberRepository memberRepository;
     private final RunningRepository runningRepository;
-    private final FriendsRepository friendsRepository;
+    private final FriendRepository friendRepository;
 
 
     public Optional<Running> findOne(Long runningId){
@@ -90,7 +90,7 @@ public class RunningService {
     }
 
     public List<Member> findFriendsAndLoginMemberList(Long memberId, Member loginMember) {
-        List<Member> allMembers = memberRepository.findAllById(friendsRepository.findBySourceMemberIdAndEstablishState(memberId, FriendState.ACCEPT)
+        List<Member> allMembers = memberRepository.findAllById(friendRepository.findBySourceMemberIdAndEstablishState(memberId, FriendState.ACCEPT)
                 .stream()
                 .map(friends -> friends.getTargetMemberId())
                 .collect(java.util.stream.Collectors.toList()));

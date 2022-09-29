@@ -7,9 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import sprint.server.controller.datatransferobject.request.*;
 import sprint.server.controller.datatransferobject.response.*;
-import sprint.server.domain.friends.FriendState;
+import sprint.server.domain.friend.FriendState;
 import sprint.server.domain.member.Member;
-import sprint.server.service.FriendsService;
+import sprint.server.service.FriendService;
 import sprint.server.service.MemberService;
 
 import javax.validation.Valid;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/user-management/users")
 public class MemberApiController {
     private final MemberService memberService;
-    private final FriendsService friendsService;
+    private final FriendService friendService;
 
     @ApiOperation(value="회원가입")
     @ApiResponses({
@@ -44,11 +44,11 @@ public class MemberApiController {
     })
     @GetMapping("")
     public FindMembersResponseDto<FindMembersResponseVo> FindMembersByNickname(@RequestParam Long userId, @RequestParam String target){
-        List<Long> friendsIdList = friendsService.findFriendsByMemberId(userId, FriendState.ACCEPT).stream()
+        List<Long> friendsIdList = friendService.findFriendsByMemberId(userId, FriendState.ACCEPT).stream()
                 .map(Member::getId).collect(Collectors.toList());
-        List<Long> requestIdList = friendsService.findBySourceMemberIdAndFriendState(userId, FriendState.REQUEST).stream()
+        List<Long> requestIdList = friendService.findBySourceMemberIdAndFriendState(userId, FriendState.REQUEST).stream()
                 .map(Member::getId).collect(Collectors.toList());
-        List<Long> receiveIdList = friendsService.findByTargetMemberIdAndFriendState(userId, FriendState.REQUEST).stream()
+        List<Long> receiveIdList = friendService.findByTargetMemberIdAndFriendState(userId, FriendState.REQUEST).stream()
                 .map(Member::getId).collect(Collectors.toList());
         List<Member> members = memberService.findByNicknameContaining(target);
         List<FindMembersResponseVo> result = members.stream()
