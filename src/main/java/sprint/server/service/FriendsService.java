@@ -96,20 +96,20 @@ public class FriendsService {
 
     /**
      * 친구 제거
-     * @param sourceMemberId -> 친구 제거를 요청한 UserId
-     * @param targetMemberId -> 친구 목록에서 삭제되길 기대되는 UserId
+     * @param sourceMember -> 친구 제거를 요청한 User
+     * @param targetMember -> 친구 목록에서 삭제되길 기대되는 User
      * @return 결과(true/false)
      */
     @Transactional
-    public Boolean deleteFriends(Long sourceMemberId, Long targetMemberId) {
-        Optional<Friends> friends = findByTwoMemberIdAndEstablishState(sourceMemberId, targetMemberId, FriendState.ACCEPT);
+    public Boolean deleteFriends(Member sourceMember, Member targetMember) {
+        Optional<Friends> friends = findByTwoMemberIdAndEstablishState(sourceMember.getId(), targetMember.getId(), FriendState.ACCEPT);
         /* 해당 친구관계가 존재하지 않은 경우 */
         if(friends.isEmpty()) {
             throw new ApiException(ExceptionEnum.FRIENDS_NOT_FOUND);
         }
         friends.get().setEstablishState(FriendState.DELETE);
 
-        return friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, FriendState.DELETE);
+        return friendsRepository.existsByTwoMemberAAndEstablishState(sourceMember.getId(), targetMember.getId(), FriendState.DELETE).isPresent();
     }
 
 
