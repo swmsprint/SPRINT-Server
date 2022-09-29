@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import sprint.server.controller.exception.ApiException;
 import sprint.server.domain.friends.FriendState;
 import sprint.server.domain.friends.Friends;
+import sprint.server.domain.member.Member;
 import sprint.server.repository.FriendsRepository;
 
 import java.util.Optional;
@@ -120,13 +121,15 @@ public class FriendsServiceTest {
     @Test
     public void deleteFriendsTest() {
         /* 둘이 친구 관계가 아닌 경우*/
-        ApiException thrown = assertThrows(ApiException.class, () -> friendsService.deleteFriends(1L, 2L));
+        Member sourceMember = memberService.findById(1L);
+        Member targetMember = memberService.findById(2L);
+        ApiException thrown = assertThrows(ApiException.class, () -> friendsService.deleteFriends(sourceMember, targetMember));
         assertEquals("F0004", thrown.getErrorCode());
 
         /* 정상적인 요청 */
         friendsService.requestFriends(1L, 2L);
         friendsService.acceptFriendsRequest(1L, 2L);
-        friendsService.deleteFriends(1L, 2L);
+        friendsService.deleteFriends(sourceMember, targetMember);
         assertEquals(true, friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(1L, 2L, FriendState.DELETE));
         assertEquals(false, friendsRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(1L, 2L, FriendState.ACCEPT));
     }

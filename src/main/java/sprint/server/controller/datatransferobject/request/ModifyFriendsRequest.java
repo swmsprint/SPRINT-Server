@@ -18,7 +18,7 @@ public class ModifyFriendsRequest {
     @ApiModelProperty(example = "5", required = true)
     private Long targetUserId;
     @NotNull
-    @ApiParam(value = "상태(ACCEPT/REJECT/CANCEL/DELETE)")
+    @ApiParam(value = "상태(ACCEPT/REJECT/CANCEL")
     @ApiModelProperty(example="REJECT")
     private FriendState friendState;
 }
