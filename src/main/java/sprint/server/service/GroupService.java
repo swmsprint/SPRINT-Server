@@ -8,8 +8,8 @@ import sprint.server.controller.exception.ApiException;
 import sprint.server.controller.exception.ExceptionEnum;
 import sprint.server.domain.Groups;
 import sprint.server.domain.groupmember.GroupMember;
-import sprint.server.domain.groupmember.GroupMemberId;
 import sprint.server.domain.groupmember.GroupMemberState;
+import sprint.server.domain.member.Member;
 import sprint.server.repository.GroupMemberRepository;
 import sprint.server.repository.GroupRepository;
 
@@ -29,111 +29,125 @@ public class GroupService {
 
     /**
      * 그룹 만들기
-     * @param groups : Groups
-     * @return : group ID
+     * @param group : Group
+     * @return : groups ID
      */
     @Transactional
-    public Integer join(Groups groups) {
-        validationBeforeCreateGroup(groups);
-        groupRepository.save(groups);
-        GroupMember groupMember = new GroupMember(new GroupMemberId(groups.getId(), groups.getGroupLeaderId()));
+    public Integer join(Groups group) {
+        if (groupRepository.existsByGroupName(group.getGroupName())) throw new ApiException(ExceptionEnum.GROUPS_NAME_ALREADY_EXISTS);
+        if (!memberService.existById(group.getGroupLeaderId())) throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
+        Member leader = memberService.findById(group.getGroupLeaderId());
+        groupRepository.save(group);
+        GroupMember groupMember = new GroupMember(group, leader);
         groupMember.setGroupMemberState(GroupMemberState.LEADER);
         groupMemberRepository.save(groupMember);
-        return groups.getId();
+        return group.getId();
     }
 
     /**
      * 그룹 가입 요청
-     * @param groupMember
+     * @param group : Group
+     * @param member : Member
      * @return result(t/f)
      */
     @Transactional
-    public Boolean requestJoinGroupMember(GroupMember groupMember) {
-        validationBeforeJoinGroup(groupMember.getGroupMemberId());
+    public boolean requestJoinGroupMember(Groups group, Member member) {
+        GroupMember groupMember = new GroupMember(group, member);
+        if (groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember.getGroupMemberId(), GroupMemberState.LEADER) ||
+                groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember.getGroupMemberId(), GroupMemberState.ACCEPT))
+            throw new ApiException(ExceptionEnum.GROUPS_ALREADY_JOINED);
+        if (groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember.getGroupMemberId(), GroupMemberState.REQUEST)) {
+            throw new ApiException(ExceptionEnum.GROUPS_ALREADY_REQUESTED);
+        }
         groupMemberRepository.save(groupMember);
         return groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember.getGroupMemberId(), GroupMemberState.REQUEST);
     }
 
     /**
      * 그룹 가입 요청 응답
-     * @param groupMemberId
+     * @param group : group
+     * @param member : member
      * @param groupMemberState (Only for ACCEPT, REJECT, CANCEL)
      * @return result(t/f)
      */
     @Transactional
-    public Boolean answerGroupMember(GroupMemberId groupMemberId, GroupMemberState groupMemberState) {
-        validationBeforeAnswerGroupMember(groupMemberId);
-        GroupMember groupMember = groupMemberRepository.findById(groupMemberId).get();
-        Groups groups = findGroupByGroupId(groupMemberId.getGroupId());
+    public Boolean answerGroupMember(Groups group, Member member, GroupMemberState groupMemberState) {
+        GroupMember groupMember = findJoinRequestByGroupAndMember(group, member);
         groupMember.setGroupMemberState(groupMemberState);
+
         if (groupMemberState.equals(GroupMemberState.ACCEPT)) {
-            groups.addMember();
+            if(group.getGroupMaxPersonnel() > group.getGroupPersonnel()){
+                group.addMember();
+            } else {
+                throw new ApiException(ExceptionEnum.GROUPS_FULL);
+            }
         }
-        return groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMemberId, groupMemberState);
+        return groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember.getGroupMemberId(), groupMemberState);
     }
-
-    public Boolean acceptGroupMember(GroupMemberId groupMemberId){
-        return answerGroupMember(groupMemberId, GroupMemberState.ACCEPT);
-    }
-
-    public Boolean rejectGroupMember(GroupMemberId groupMemberId){
-        return answerGroupMember(groupMemberId, GroupMemberState.REJECT);
-    }
-
-    public Boolean cancelGroupMember(GroupMemberId groupMemberId){
-        return answerGroupMember(groupMemberId, GroupMemberState.CANCEL);
-    }
-
 
     /**
      * 그룹 탈퇴 요청
-     * @param groupMemberId
+     * @param group : group
+     * @param member : member
      * @return result(t/f)
      */
     @Transactional
-    public Boolean leaveGroupMember(GroupMemberId groupMemberId) {
-        validationBeforeLeaveGroup(groupMemberId);
-        GroupMember groupMember = groupMemberRepository.findByGroupMemberIdAndGroupMemberState(groupMemberId, GroupMemberState.ACCEPT).get();
-        groupMember.setGroupMemberState(GroupMemberState.LEAVE);
-        Groups group = findGroupByGroupId(groupMemberId.getGroupId());
-        group.leaveMember();
-        return groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMemberId, GroupMemberState.LEAVE);
-    }
+    public Boolean leaveGroupMember(Groups group, Member member) {
+        GroupMember groupMember = findJoinedGroupMemberByGroupAndMember(group, member);
+        if (groupMember.getGroupMemberState().equals(GroupMemberState.LEADER))
+            throw new ApiException(ExceptionEnum.GROUPS_LEADER_CANT_LEAVE);
+        if (!groupMember.getGroupMemberState().equals(GroupMemberState.ACCEPT))
+            throw new ApiException(ExceptionEnum.GROUPS_MEMBER_NOT_FOUND);
 
-    /**
-     * 그룹장 변경 요청
-     * @param groupId 변경하고자 하는 그룹 ID
-     * @param memberId 그룹장이 될 그룹원 ID
-     * @return result(t/f)
-     */
-    @Transactional
-    public Boolean changeGroupLeaderByGroupIdAndMemberID(Integer groupId, Long memberId) {
-        validationGroup(groupId);
-        validationMember(memberId);
-        GroupMember groupLeader = getGroupLeader(groupId);
-        GroupMember targetMember = getGroupMemberByGroupMemberId(new GroupMemberId(groupId, memberId));
-        groupLeader.setGroupMemberState(GroupMemberState.ACCEPT);
-        targetMember.setGroupMemberState(GroupMemberState.LEADER);
-        return getGroupLeader(groupId).equals(targetMember)
-                && groupLeader.getGroupMemberState().equals(GroupMemberState.ACCEPT);
+        groupMember.setGroupMemberState(GroupMemberState.LEAVE);
+        group.leaveMember();
+        return groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember.getGroupMemberId(), GroupMemberState.LEAVE);
     }
 
     /**
      * 그룹 삭제
+     * @param group : group
+     * @return
      */
     @Transactional
-    public Boolean deleteGroup(Integer groupId) {
-        validationGroup(groupId);
+    public Boolean deleteGroup(Groups group) {
+        Integer groupId = group.getId();
         List<GroupMember> groupMemberList = groupMemberRepository.findAllMemberByGroupId(groupId);
         List<GroupMember> requestGroupMemberList = groupMemberRepository.findRequestGroupMemberByGroupId(groupId);
-        Groups group = findGroupByGroupId(groupId);
 
         groupMemberList.forEach(groupMember -> groupMember.setGroupMemberState(GroupMemberState.LEAVE));
         requestGroupMemberList.forEach(groupMember -> groupMember.setGroupMemberState(GroupMemberState.REJECT));
         group.delete();
-        return group.getIsDeleted().equals(true) && groupMemberRepository.findAllMemberByGroupId(groupId).size() == 0;
+        return group.getIsDeleted().equals(true) && groupMemberRepository.findAllMemberByGroupId(groupId).isEmpty();
     }
 
+    /**
+     * 그룹장 변경 요청
+     * @param group : group
+     * @param newLeader : member
+     * @return result(t/f)
+     */
+    @Transactional
+    public Boolean changeGroupLeaderByGroupAndMember(Groups group, Member newLeader) {
+        Member existLeader = findGroupLeader(group);
+        if (existLeader.equals(newLeader)) {
+            throw new ApiException(ExceptionEnum.GROUPS_ALREADY_LEADER);
+        }
+        GroupMember existLeaderMember = findJoinedGroupMemberByGroupAndMember(group, existLeader);
+        GroupMember newLeaderMember = findJoinedGroupMemberByGroupAndMember(group, newLeader);
+        existLeaderMember.setGroupMemberState(GroupMemberState.ACCEPT);
+        newLeaderMember.setGroupMemberState(GroupMemberState.LEADER);
+        group.changeGroupLeader(newLeader.getId());
+        return findGroupLeader(group).equals(newLeader)
+                && existLeaderMember.getGroupMemberState().equals(GroupMemberState.ACCEPT);
+    }
+
+    /**
+     * 그룹 정보 변경
+     * @param group : group
+     * @param request : information
+     * @return
+     */
     @Transactional
     public Boolean modifyGroupInfo(Groups group, ModifyGroupInfoRequest request) {
         group.changeDescriptionAndPicture(request.getGroupDescription(), request.getGroupPicture());
@@ -141,118 +155,98 @@ public class GroupService {
                 group.getGroupPicture().equals(request.getGroupPicture());
     }
 
-
     /**
      * 그룹장 조회
-     * @param groupId 조회하고자 하는 그룹 ID
+     * @param group : group
      * @return GroupMember
      */
-    public GroupMember getGroupLeader(Integer groupId) {
-        validationGroup(groupId);
-        Optional<GroupMember> leader = groupMemberRepository.findGroupLeaderByGroupId(groupId);
+    public Member findGroupLeader(Groups group) {
+        Optional<GroupMember> leader = groupMemberRepository.findGroupLeaderByGroupId(group.getId());
         if (leader.isEmpty()) throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
-        return leader.get();
+        return memberService.findById(leader.get().getMemberId());
     }
 
     /**
-     * 그룹원 조회
-     * @param groupMemberId 조회하고자 하는 GroupMemberId
+     * 그룹원 조회 (group, member)
+     * @param group : group
+     * @param member : member
      * @return GroupMember
      */
-    public GroupMember getGroupMemberByGroupMemberId(GroupMemberId groupMemberId) {
-        validationGroup(groupMemberId.getGroupId());
-        Optional<GroupMember> groupMember = groupMemberRepository.findByGroupMemberIdAndGroupMemberState(
-                groupMemberId, GroupMemberState.ACCEPT);
-        if (groupMember.isEmpty()) throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
+    public GroupMember findJoinedGroupMemberByGroupAndMember(Groups group, Member member) {
+        Optional<GroupMember> groupMember = groupMemberRepository.findByGroupIdAndMemberId(group.getId(), member.getId());
+        if (groupMember.isEmpty() ||
+                !(groupMember.get().getGroupMemberState().equals(GroupMemberState.ACCEPT) ||
+                groupMember.get().getGroupMemberState().equals(GroupMemberState.LEADER))) {
+
+            throw new ApiException(ExceptionEnum.GROUPS_MEMBER_NOT_FOUND);
+        }
         return groupMember.get();
     }
 
-    public List<GroupMember> findJoinedGroupByMemberId(Long userId) {
-        List<GroupMember> groupMemberList = groupMemberRepository.findJoinedGroupByMemberId(userId);
-        return groupMemberList.stream()
-                .filter(groupMember -> findGroupByGroupId(groupMember.getGroupMemberId().getGroupId()).getIsDeleted().equals(false))
-                .collect(Collectors.toList());
-    }
-
-    public List<Groups> findNotLeaderGroupByMemberId(Long userId) {
-        List<GroupMember> groupMemberList = groupMemberRepository.findJoinedGroupByMemberId(userId);
-        return groupMemberList.stream()
-                .filter(groupMember -> groupMember.getGroupMemberState() == GroupMemberState.ACCEPT)
-                .map(groupMember -> findGroupByGroupId(groupMember.getGroupMemberId().getGroupId()))
-                .collect(Collectors.toList());
+    /**
+     * 가입한 모든 GroupMember 조회
+     * @param member : member
+     * @return
+     */
+    public List<GroupMember> findJoinedGroupMemberByMember(Member member) {
+        return groupMemberRepository.findJoinedGroupByMemberId(member.getId());
     }
 
     /**
-     * validation available group
-     * @param groupId -> group id
+     * 그룹 가입 요청 조회
+     * @param group : group
+     * @param member : member
+     * @return
      */
-    private void validationGroup(Integer groupId){
-        Optional<Groups> group = groupRepository.findById(groupId);
-        if (group.isEmpty()) throw new ApiException(ExceptionEnum.GROUPS_NOT_FOUND);
-        if (group.get().getIsDeleted()) throw new ApiException(ExceptionEnum.GROUPS_DELETED);
-    }
-
-    /**
-     * validation available group, exist user
-     */
-    private void validationMember(Long memberId){
-        if (!memberService.existById(memberId)) throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
-    }
-
-
-    /**
-     * validation available group, exist user
-     */
-    private void validationGroupAndUser(GroupMemberId groupMemberId){
-        validationGroup(groupMemberId.getGroupId());
-        validationMember(groupMemberId.getMemberId());
-    }
-
-    /**
-     * validation available group, exists user, join request
-     * @param groupMemberId -> groupMemberId
-     */
-    private void validationBeforeAnswerGroupMember(GroupMemberId groupMemberId) {
-        validationGroupAndUser(groupMemberId);
-        if (!groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMemberId, GroupMemberState.REQUEST))
+    public GroupMember findJoinRequestByGroupAndMember(Groups group, Member member) {
+        Optional<GroupMember> groupMember = groupMemberRepository.findByGroupIdAndMemberId(group.getId(), member.getId());
+        if (groupMember.isEmpty() || !groupMember.get().getGroupMemberState().equals(GroupMemberState.REQUEST)) {
             throw new ApiException(ExceptionEnum.GROUPS_REQUEST_NOT_FOUND);
-    }
-
-    /**
-     * validation available group, exists user, groupmember
-     * @param groupMemberId -> groupMemberId
-     */
-    private void validationBeforeLeaveGroup(GroupMemberId groupMemberId) {
-        validationGroupAndUser(groupMemberId);
-        if (groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMemberId, GroupMemberState.LEADER))
-            throw new ApiException(ExceptionEnum.GROUPS_LEADER_CANT_LEAVE);
-        if (!groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMemberId, GroupMemberState.ACCEPT))
-            throw new ApiException(ExceptionEnum.GROUPS_MEMBER_NOT_FOUND);
-    }
-
-    /**
-     * validation new group name, exists user,
-     * @param group -> group
-     */
-    private void validationBeforeCreateGroup(Groups group) {
-        if (groupRepository.existsByGroupName(group.getGroupName())) throw new ApiException(ExceptionEnum.GROUPS_NAME_ALREADY_EXISTS);
-        if (!memberService.existById(group.getGroupLeaderId())) throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
-    }
-
-    /**
-     * validation available group, exists user, not groupmember;
-     * @param groupMemberId -> groupMemberId
-     */
-    private void validationBeforeJoinGroup(GroupMemberId groupMemberId) {
-        validationGroupAndUser(groupMemberId);
-        if (groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMemberId, GroupMemberState.LEADER) ||
-                groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMemberId, GroupMemberState.ACCEPT))
-            throw new ApiException(ExceptionEnum.GROUPS_ALREADY_JOINED);
-        if (groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMemberId, GroupMemberState.REQUEST)) {
-            throw new ApiException(ExceptionEnum.GROUPS_ALREADY_REQUESTED);
         }
+        return groupMember.get();
     }
 
+    /**
+     * 가입한 모든 Group 조회
+     * @param member : member
+     * @return
+     */
+    public List<Groups> findAllJoinedGroupByMember(Member member) {
+        List<GroupMember> groupMemberList = findJoinedGroupMemberByMember(member);
+        return groupMemberList.stream()
+                .map(groupMember->findGroupByGroupId(groupMember.getGroupMemberId().getGroupId()))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 요청 보낸 모든 GroupMember 조회
+     * @param member : member
+     * @return
+     */
+    public List<Groups> findRequestGroupMemberByMember(Member member) {
+        List<GroupMember> groupMemberList = groupMemberRepository.findByMemberIdAndState(member.getId(), GroupMemberState.REQUEST);
+        return groupMemberList.stream()
+                .map(groupMember -> findGroupByGroupId(groupMember.getGroupId()))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 모든 그룹원 조회
+     * @param group : group
+     * @return
+     */
+    public List<Member> findAllMemberByGroup(Groups group) {
+        return groupMemberRepository.findAllMemberByGroupId(group.getId())
+                .stream()
+                .map(gm -> memberService.findById(gm.getMemberId()))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Validation Group exists, not delete.
+     * @param groupId
+     * @return
+     */
     public Groups findGroupByGroupId(Integer groupId) {
         Optional<Groups> group = groupRepository.findById(groupId);
         if (group.isEmpty()) throw new ApiException(ExceptionEnum.GROUPS_NOT_FOUND);

@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @Repository
 public interface FriendRepository extends JpaRepository<Friend, FriendId>{
-    Boolean existsBySourceMemberIdAndTargetMemberIdAndEstablishState(Long sourceMemberId, Long targetMemberId, FriendState friendState);
+    boolean existsBySourceMemberIdAndTargetMemberIdAndEstablishState(Long sourceMemberId, Long targetMemberId, FriendState friendState);
 
     @Query("select f from Friend f where (f.sourceMemberId = :sourceMemberId and f.targetMemberId = :targetMemberId and f.establishState = :friendState) or" +
             "(f.sourceMemberId = :targetMemberId and f.targetMemberId = :sourceMemberId and f.establishState = :friendState)")

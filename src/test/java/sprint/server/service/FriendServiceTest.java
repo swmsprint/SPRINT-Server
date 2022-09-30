@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-public class FriendServiceTest {
+class FriendServiceTest {
 
     @Autowired
     FriendService friendService;
@@ -25,7 +25,7 @@ public class FriendServiceTest {
     @Autowired MemberService memberService;
 
     @Test
-    public void Test() {
+    void Test() {
         friendService.requestFriends(1L, 2L);
         Optional<Friend> friends1 = friendService.findByTwoMemberIdAndEstablishState(2L, 1L, FriendState.REQUEST);
         if (friends1.isPresent()){
@@ -38,7 +38,7 @@ public class FriendServiceTest {
      * 친구 요청 테스트
      */
     @Test
-    public void friendsRequestTest(){
+    void friendsRequestTest(){
         /* 정상적인 요청 */
         Boolean requestResult = friendService.requestFriends(1L, 2L);
         Friend friend1 = friendRepository.findBySourceMemberIdAndTargetMemberId(1L, 2L).get();
@@ -78,7 +78,7 @@ public class FriendServiceTest {
      * 친구 추가 거절 요청 테스트
      */
     @Test
-    public void rejectFriendsRequestTest() {
+    void rejectFriendsRequestTest() {
         /* 해당 친구 추가 요청이 존재하지 없을 때 */
         ApiException thrown = assertThrows(ApiException.class, () -> friendService.rejectFriendsRequest(1L, 2L));
         assertEquals("F0001", thrown.getErrorCode());
@@ -98,7 +98,7 @@ public class FriendServiceTest {
      * 친구 추가 수락 요청 테스트
      */
     @Test
-    public void acceptFriendsRequestTest() {
+    void acceptFriendsRequestTest() {
         /* 해당 친구 추가 요청이 존재하지 없을 때 */
         ApiException thrown = assertThrows(ApiException.class, () -> friendService.acceptFriendsRequest(1L, 2L));
         assertEquals("F0001", thrown.getErrorCode());
@@ -121,7 +121,7 @@ public class FriendServiceTest {
      * 친구 제거 요청 테스트
      */
     @Test
-    public void deleteFriendsTest() {
+    void deleteFriendsTest() {
         /* 둘이 친구 관계가 아닌 경우*/
         Member sourceMember = memberService.findById(1L);
         Member targetMember = memberService.findById(2L);
@@ -137,7 +137,7 @@ public class FriendServiceTest {
     }
 
     @Test
-    public void cancelFriendsTest() {
+    void cancelFriendsTest() {
         /* 해당 친구 추가 요청이 존재하지 없을 때 */
         ApiException thrown = assertThrows(ApiException.class, () -> friendService.cancelFriends(1L, 2L));
         assertEquals("F0001", thrown.getErrorCode());
@@ -153,7 +153,7 @@ public class FriendServiceTest {
      * 친구 목록 요청 테스트
      */
     @Test
-    public void friendsListTest() {
+    void friendsListTest() {
         /* 정상적인 요청 */
         friendService.requestFriends(1L, 2L);
         friendService.requestFriends(3L, 1L);
@@ -181,7 +181,7 @@ public class FriendServiceTest {
      * 친구 목록 요청 테스트 (내가 보낸 친구 요청)
      */
     @Test
-    public void friendsListSentTest() {
+    void friendsListSentTest() {
         /* 정상적인 요청 */
         friendService.requestFriends(1L, 2L);
         friendService.requestFriends(1L, 3L);
@@ -198,7 +198,7 @@ public class FriendServiceTest {
      * 친구 목록 요청 테스트 (내가 받은 친구 요청)
      */
     @Test
-    public void friendsListReceivedTest() {
+    void friendsListReceivedTest() {
         /* 정상적인 요청 */
         friendService.requestFriends(3L, 1L);
         friendService.requestFriends(1L, 2L);

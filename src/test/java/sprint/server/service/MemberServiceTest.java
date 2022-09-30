@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-public class MemberServiceTest {
+class MemberServiceTest {
     @Autowired MemberService memberService;
     @Autowired MemberRepository memberRepository;
 
@@ -26,7 +26,7 @@ public class MemberServiceTest {
      * 회원가입 테스트
      */
     @Test
-    public void memberJoinTest(){
+    void memberJoinTest(){
         String testName = "TestName";
         String testName2 = "TestName2";
         /* 정상적인 요청 */
@@ -54,7 +54,7 @@ public class MemberServiceTest {
      * 회원 정보 수정 테스트
      */
     @Test
-    public void modifyMembersTest(){
+    void modifyMembersTest(){
         /* 정상적인 요청 */
         ModifyMembersRequest modifyMembersRequest = new ModifyMembersRequest();
         modifyMembersRequest.setNickname("Modify1");
@@ -88,7 +88,7 @@ public class MemberServiceTest {
      * 회원 정보 이름으로 검색 (LIKE) 테스트
      */
     @Test
-    public void findByNicknameContainingTest(){
+    void findByNicknameContainingTest(){
         /* 정상적인 요청 */
         List<Member> members = memberService.findByNicknameContaining("Test1");
         assertEquals(1, members.size());
@@ -100,7 +100,7 @@ public class MemberServiceTest {
      * 회원 정보 비활성화 테스트
      */
     @Test
-    public void disableMemberTest(){
+    void disableMemberTest(){
         /* 정상적인 요청 */
         Boolean result = memberService.disableMember(1L);
         assertEquals(true, result);

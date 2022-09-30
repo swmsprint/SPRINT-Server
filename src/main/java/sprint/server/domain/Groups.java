@@ -3,8 +3,6 @@ package sprint.server.domain;
 import lombok.Getter;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -40,6 +38,7 @@ public class Groups extends BaseEntity {
         this.groupDescription = groupDescription;
         this.groupPicture = groupPicture;
     }
+    public void changeGroupLeader(Long memberId) { this.groupLeaderId = memberId; }
     public void addMember(){
         this.groupPersonnel +=1;
     }

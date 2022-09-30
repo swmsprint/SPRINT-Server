@@ -76,13 +76,13 @@ public class MemberService {
             throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
         }
     }
-    public Boolean existById(Long memberId) {
+    public boolean existById(Long memberId) {
         return memberRepository.existsByIdAndDisableDayIsNull(memberId);
     }
     public List<Member> findByNicknameContaining(String nickname) {
         return memberRepository.findByNicknameContainingAndDisableDayIsNull(nickname);
     }
-    public Boolean existsByNickname(String nickname) {
+    public boolean existsByNickname(String nickname) {
         return memberRepository.existsByNicknameAndDisableDayIsNull(nickname);
     }
 

@@ -32,7 +32,7 @@ public class FindMembersResponseVo {
                 FriendState.NOT_FRIEND;
     }
 
-    public static Comparator<FindMembersResponseVo> COMPARE_BY_NICKNAME = Comparator.comparing(o -> o.nickname);
+    public static final Comparator<FindMembersResponseVo> COMPARE_BY_NICKNAME = Comparator.comparing(o -> o.nickname);
 }
 
 

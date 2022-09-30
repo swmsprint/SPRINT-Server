@@ -147,15 +147,6 @@ public class FriendService {
         return findByTwoMemberIdAndEstablishState(sourceMemberId, targetMemberId, friendState).isPresent();
     }
 
-    private Optional<Friend> findByTwoMemberId(Long sourceMemberId, Long targetMemberId) {
-        Optional <Friend> friends = friendRepository.findBySourceMemberIdAndTargetMemberId(sourceMemberId, targetMemberId);
-        if (friends.isPresent()) {
-            return friends;
-        } else {
-            return friendRepository.findBySourceMemberIdAndTargetMemberId(targetMemberId, sourceMemberId);
-        }
-    }
-
     public Optional<Friend> findByTwoMemberIdAndEstablishState(Long sourceMemberId, Long targetMemberId, FriendState friendState) {
         Optional<Friend> friends = friendRepository.findBySourceMemberIdAndTargetMemberIdAndEstablishState(sourceMemberId, targetMemberId, friendState);
         if (friends.isPresent()) {
