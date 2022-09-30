@@ -43,12 +43,13 @@ public class MemberApiController {
             @ApiResponse(code = 500, message = "서버 에러")
     })
     @GetMapping("")
-    public FindMembersResponseDto<FindMembersResponseVo> FindMembersByNickname(@RequestParam Long userId, @RequestParam String target){
-        List<Long> friendsIdList = friendService.findFriendsByMemberId(userId, FriendState.ACCEPT).stream()
+    public FindMembersResponseDto<FindMembersResponseVo> findMembersByNickname(@RequestParam Long userId, @RequestParam String target){
+        Member member = memberService.findById(userId);
+        List<Long> friendsIdList = friendService.findFriendsByMemberId(member, FriendState.ACCEPT).stream()
                 .map(Member::getId).collect(Collectors.toList());
-        List<Long> requestIdList = friendService.findBySourceMemberIdAndFriendState(userId, FriendState.REQUEST).stream()
+        List<Long> requestIdList = friendService.findBySourceMemberIdAndFriendState(member, FriendState.REQUEST).stream()
                 .map(Member::getId).collect(Collectors.toList());
-        List<Long> receiveIdList = friendService.findByTargetMemberIdAndFriendState(userId, FriendState.REQUEST).stream()
+        List<Long> receiveIdList = friendService.findByTargetMemberIdAndFriendState(member, FriendState.REQUEST).stream()
                 .map(Member::getId).collect(Collectors.toList());
         List<Member> members = memberService.findByNicknameContaining(target);
         List<FindMembersResponseVo> result = members.stream()

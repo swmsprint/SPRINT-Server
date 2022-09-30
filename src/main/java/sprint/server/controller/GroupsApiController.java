@@ -9,7 +9,6 @@ import sprint.server.controller.exception.ApiException;
 import sprint.server.controller.exception.ExceptionEnum;
 import sprint.server.domain.Groups;
 import sprint.server.domain.member.Member;
-import sprint.server.repository.GroupRepository;
 import sprint.server.service.GroupService;
 import sprint.server.service.MemberService;
 import sprint.server.service.StatisticsService;
@@ -25,7 +24,6 @@ import java.util.stream.Collectors;
 public class GroupsApiController {
     private final MemberService memberService;
     private final GroupService groupService;
-    private final GroupRepository groupRepository;
     private final StatisticsService statisticsService;
 
     @ApiOperation(value="그룹 만들기", notes ="groupName: NotNull\ngroupLeaderId: NotNull\ngroupDescription, groupPicture: Nullable")
@@ -54,13 +52,13 @@ public class GroupsApiController {
     @GetMapping("/list")
     public GroupListResponse<GroupsInfoVo> findGroupsByGroupName(@RequestParam Long userId, @RequestParam String target) {
         Member member = memberService.findById(userId);
-        List<Groups> groupsList = groupRepository.findByGroupNameContaining(target);
+        List<Groups> groupList = groupService.findGroupByString(target);
         List<Integer> myGroupList = groupService.findAllJoinedGroupByMember(member).stream()
                 .map(Groups::getId)
                 .collect(Collectors.toList());
         List<Integer> requestGroupList = groupService.findRequestGroupMemberByMember(member)
                 .stream().map(Groups::getId).collect(Collectors.toList());
-        List<GroupsInfoVo> result = groupsList.stream()
+        List<GroupsInfoVo> result = groupList.stream()
                 .map(g -> new GroupsInfoVo(g, myGroupList, requestGroupList))
                 .sorted(GroupsInfoVo.COMPARE_BY_GROUPNAME)
                 .collect(Collectors.toList());
@@ -88,7 +86,7 @@ public class GroupsApiController {
             case CANCEL:
                 return new BooleanResponse(groupService.answerGroupMember(group, member, request.getGroupMemberState()));
             default:
-                throw new ApiException(ExceptionEnum.GROUPS_METHOD_NOT_FOUND);
+                throw new ApiException(ExceptionEnum.GROUP_METHOD_NOT_FOUND);
         }
     }
 
@@ -145,7 +143,7 @@ public class GroupsApiController {
         Groups group = groupService.findGroupByGroupId(groupId);
         Member leader = groupService.findGroupLeader(group);
         if (!member.equals(leader)){
-            throw new ApiException(ExceptionEnum.GROUPS_NOT_LEADER);
+            throw new ApiException(ExceptionEnum.GROUP_NOT_LEADER);
         }
         return new BooleanResponse(groupService.deleteGroup(group));
     }

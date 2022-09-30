@@ -34,7 +34,7 @@ public class GroupService {
      */
     @Transactional
     public Integer join(Groups group) {
-        if (groupRepository.existsByGroupName(group.getGroupName())) throw new ApiException(ExceptionEnum.GROUPS_NAME_ALREADY_EXISTS);
+        if (groupRepository.existsByGroupName(group.getGroupName())) throw new ApiException(ExceptionEnum.GROUP_NAME_ALREADY_EXISTS);
         if (!memberService.existById(group.getGroupLeaderId())) throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
         Member leader = memberService.findById(group.getGroupLeaderId());
         groupRepository.save(group);
@@ -55,9 +55,9 @@ public class GroupService {
         GroupMember groupMember = new GroupMember(group, member);
         if (groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember.getGroupMemberId(), GroupMemberState.LEADER) ||
                 groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember.getGroupMemberId(), GroupMemberState.ACCEPT))
-            throw new ApiException(ExceptionEnum.GROUPS_ALREADY_JOINED);
+            throw new ApiException(ExceptionEnum.GROUP_ALREADY_JOINED);
         if (groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember.getGroupMemberId(), GroupMemberState.REQUEST)) {
-            throw new ApiException(ExceptionEnum.GROUPS_ALREADY_REQUESTED);
+            throw new ApiException(ExceptionEnum.GROUP_ALREADY_REQUESTED);
         }
         groupMemberRepository.save(groupMember);
         return groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember.getGroupMemberId(), GroupMemberState.REQUEST);
@@ -79,7 +79,7 @@ public class GroupService {
             if(group.getGroupMaxPersonnel() > group.getGroupPersonnel()){
                 group.addMember();
             } else {
-                throw new ApiException(ExceptionEnum.GROUPS_FULL);
+                throw new ApiException(ExceptionEnum.GROUP_PERSONNEL_FULL);
             }
         }
         return groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember.getGroupMemberId(), groupMemberState);
@@ -95,9 +95,9 @@ public class GroupService {
     public Boolean leaveGroupMember(Groups group, Member member) {
         GroupMember groupMember = findJoinedGroupMemberByGroupAndMember(group, member);
         if (groupMember.getGroupMemberState().equals(GroupMemberState.LEADER))
-            throw new ApiException(ExceptionEnum.GROUPS_LEADER_CANT_LEAVE);
+            throw new ApiException(ExceptionEnum.GROUP_LEADER_CANT_LEAVE);
         if (!groupMember.getGroupMemberState().equals(GroupMemberState.ACCEPT))
-            throw new ApiException(ExceptionEnum.GROUPS_MEMBER_NOT_FOUND);
+            throw new ApiException(ExceptionEnum.GROUP_MEMBER_NOT_FOUND);
 
         groupMember.setGroupMemberState(GroupMemberState.LEAVE);
         group.leaveMember();
@@ -131,7 +131,7 @@ public class GroupService {
     public Boolean changeGroupLeaderByGroupAndMember(Groups group, Member newLeader) {
         Member existLeader = findGroupLeader(group);
         if (existLeader.equals(newLeader)) {
-            throw new ApiException(ExceptionEnum.GROUPS_ALREADY_LEADER);
+            throw new ApiException(ExceptionEnum.GROUP_ALREADY_LEADER);
         }
         GroupMember existLeaderMember = findJoinedGroupMemberByGroupAndMember(group, existLeader);
         GroupMember newLeaderMember = findJoinedGroupMemberByGroupAndMember(group, newLeader);
@@ -178,7 +178,7 @@ public class GroupService {
                 !(groupMember.get().getGroupMemberState().equals(GroupMemberState.ACCEPT) ||
                 groupMember.get().getGroupMemberState().equals(GroupMemberState.LEADER))) {
 
-            throw new ApiException(ExceptionEnum.GROUPS_MEMBER_NOT_FOUND);
+            throw new ApiException(ExceptionEnum.GROUP_MEMBER_NOT_FOUND);
         }
         return groupMember.get();
     }
@@ -201,7 +201,7 @@ public class GroupService {
     public GroupMember findJoinRequestByGroupAndMember(Groups group, Member member) {
         Optional<GroupMember> groupMember = groupMemberRepository.findByGroupIdAndMemberId(group.getId(), member.getId());
         if (groupMember.isEmpty() || !groupMember.get().getGroupMemberState().equals(GroupMemberState.REQUEST)) {
-            throw new ApiException(ExceptionEnum.GROUPS_REQUEST_NOT_FOUND);
+            throw new ApiException(ExceptionEnum.GROUP_REQUEST_NOT_FOUND);
         }
         return groupMember.get();
     }
@@ -249,8 +249,12 @@ public class GroupService {
      */
     public Groups findGroupByGroupId(Integer groupId) {
         Optional<Groups> group = groupRepository.findById(groupId);
-        if (group.isEmpty()) throw new ApiException(ExceptionEnum.GROUPS_NOT_FOUND);
-        if (group.get().getIsDeleted().equals(true)) throw new ApiException(ExceptionEnum.GROUPS_DELETED);
+        if (group.isEmpty()) throw new ApiException(ExceptionEnum.GROUP_NOT_FOUND);
+        if (group.get().getIsDeleted().equals(true)) throw new ApiException(ExceptionEnum.GROUP_DELETED);
         return group.get();
+    }
+
+    public List<Groups> findGroupByString(String target) {
+        return groupRepository.findByGroupNameContaining(target);
     }
 }

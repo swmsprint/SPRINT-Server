@@ -26,7 +26,9 @@ class FriendServiceTest {
 
     @Test
     void Test() {
-        friendService.requestFriends(1L, 2L);
+        Member member1 = memberService.findById(1L);
+        Member member2 = memberService.findById(2L);
+        friendService.requestFriends(member1, member2);
         Optional<Friend> friends1 = friendService.findByTwoMemberIdAndEstablishState(2L, 1L, FriendState.REQUEST);
         if (friends1.isPresent()){
             assertEquals(1L, friends1.get().getSourceMemberId());
@@ -34,13 +36,17 @@ class FriendServiceTest {
         }
         assertEquals(friends1, friendService.findByTwoMemberIdAndEstablishState(2L, 1L, FriendState.REQUEST));
     }
+
     /**
      * 친구 요청 테스트
      */
     @Test
     void friendsRequestTest(){
         /* 정상적인 요청 */
-        Boolean requestResult = friendService.requestFriends(1L, 2L);
+        Member member1 = memberService.findById(1L);
+        Member member2 = memberService.findById(2L);
+        Member member3 = memberService.findById(3L);
+        Boolean requestResult = friendService.requestFriends(member1, member2);
         Friend friend1 = friendRepository.findBySourceMemberIdAndTargetMemberId(1L, 2L).get();
         assertEquals(true, requestResult);
         assertEquals(1L, friend1.getSourceMemberId());
@@ -48,17 +54,17 @@ class FriendServiceTest {
         assertEquals(FriendState.REQUEST, friend1.getEstablishState());
 
         /* 이미 해당 친구 추가 요청이 존재할 경우*/
-        ApiException thrown = assertThrows(ApiException.class, () -> friendService.requestFriends(1L, 2L));
+        ApiException thrown = assertThrows(ApiException.class, () -> friendService.requestFriends(member1, member2));
         assertEquals("F0002", thrown.getErrorCode());
 
         /* 이미 둘이 친구인 경우*/
-        friendService.acceptFriendsRequest(1L, 2L);
-        ApiException thrown2 = assertThrows(ApiException.class, () -> friendService.requestFriends(1L, 2L));
+        friendService.acceptFriendsRequest(member1, member2);
+        ApiException thrown2 = assertThrows(ApiException.class, () -> friendService.requestFriends(member1, member2));
         assertEquals("F0003", thrown2.getErrorCode());
 
         /* 이미 상대방으로부터 친구 추가 요청이 존재할 경우 */
-        Boolean requestResult2 = friendService.requestFriends(1L, 3L);
-        Boolean requestResult3 = friendService.requestFriends(3L, 1L);
+        Boolean requestResult2 = friendService.requestFriends(member1, member3);
+        Boolean requestResult3 = friendService.requestFriends(member3, member1);
         Friend friend2 = friendRepository.findBySourceMemberIdAndTargetMemberId(1L, 3L).get();
         assertEquals(1L, friend2.getSourceMemberId());
         assertEquals(3L, friend2.getTargetMemberId());
@@ -66,12 +72,6 @@ class FriendServiceTest {
         assertEquals(true, requestResult2);
         assertEquals(true, requestResult3);
         assertEquals(true, friendRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(1L, 3L, FriendState.ACCEPT));
-
-        /* 해당 유저가 존재하지 않은 경우 */
-        ApiException thrown3 = assertThrows(ApiException.class, () -> friendService.requestFriends(-1L, 1L));
-        assertEquals("Source Member가 존재하지 않습니다.", thrown3.getMessage());
-        ApiException thrown4 = assertThrows(ApiException.class, () -> friendService.requestFriends(1L, -1L));
-        assertEquals("Target Member가 존재하지 않습니다.", thrown4.getMessage());
     }
 
     /**
@@ -79,13 +79,15 @@ class FriendServiceTest {
      */
     @Test
     void rejectFriendsRequestTest() {
+        Member member1 = memberService.findById(1L);
+        Member member2 = memberService.findById(2L);
         /* 해당 친구 추가 요청이 존재하지 없을 때 */
-        ApiException thrown = assertThrows(ApiException.class, () -> friendService.rejectFriendsRequest(1L, 2L));
+        ApiException thrown = assertThrows(ApiException.class, () -> friendService.rejectFriendsRequest(member1, member2));
         assertEquals("F0001", thrown.getErrorCode());
 
         /* 정상적인 요청 */
-        Boolean result1 = friendService.requestFriends(1L, 2L);
-        Boolean result2 = friendService.rejectFriendsRequest(1L, 2L);
+        Boolean result1 = friendService.requestFriends(member1, member2);
+        Boolean result2 = friendService.rejectFriendsRequest(member1, member2);
         Friend friend = friendRepository.findBySourceMemberIdAndTargetMemberId(1L, 2L).get();
         assertEquals(1L, friend.getSourceMemberId());
         assertEquals(2L, friend.getTargetMemberId());
@@ -99,13 +101,15 @@ class FriendServiceTest {
      */
     @Test
     void acceptFriendsRequestTest() {
+        Member member1 = memberService.findById(1L);
+        Member member2 = memberService.findById(2L);
         /* 해당 친구 추가 요청이 존재하지 없을 때 */
-        ApiException thrown = assertThrows(ApiException.class, () -> friendService.acceptFriendsRequest(1L, 2L));
+        ApiException thrown = assertThrows(ApiException.class, () -> friendService.acceptFriendsRequest(member1, member2));
         assertEquals("F0001", thrown.getErrorCode());
 
         /* 정상적인 요청 */
-        Boolean result1 = friendService.requestFriends(1L, 2L);
-        Boolean result2 = friendService.acceptFriendsRequest(1L, 2L);
+        Boolean result1 = friendService.requestFriends(member1, member2);
+        Boolean result2 = friendService.acceptFriendsRequest(member1, member2);
         Friend friend = friendRepository.findBySourceMemberIdAndTargetMemberId(1L, 2L).get();
         assertEquals(FriendState.ACCEPT, friend.getEstablishState());
         assertEquals(true, friendRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(1L, 2L, FriendState.ACCEPT));
@@ -113,7 +117,7 @@ class FriendServiceTest {
         assertEquals(true, result2);
 
         /* 이미 둘이 친구인 경우 */
-        ApiException thrown2 = assertThrows(ApiException.class, () -> friendService.acceptFriendsRequest(1L, 2L));
+        ApiException thrown2 = assertThrows(ApiException.class, () -> friendService.acceptFriendsRequest(member1, member2));
         assertEquals("F0003", thrown2.getErrorCode());
     }
 
@@ -129,8 +133,8 @@ class FriendServiceTest {
         assertEquals("F0004", thrown.getErrorCode());
 
         /* 정상적인 요청 */
-        friendService.requestFriends(1L, 2L);
-        friendService.acceptFriendsRequest(1L, 2L);
+        friendService.requestFriends(sourceMember, targetMember);
+        friendService.acceptFriendsRequest(sourceMember, targetMember);
         friendService.deleteFriends(sourceMember, targetMember);
         assertEquals(true, friendRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(1L, 2L, FriendState.DELETE));
         assertEquals(false, friendRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(1L, 2L, FriendState.ACCEPT));
@@ -138,13 +142,15 @@ class FriendServiceTest {
 
     @Test
     void cancelFriendsTest() {
+        Member member1 = memberService.findById(1L);
+        Member member2 = memberService.findById(2L);
         /* 해당 친구 추가 요청이 존재하지 없을 때 */
-        ApiException thrown = assertThrows(ApiException.class, () -> friendService.cancelFriends(1L, 2L));
+        ApiException thrown = assertThrows(ApiException.class, () -> friendService.cancelFriends(member1, member2));
         assertEquals("F0001", thrown.getErrorCode());
 
         /* 정상적인 요청 */
-        friendService.requestFriends(1L, 2L);
-        Boolean result = friendService.cancelFriends(1L, 2L);
+        friendService.requestFriends(member1, member2);
+        Boolean result = friendService.cancelFriends(member1, member2);
         assertEquals(true, friendRepository.existsBySourceMemberIdAndTargetMemberIdAndEstablishState(1L, 2L, FriendState.CANCEL));
         assertEquals(true, result);
     }
@@ -154,27 +160,30 @@ class FriendServiceTest {
      */
     @Test
     void friendsListTest() {
+        Member member1 = memberService.findById(1L);
+        Member member2 = memberService.findById(2L);
+        Member member3 = memberService.findById(3L);
+        Member member4 = memberService.findById(4L);
+
         /* 정상적인 요청 */
-        friendService.requestFriends(1L, 2L);
-        friendService.requestFriends(3L, 1L);
-        friendService.requestFriends(4L, 1L);
-        friendService.requestFriends(4L, 2L);
-        friendService.acceptFriendsRequest(1L, 2L);
-        friendService.acceptFriendsRequest(3L, 1L);
-        friendService.acceptFriendsRequest(4L, 1L);
-        friendService.acceptFriendsRequest(4L, 2L);
-        assertEquals(3, friendService.findFriendsByMemberId(1L, FriendState.ACCEPT).size());
-        assertEquals(2, friendService.findFriendsByMemberId(2L, FriendState.ACCEPT).size());
-        assertEquals(1, friendService.findFriendsByMemberId(3L, FriendState.ACCEPT).size());
-        assertEquals(2, friendService.findFriendsByMemberId(4L, FriendState.ACCEPT).size());
+        friendService.requestFriends(member1, member2);
+        friendService.requestFriends(member3, member1);
+        friendService.requestFriends(member4, member1);
+        friendService.requestFriends(member4, member2);
+        friendService.acceptFriendsRequest(member1, member2);
+        friendService.acceptFriendsRequest(member3, member1);
+        friendService.acceptFriendsRequest(member4, member1);
+        friendService.acceptFriendsRequest(member4, member2);
+        assertEquals(3, friendService.findFriendsByMemberId(member1, FriendState.ACCEPT).size());
+        assertEquals(2, friendService.findFriendsByMemberId(member2, FriendState.ACCEPT).size());
+        assertEquals(1, friendService.findFriendsByMemberId(member3, FriendState.ACCEPT).size());
+        assertEquals(2, friendService.findFriendsByMemberId(member4, FriendState.ACCEPT).size());
 
         /* 친구가 계정을 비활성화할 때 */
         memberService.disableMember(2L); // 비활성화
-        assertEquals(2, friendService.findFriendsByMemberId(1L, FriendState.ACCEPT).size());
-        ApiException thrown = assertThrows(ApiException.class, ()-> friendService.findFriendsByMemberId(2L, FriendState.ACCEPT));
-        assertEquals("M0001", thrown.getErrorCode());
-        assertEquals(1, friendService.findFriendsByMemberId(3L, FriendState.ACCEPT).size());
-        assertEquals(1, friendService.findFriendsByMemberId(4L, FriendState.ACCEPT).size());
+        assertEquals(2, friendService.findFriendsByMemberId(member1, FriendState.ACCEPT).size());
+        assertEquals(1, friendService.findFriendsByMemberId(member3, FriendState.ACCEPT).size());
+        assertEquals(1, friendService.findFriendsByMemberId(member4, FriendState.ACCEPT).size());
     }
 
     /**
@@ -182,16 +191,18 @@ class FriendServiceTest {
      */
     @Test
     void friendsListSentTest() {
-        /* 정상적인 요청 */
-        friendService.requestFriends(1L, 2L);
-        friendService.requestFriends(1L, 3L);
-        friendService.requestFriends(1L, 4L);
-        friendService.requestFriends(1L, 5L);
-        assertEquals(4, friendService.findFriendsByMemberId(1L, FriendState.REQUEST).size());
+        Member member1 = memberService.findById(1L);
+        Member member2 = memberService.findById(2L);
+        Member member3 = memberService.findById(3L);
+        Member member4 = memberService.findById(4L);
+        Member member5 = memberService.findById(5L);
 
-        /* 존재하지 않은 유저의 요청 */
-        ApiException thrown = assertThrows(ApiException.class, () -> friendService.findFriendsByMemberId(-1L, FriendState.REQUEST));
-        assertEquals("M0001", thrown.getErrorCode());
+        /* 정상적인 요청 */
+        friendService.requestFriends(member1, member2);
+        friendService.requestFriends(member1, member3);
+        friendService.requestFriends(member1, member4);
+        friendService.requestFriends(member1, member5);
+        assertEquals(4, friendService.findFriendsByMemberId(member1, FriendState.REQUEST).size());
     }
 
     /**
@@ -199,15 +210,16 @@ class FriendServiceTest {
      */
     @Test
     void friendsListReceivedTest() {
-        /* 정상적인 요청 */
-        friendService.requestFriends(3L, 1L);
-        friendService.requestFriends(1L, 2L);
-        friendService.requestFriends(4L, 2L);
-        assertEquals(1, friendService.findByTargetMemberIdAndFriendState(1L, FriendState.REQUEST).size());
-        assertEquals(2, friendService.findByTargetMemberIdAndFriendState(2L, FriendState.REQUEST).size());
+        Member member1 = memberService.findById(1L);
+        Member member2 = memberService.findById(2L);
+        Member member3 = memberService.findById(3L);
+        Member member4 = memberService.findById(4L);
 
-        /* 존재하지 않은 유저의 요청 */
-        ApiException thrown = assertThrows(ApiException.class, () -> friendService.findByTargetMemberIdAndFriendState(-1L, FriendState.REQUEST));
-        assertEquals("M0001", thrown.getErrorCode());
+        /* 정상적인 요청 */
+        friendService.requestFriends(member3, member1);
+        friendService.requestFriends(member1, member2);
+        friendService.requestFriends(member4, member2);
+        assertEquals(1, friendService.findByTargetMemberIdAndFriendState(member1, FriendState.REQUEST).size());
+        assertEquals(2, friendService.findByTargetMemberIdAndFriendState(member2, FriendState.REQUEST).size());
     }
 }

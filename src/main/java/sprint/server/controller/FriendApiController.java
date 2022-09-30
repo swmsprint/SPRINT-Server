@@ -34,7 +34,9 @@ public class FriendApiController {
     })
     @PostMapping("")
     public BooleanResponse createFriends(@RequestBody @Valid FriendsRequest request) {
-        return new BooleanResponse(friendService.requestFriends(request.getSourceUserId(), request.getTargetUserId()));
+        Member sourceMember = memberService.findById(request.getSourceUserId());
+        Member targetMember = memberService.findById(request.getTargetUserId());
+        return new BooleanResponse(friendService.requestFriends(sourceMember, targetMember));
     }
 
     @ApiOperation(value="친구 수락/거절/취소", notes =
@@ -46,15 +48,17 @@ public class FriendApiController {
     })
     @PutMapping("")
     public BooleanResponse modifyFriendsState(@RequestBody @Valid ModifyFriendsRequest request) {
+        Member sourceMember = memberService.findById(request.getSourceUserId());
+        Member targetMember = memberService.findById(request.getTargetUserId());
         switch (request.getFriendState()) {
             case ACCEPT:
-                return new BooleanResponse(friendService.acceptFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
+                return new BooleanResponse(friendService.acceptFriendsRequest(targetMember, sourceMember));
             case REJECT:
-                return new BooleanResponse(friendService.rejectFriendsRequest(request.getTargetUserId(), request.getSourceUserId()));
+                return new BooleanResponse(friendService.rejectFriendsRequest(targetMember, sourceMember));
             case CANCEL:
-                return new BooleanResponse(friendService.cancelFriends(request.getSourceUserId(), request.getTargetUserId()));
+                return new BooleanResponse(friendService.cancelFriends(sourceMember, targetMember));
             default:
-                throw new ApiException(ExceptionEnum.FRIENDS_METHOD_NOT_FOUND);
+                throw new ApiException(ExceptionEnum.FRIEND_METHOD_NOT_FOUND);
         }
     }
 
@@ -65,6 +69,7 @@ public class FriendApiController {
         Member targetMember = memberService.findById(request.getTargetUserId());
         return new BooleanResponse(friendService.deleteFriends(sourceMember, targetMember));
     }
+
     @ApiOperation(value="친구 목록 요청",
             notes = "Example: http://localhost:8080/api/user-management/friends/3")
     @ApiResponses({
@@ -74,8 +79,9 @@ public class FriendApiController {
     })
     @GetMapping("/{userId}")
     public FindMembersResponseDto<FindFriendsResponseVo> findFriends(@PathVariable Long userId) {
-        List<Member> members = friendService.findFriendsByMemberId(userId, FriendState.ACCEPT);
-        List<FindFriendsResponseVo> result = members.stream()
+        Member member = memberService.findById(userId);
+        List<Member> memberList = friendService.findFriendsByMemberId(member, FriendState.ACCEPT);
+        List<FindFriendsResponseVo> result = memberList.stream()
                 .map(FindFriendsResponseVo::new)
                 .sorted(FindFriendsResponseVo.COMPARE_BY_NICKNAME)
                 .collect(Collectors.toList());
@@ -91,7 +97,8 @@ public class FriendApiController {
     })
     @GetMapping("/{userId}/received")
     public FindMembersResponseDto<FindFriendsResponseVo> findFriendsReceive(@PathVariable Long userId) {
-        List<Member> members = friendService.findByTargetMemberIdAndFriendState(userId, FriendState.REQUEST);
+        Member member = memberService.findById(userId);
+        List<Member> members = friendService.findByTargetMemberIdAndFriendState(member, FriendState.REQUEST);
         List<FindFriendsResponseVo> result = members.stream()
                 .map(FindFriendsResponseVo::new)
                 .collect(Collectors.toList());
@@ -107,7 +114,8 @@ public class FriendApiController {
     })
     @GetMapping("/{userId}/requested")
     public FindMembersResponseDto<FindFriendsResponseVo> findFriendsRequest(@PathVariable Long userId) {
-        List<Member> members = friendService.findBySourceMemberIdAndFriendState(userId, FriendState.REQUEST);
+        Member member = memberService.findById(userId);
+        List<Member> members = friendService.findBySourceMemberIdAndFriendState(member, FriendState.REQUEST);
         List<FindFriendsResponseVo> result = members.stream()
                 .map(FindFriendsResponseVo::new)
                 .collect(Collectors.toList());

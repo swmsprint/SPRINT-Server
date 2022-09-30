@@ -17,7 +17,14 @@ public interface FriendRepository extends JpaRepository<Friend, FriendId>{
 
     @Query("select f from Friend f where (f.sourceMemberId = :sourceMemberId and f.targetMemberId = :targetMemberId and f.establishState = :friendState) or" +
             "(f.sourceMemberId = :targetMemberId and f.targetMemberId = :sourceMemberId and f.establishState = :friendState)")
-    Optional<Friend> existsByTwoMemberAAndEstablishState(@Param("sourceMemberId") Long sourceMemberId, @Param("targetMemberId")Long targetMemberId, @Param("friendState")FriendState friendState);
+    Optional<Friend> findByTwoMemberAndEstablishState(@Param("sourceMemberId") Long sourceMemberId, @Param("targetMemberId")Long targetMemberId, @Param("friendState")FriendState friendState);
+
+    @Query("select f from Friend f where (f.sourceMemberId =:sourceMemberId and f.targetMemberId =:targetMemberId) or " +
+            "(f.sourceMemberId =:targetMemberId and f.targetMemberId =:sourceMemberId)")
+    Optional<Friend> findFriendByTwoMemberId(@Param("sourceMemberId") Long sourceMemberId, @Param("targetMemberId") Long targetMemberId);
+
+    @Query("select f from Friend f where (f.sourceMemberId =:memberId or f.targetMemberId =:memberId) and f.establishState =:state")
+    List<Friend> findFriendsByMemberIdAndEstablishState(@Param("memberId") Long memberId, @Param("state") FriendState state);
     Optional<Friend> findBySourceMemberIdAndTargetMemberId(Long sourceMemberId, Long targetMemberId);
     Optional<Friend> findBySourceMemberIdAndTargetMemberIdAndEstablishState(Long sourceMemberId, Long targetMemberId, FriendState friendState);
     List<Friend> findBySourceMemberIdAndEstablishState(Long sourceMemberId, FriendState friendState);

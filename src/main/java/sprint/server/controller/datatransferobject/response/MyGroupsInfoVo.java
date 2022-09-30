@@ -18,14 +18,14 @@ public class MyGroupsInfoVo {
     private int groupMaxPersonnel;
     private Boolean isLeader;
 
-    public MyGroupsInfoVo(Groups groups, GroupMemberState State) {
+    public MyGroupsInfoVo(Groups groups, GroupMemberState state) {
         this.groupId = groups.getId();
         this.groupName = groups.getGroupName();
         this.groupDescription = groups.getGroupDescription();
         this.groupPicture = groups.getGroupPicture();
         this.groupPersonnel = groups.getGroupPersonnel();
         this.groupMaxPersonnel = groups.getGroupMaxPersonnel();
-        this.isLeader = State == GroupMemberState.LEADER;
+        this.isLeader = state == GroupMemberState.LEADER;
     }
 
     public static final Comparator<MyGroupsInfoVo> COMPARE_BY_ISLEADER = Comparator.comparing(o -> !o.getIsLeader());
