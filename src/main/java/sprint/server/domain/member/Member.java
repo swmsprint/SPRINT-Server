@@ -58,9 +58,8 @@ public class Member extends BaseEntity {
         this.picture = picture;
     }
 
-    public void setDisableDay(LocalDate localDate){
-        this.disableDay = localDate;
-    }
+    public void disable(){ this.disableDay = LocalDate.now(); }
+    public void enable() { this.disableDay = null; }
 
     public void changeMainGroupId(int mainGroupId) {
         this.mainGroupId = mainGroupId;

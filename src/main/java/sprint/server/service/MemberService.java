@@ -9,7 +9,6 @@ import sprint.server.controller.exception.ExceptionEnum;
 import sprint.server.domain.member.Member;
 import sprint.server.repository.MemberRepository;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,39 +32,15 @@ public class MemberService {
     }
 
     @Transactional
-    public Boolean modifyMembers(Long userId, ModifyMembersRequest request) {
-        Optional<Member> member = memberRepository.findByIdAndDisableDayIsNull(userId);
-        if (member.isEmpty()) {
-            throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
-        }
-        member.get().changeMemberInfo(request.getNickname(), request.getGender(), request.getEmail(), request.getBirthday(), request.getHeight(), request.getWeight(), request.getPicture());
+    public Boolean modifyMembers(Member member, ModifyMembersRequest request) {
+        member.changeMemberInfo(request.getNickname(), request.getGender(), request.getEmail(), request.getBirthday(), request.getHeight(), request.getWeight(), request.getPicture());
         return true;
     }
 
     @Transactional
-    public Boolean disableMember(Long memberId) {
-        Optional<Member> member = memberRepository.findById(memberId);
-        if (member.isEmpty()) {
-            throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
-        } else if (member.get().getDisableDay() != null) {
-            throw new ApiException(ExceptionEnum.MEMBER_ALREADY_DISABLED);
-        } else {
-            member.get().setDisableDay(LocalDate.now());
-            return true;
-        }
-    }
-
-    @Transactional
-    public Boolean enableMember(Long memberId) {
-        Optional<Member> member = memberRepository.findById(memberId);
-        if (member.isEmpty()) {
-            throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
-        } else if (member.get().getDisableDay() == null){
-            throw new ApiException(ExceptionEnum.MEMBER_NOT_DISABLED);
-        } else {
-            member.get().setDisableDay(null);
-            return true;
-        }
+    public Boolean disableMember(Member member) {
+        member.disable();
+        return !member.getDisableDay().equals(null);
     }
 
     public Member findById(Long id){

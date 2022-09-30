@@ -180,7 +180,7 @@ class FriendServiceTest {
         assertEquals(2, friendService.findFriendsByMemberId(member4, FriendState.ACCEPT).size());
 
         /* 친구가 계정을 비활성화할 때 */
-        memberService.disableMember(2L); // 비활성화
+        memberService.disableMember(member2); // 비활성화
         assertEquals(2, friendService.findFriendsByMemberId(member1, FriendState.ACCEPT).size());
         assertEquals(1, friendService.findFriendsByMemberId(member3, FriendState.ACCEPT).size());
         assertEquals(1, friendService.findFriendsByMemberId(member4, FriendState.ACCEPT).size());
