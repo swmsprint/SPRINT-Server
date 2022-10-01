@@ -4,7 +4,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import sprint.server.domain.Groups;
-import sprint.server.domain.groupmember.GroupMember;
 import sprint.server.domain.groupmember.GroupMemberState;
 
 import java.util.Comparator;
@@ -34,5 +33,5 @@ public class GroupsInfoVo {
                 GroupMemberState.NOT_MEMBER;
     }
 
-    public static Comparator<GroupsInfoVo> COMPARE_BY_GROUPNAME = Comparator.comparing(o -> o.getGroupName());
+    public static final Comparator<GroupsInfoVo> COMPARE_BY_GROUPNAME = Comparator.comparing(o -> o.getGroupName());
 }

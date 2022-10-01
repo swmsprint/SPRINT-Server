@@ -7,9 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import sprint.server.controller.datatransferobject.request.*;
 import sprint.server.controller.datatransferobject.response.*;
-import sprint.server.domain.friends.FriendState;
+import sprint.server.domain.friend.FriendState;
 import sprint.server.domain.member.Member;
-import sprint.server.service.FriendsService;
+import sprint.server.service.FriendService;
 import sprint.server.service.MemberService;
 
 import javax.validation.Valid;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/user-management/users")
 public class MemberApiController {
     private final MemberService memberService;
-    private final FriendsService friendsService;
+    private final FriendService friendService;
 
     @ApiOperation(value="회원가입")
     @ApiResponses({
@@ -43,12 +43,13 @@ public class MemberApiController {
             @ApiResponse(code = 500, message = "서버 에러")
     })
     @GetMapping("")
-    public FindMembersResponseDto<FindMembersResponseVo> FindMembersByNickname(@RequestParam Long userId, @RequestParam String target){
-        List<Long> friendsIdList = friendsService.findFriendsByMemberId(userId, FriendState.ACCEPT).stream()
+    public FindMembersResponseDto<FindMembersResponseVo> findMembersByNickname(@RequestParam Long userId, @RequestParam String target){
+        Member member = memberService.findById(userId);
+        List<Long> friendsIdList = friendService.findFriendsByMemberId(member, FriendState.ACCEPT).stream()
                 .map(Member::getId).collect(Collectors.toList());
-        List<Long> requestIdList = friendsService.findBySourceMemberIdAndFriendState(userId, FriendState.REQUEST).stream()
+        List<Long> requestIdList = friendService.findBySourceMemberIdAndFriendState(member, FriendState.REQUEST).stream()
                 .map(Member::getId).collect(Collectors.toList());
-        List<Long> receiveIdList = friendsService.findByTargetMemberIdAndFriendState(userId, FriendState.REQUEST).stream()
+        List<Long> receiveIdList = friendService.findByTargetMemberIdAndFriendState(member, FriendState.REQUEST).stream()
                 .map(Member::getId).collect(Collectors.toList());
         List<Member> members = memberService.findByNicknameContaining(target);
         List<FindMembersResponseVo> result = members.stream()
@@ -67,18 +68,8 @@ public class MemberApiController {
     })
     @PutMapping("/{userId}/disable")
     public BooleanResponse disableMember(@PathVariable Long userId) {
-        return new BooleanResponse(memberService.disableMember(userId));
-    }
-
-    @ApiOperation(value="회원 활성화")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "정상 작동"),
-            @ApiResponse(code = 400, message = "요청 에러"),
-            @ApiResponse(code = 500, message = "서버 에러")
-    })
-    @PutMapping("/{userId}/enable")
-    public BooleanResponse enableMember(@PathVariable Long userId) {
-        return new BooleanResponse(memberService.enableMember(userId));
+        Member member = memberService.findById(userId);
+        return new BooleanResponse(memberService.disableMember(member));
     }
 
     @ApiOperation(value="회원 정보 변경")
@@ -89,7 +80,8 @@ public class MemberApiController {
     })
     @PutMapping("/{userId}")
     public BooleanResponse modifyMembers(@PathVariable Long userId, @RequestBody @Valid ModifyMembersRequest request) {
-        return new BooleanResponse(memberService.modifyMembers(userId, request));
+        Member member = memberService.findById(userId);
+        return new BooleanResponse(memberService.modifyMembers(member, request));
     }
 
     @ApiOperation(value="중복 닉네임 확인", notes="Example: http://localhost:8080/user-management/users?target=test")

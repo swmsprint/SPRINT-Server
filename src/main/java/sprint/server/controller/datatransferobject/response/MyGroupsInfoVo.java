@@ -6,7 +6,6 @@ import sprint.server.domain.Groups;
 import sprint.server.domain.groupmember.GroupMemberState;
 
 import java.util.Comparator;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -19,15 +18,15 @@ public class MyGroupsInfoVo {
     private int groupMaxPersonnel;
     private Boolean isLeader;
 
-    public MyGroupsInfoVo(Groups groups, GroupMemberState State) {
+    public MyGroupsInfoVo(Groups groups, GroupMemberState state) {
         this.groupId = groups.getId();
         this.groupName = groups.getGroupName();
         this.groupDescription = groups.getGroupDescription();
         this.groupPicture = groups.getGroupPicture();
         this.groupPersonnel = groups.getGroupPersonnel();
         this.groupMaxPersonnel = groups.getGroupMaxPersonnel();
-        this.isLeader = State == GroupMemberState.LEADER ? true : false;
+        this.isLeader = state == GroupMemberState.LEADER;
     }
 
-    public static Comparator<MyGroupsInfoVo> COMPARE_BY_ISLEADER = Comparator.comparing(o -> !o.getIsLeader());
+    public static final Comparator<MyGroupsInfoVo> COMPARE_BY_ISLEADER = Comparator.comparing(o -> !o.getIsLeader());
 }

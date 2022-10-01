@@ -3,7 +3,7 @@ package sprint.server.controller.datatransferobject.request;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiParam;
 import lombok.Data;
-import sprint.server.domain.friends.FriendState;
+import sprint.server.domain.friend.FriendState;
 
 import javax.validation.constraints.NotNull;
 
@@ -18,7 +18,7 @@ public class ModifyFriendsRequest {
     @ApiModelProperty(example = "5", required = true)
     private Long targetUserId;
     @NotNull
-    @ApiParam(value = "상태(ACCEPT/REJECT/CANCEL/DELETE)")
+    @ApiParam(value = "상태(ACCEPT/REJECT/CANCEL")
     @ApiModelProperty(example="REJECT")
     private FriendState friendState;
 }

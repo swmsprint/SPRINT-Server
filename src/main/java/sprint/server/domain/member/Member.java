@@ -5,9 +5,7 @@ import sprint.server.domain.BaseEntity;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -60,11 +58,27 @@ public class Member extends BaseEntity {
         this.picture = picture;
     }
 
-    public void setDisableDay(LocalDate localDate){
-        this.disableDay = localDate;
-    }
+    public void disable(){ this.disableDay = LocalDate.now(); }
+    public void enable() { this.disableDay = null; }
 
     public void changeMainGroupId(int mainGroupId) {
         this.mainGroupId = mainGroupId;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        Member m = (Member) obj;
+        return m.getId().equals(id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.intValue();
     }
 }
