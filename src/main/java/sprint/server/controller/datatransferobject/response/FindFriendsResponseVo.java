@@ -25,7 +25,7 @@ public class FindFriendsResponseVo {
         this.picture = member.getPicture();
     }
 
-    public static Comparator<FindFriendsResponseVo> COMPARE_BY_NICKNAME = Comparator.comparing(o -> o.nickname);
+    public static final Comparator<FindFriendsResponseVo> COMPARE_BY_NICKNAME = Comparator.comparing(o -> o.nickname);
 }
 
 

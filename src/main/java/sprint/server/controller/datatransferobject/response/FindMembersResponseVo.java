@@ -1,7 +1,7 @@
 package sprint.server.controller.datatransferobject.response;
 
 import lombok.Data;
-import sprint.server.domain.friends.FriendState;
+import sprint.server.domain.friend.FriendState;
 import sprint.server.domain.member.Member;
 
 import java.util.Comparator;
@@ -32,7 +32,7 @@ public class FindMembersResponseVo {
                 FriendState.NOT_FRIEND;
     }
 
-    public static Comparator<FindMembersResponseVo> COMPARE_BY_NICKNAME = Comparator.comparing(o -> o.nickname);
+    public static final Comparator<FindMembersResponseVo> COMPARE_BY_NICKNAME = Comparator.comparing(o -> o.nickname);
 }
 
 

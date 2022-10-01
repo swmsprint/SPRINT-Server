@@ -4,7 +4,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import sprint.server.domain.Groups;
-import sprint.server.domain.groupmember.GroupMember;
 import sprint.server.domain.groupmember.GroupMemberState;
 
 import java.util.Comparator;
@@ -12,7 +11,7 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class GroupsInfoVo {
+public class GroupInfoVo {
     private int groupId;
     private String groupName;
     private String groupDescription;
@@ -22,7 +21,7 @@ public class GroupsInfoVo {
     @ApiModelProperty(example = "MEMBER")
     private GroupMemberState state;
 
-    public GroupsInfoVo(Groups groups, List<Integer> myGroupList, List<Integer> requestedGroupList) {
+    public GroupInfoVo(Groups groups, List<Integer> myGroupList, List<Integer> requestedGroupList, List<Integer> leaderGroupList) {
         this.groupId = groups.getId();
         this.groupName = groups.getGroupName();
         this.groupDescription = groups.getGroupDescription();
@@ -31,8 +30,9 @@ public class GroupsInfoVo {
         this.groupMaxPersonnel = groups.getGroupMaxPersonnel();
         this.state = myGroupList.contains(groups.getId()) ? GroupMemberState.MEMBER :
                 requestedGroupList.contains(groups.getId()) ? GroupMemberState.REQUEST :
+                leaderGroupList.contains(groups.getId()) ? GroupMemberState.LEADER :
                 GroupMemberState.NOT_MEMBER;
     }
 
-    public static Comparator<GroupsInfoVo> COMPARE_BY_GROUPNAME = Comparator.comparing(o -> o.getGroupName());
+    public static final Comparator<GroupInfoVo> COMPARE_BY_GROUPNAME = Comparator.comparing(o -> o.getGroupName());
 }
