@@ -1,37 +1,32 @@
 package sprint.server.controller.datatransferobject.response;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import sprint.server.domain.Groups;
 import sprint.server.domain.groupmember.GroupMemberState;
 
 import java.util.Comparator;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class GroupsInfoVo {
+public class MyGroupInfoVo {
     private int groupId;
     private String groupName;
     private String groupDescription;
     private String groupPicture;
     private int groupPersonnel;
     private int groupMaxPersonnel;
-    @ApiModelProperty(example = "MEMBER")
     private GroupMemberState state;
 
-    public GroupsInfoVo(Groups groups, List<Integer> myGroupList, List<Integer> requestedGroupList) {
+    public MyGroupInfoVo(Groups groups, GroupMemberState state) {
         this.groupId = groups.getId();
         this.groupName = groups.getGroupName();
         this.groupDescription = groups.getGroupDescription();
         this.groupPicture = groups.getGroupPicture();
         this.groupPersonnel = groups.getGroupPersonnel();
         this.groupMaxPersonnel = groups.getGroupMaxPersonnel();
-        this.state = myGroupList.contains(groups.getId()) ? GroupMemberState.MEMBER :
-                requestedGroupList.contains(groups.getId()) ? GroupMemberState.REQUEST :
-                GroupMemberState.NOT_MEMBER;
+        this.state = state.equals(GroupMemberState.ACCEPT) ? GroupMemberState.MEMBER : state;
     }
 
-    public static final Comparator<GroupsInfoVo> COMPARE_BY_GROUPNAME = Comparator.comparing(o -> o.getGroupName());
+    public static final Comparator<MyGroupInfoVo> COMPARE_BY_ISLEADER = Comparator.comparing(o -> o.getState());
 }

@@ -8,6 +8,8 @@ import sprint.server.controller.datatransferobject.response.*;
 import sprint.server.controller.exception.ApiException;
 import sprint.server.controller.exception.ExceptionEnum;
 import sprint.server.domain.Groups;
+import sprint.server.domain.groupmember.GroupMember;
+import sprint.server.domain.groupmember.GroupMemberState;
 import sprint.server.domain.member.Member;
 import sprint.server.service.GroupService;
 import sprint.server.service.MemberService;
@@ -37,30 +39,36 @@ public class GroupsApiController {
 
     @ApiOperation(value="내가 가입한 그룹 목록 검색", notes = "그룹장인 그룹이 더 우선으로 존재")
     @GetMapping("/list/{userId}")
-    public GroupListResponse<MyGroupsInfoVo> findGroupsByUserId(@PathVariable Long userId) {
+    public GroupListResponse<MyGroupInfoVo> findGroupsByUserId(@PathVariable Long userId) {
         Member member = memberService.findById(userId);
-        List<MyGroupsInfoVo> result = groupService.findJoinedGroupMemberByMember(member)
+        List<MyGroupInfoVo> result = groupService.findJoinedGroupMemberByMember(member)
                 .stream()
-                .map(groupMember -> new MyGroupsInfoVo(
+                .map(groupMember -> new MyGroupInfoVo(
                         groupService.findGroupByGroupId(groupMember.getGroupId()), groupMember.getGroupMemberState()))
-                .sorted(MyGroupsInfoVo.COMPARE_BY_ISLEADER)
+                .sorted(MyGroupInfoVo.COMPARE_BY_ISLEADER)
                 .collect(Collectors.toList());
         return new GroupListResponse(result.size(), result);
     }
 
-    @ApiOperation(value="전체 그룹 목록 검색", notes="그룹 이름 기준, LIKE연산\nstate는 \"MEMBER\", \"NON_MEMBER\", \"REQUEST\" 중 하나로 응답.")
+    @ApiOperation(value="전체 그룹 목록 검색", notes="그룹 이름 기준, LIKE연산\nstate는 \"LEADER\", \"MEMBER\", \"NOT_MEMBER\", \"REQUEST\" 중 하나로 응답.")
     @GetMapping("/list")
-    public GroupListResponse<GroupsInfoVo> findGroupsByGroupName(@RequestParam Long userId, @RequestParam String target) {
+    public GroupListResponse<GroupInfoVo> findGroupsByGroupName(@RequestParam Long userId, @RequestParam String target) {
         Member member = memberService.findById(userId);
         List<Groups> groupList = groupService.findGroupByString(target);
-        List<Integer> myGroupList = groupService.findAllJoinedGroupByMember(member).stream()
-                .map(Groups::getId)
+        List<GroupMember> groupMemberList = groupService.findJoinedGroupMemberByMember(member);
+        List<Integer> leaderGroupId = groupMemberList.stream()
+                .filter(groupMember -> groupMember.getGroupMemberState().equals(GroupMemberState.LEADER))
+                .map(GroupMember::getGroupId)
+                .collect(Collectors.toList());
+        List<Integer> memberGroupList = groupMemberList.stream()
+                .filter(groupMember -> groupMember.getGroupMemberState().equals(GroupMemberState.ACCEPT))
+                .map(GroupMember::getGroupId)
                 .collect(Collectors.toList());
         List<Integer> requestGroupList = groupService.findRequestGroupMemberByMember(member)
                 .stream().map(Groups::getId).collect(Collectors.toList());
-        List<GroupsInfoVo> result = groupList.stream()
-                .map(g -> new GroupsInfoVo(g, myGroupList, requestGroupList))
-                .sorted(GroupsInfoVo.COMPARE_BY_GROUPNAME)
+        List<GroupInfoVo> result = groupList.stream()
+                .map(g -> new GroupInfoVo(g, memberGroupList, requestGroupList, leaderGroupId))
+                .sorted(GroupInfoVo.COMPARE_BY_GROUPNAME)
                 .collect(Collectors.toList());
         return new GroupListResponse(result.size(), result);
     }
