@@ -1,4 +1,4 @@
-package sprint.server.controller;
+package sprint.server.controller.datatransferobject.response;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;

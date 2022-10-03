@@ -8,8 +8,14 @@ import java.sql.Timestamp;
 
 @Data
 @Embeddable
-public class UserApplyMatchId implements Serializable {
+public class UserMatchApplyId implements Serializable {
     private Long memberId;
     private Timestamp applyTime;
 
+
+    public UserMatchApplyId(Long memberId, Timestamp applyTime) {
+        this.memberId = memberId;
+        this.applyTime = applyTime;
+    }
+    public UserMatchApplyId() {}
 }
