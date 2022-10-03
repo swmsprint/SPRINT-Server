@@ -1,6 +1,7 @@
 package sprint.server.domain.usermatch;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -8,7 +9,7 @@ import javax.persistence.Id;
 import java.sql.Timestamp;
 
 @Entity
-@Getter
+@Getter @Setter
 public class UserMatch {
 
     @Id
@@ -16,7 +17,7 @@ public class UserMatch {
     private Long matchId;
 
     private Long memberId;
-    private Long teamNumber;
+    private Integer teamNumber;
 
     private Timestamp matchTime;
 

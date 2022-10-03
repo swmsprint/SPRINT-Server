@@ -14,15 +14,19 @@ public class statisticsScheduler {
 
     private final StatisticsService statisticsService;
 
-    //매주 월요일 새벽 3시 에 전주 통계 저장
-    @Scheduled(cron = "0 0 3 ? * MON")
+//    매주 월요일 새벽 3시 에 전주 통계 저장
+    @Scheduled(cron = "0 0 3 ? * MON", zone = "GMT+9:00")
 //    @Scheduled(cron = "*/20 * * * * *")
     public void savePreviousWeekStatistics(){
         statisticsService.savePreviousStatistics(StatisticsType.Weekly);
         log.info("Insert statistics Weekly finish");
     }
+
+
+
+
     //매월 1일 새벽 4시에 그 전달 통계 저장
-    @Scheduled(cron = "0 0 4 1 1/1 ?")
+    @Scheduled(cron = "0 0 4 1 1/1 ?", zone = "GMT+9:00")
     public void savePreviousMonthStatistics(){
         statisticsService.savePreviousStatistics(StatisticsType.Monthly);
         log.info("Insert statistics Monthly finish");

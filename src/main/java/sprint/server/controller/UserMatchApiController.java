@@ -25,4 +25,9 @@ public class UserMatchApiController {
     }
 
 
+    @PostMapping("apply/test")
+    public void test(){
+        userMatchService.matchingApplyUser();
+    }
+
 }

@@ -16,9 +16,12 @@ public class UserMatchApply {
     @Enumerated
     private MatchStatus matchStatus;
 
-    public UserMatchApply(UserMatchApplyId matchId, MatchStatus matchStatus) {
+    private Long score;
+
+    public UserMatchApply(UserMatchApplyId matchId, MatchStatus matchStatus, Long score) {
         this.matchId = matchId;
         this.matchStatus = matchStatus;
+        this.score = score;
     }
 
     public UserMatchApply() {
