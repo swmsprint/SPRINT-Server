@@ -11,6 +11,7 @@ public class GroupInfoResponse<T, D> {
     private Long groupLeaderId;
     private String groupName;
     private Integer groupPersonnel;
+    private Integer groupMaxPersonnel;
     private String groupPicture;
     private String groupDescription;
     private T groupWeeklyStat;
@@ -22,15 +23,8 @@ public class GroupInfoResponse<T, D> {
         this.groupPersonnel = groups.getGroupPersonnel();
         this.groupPicture = groups.getGroupPicture();
         this.groupDescription = groups.getGroupDescription();
+        this.groupMaxPersonnel = groups.getGroupMaxPersonnel();
         this.groupWeeklyStat = groupWeeklyStat;
-        this.groupWeeklyUserData = groupWeeklyUserData;
-    }
-
-    public void setGroupWeeklyStat(T groupWeeklyStat) {
-        this.groupWeeklyStat = groupWeeklyStat;
-    }
-
-    public void setGroupWeeklyUserData(D groupWeeklyUserData) {
         this.groupWeeklyUserData = groupWeeklyUserData;
     }
 }

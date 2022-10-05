@@ -255,6 +255,9 @@ public class GroupService {
     }
 
     public List<Groups> findGroupByString(String target) {
-        return groupRepository.findByGroupNameContaining(target);
+        return groupRepository.findByGroupNameContaining(target)
+                .stream()
+                .filter(groups -> groups.getIsDeleted().equals(false))
+                .collect(Collectors.toList());
     }
 }
