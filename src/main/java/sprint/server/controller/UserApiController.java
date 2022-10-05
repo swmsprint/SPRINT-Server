@@ -18,8 +18,8 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/user-management/users")
-public class MemberApiController {
+@RequestMapping("/api/user-management/user")
+public class UserApiController {
     private final MemberService memberService;
     private final FriendService friendService;
 
