@@ -21,26 +21,21 @@ public class MemberService {
 
     @Transactional // readOnly = false
     public Long join(Member member){
-        if (existsByNickname(member.getNickname())){
-            throw new ApiException(ExceptionEnum.MEMBER_DUPLICATE_NICKNAME);
-        } else if (existsByEmail(member.getEmail())){
-            throw new ApiException(ExceptionEnum.MEMBER_DUPLICATE_EMAIL);
-        } else {
-            memberRepository.save(member);
-            return member.getId();
-        }
+        if (existsByNickname(member.getNickname())) throw new ApiException(ExceptionEnum.MEMBER_DUPLICATE_NICKNAME);
+        memberRepository.save(member);
+        return member.getId();
     }
 
     @Transactional
     public Boolean modifyMembers(Member member, ModifyMembersRequest request) {
-        member.changeMemberInfo(request.getNickname(), request.getGender(), request.getEmail(), request.getBirthday(), request.getHeight(), request.getWeight(), request.getPicture());
+        member.changeMemberInfo(request.getNickname(), request.getGender(), request.getBirthday(), request.getHeight(), request.getWeight(), request.getPicture());
         return true;
     }
 
     @Transactional
     public Boolean disableMember(Member member) {
         member.disable();
-        return !member.getDisableDay().equals(null);
+        return !(member.getDisableDay()==null);
     }
 
     public Member findById(Long id){
@@ -59,9 +54,5 @@ public class MemberService {
     }
     public boolean existsByNickname(String nickname) {
         return memberRepository.existsByNicknameAndDisableDayIsNull(nickname);
-    }
-
-    public boolean existsByEmail(String email) {
-        return memberRepository.existsByEmailAndDisableDayIsNull(email);
     }
 }

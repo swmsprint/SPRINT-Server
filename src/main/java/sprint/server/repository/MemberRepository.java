@@ -13,6 +13,5 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
     List<Member> findByNicknameContainingAndDisableDayIsNull(String nickName);
     Optional<Member> findByIdAndDisableDayIsNull(Long id);
     boolean existsByNicknameAndDisableDayIsNull(String nickName);
-    boolean existsByEmailAndDisableDayIsNull(String email);
     boolean existsByIdAndDisableDayIsNull(Long id);
 }

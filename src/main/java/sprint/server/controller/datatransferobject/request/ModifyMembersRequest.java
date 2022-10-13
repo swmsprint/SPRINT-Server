@@ -13,8 +13,6 @@ public class ModifyMembersRequest {
     @NotNull
     private String nickname;
     @NotNull
-    private String email;
-    @NotNull
     private Gender gender;
     @NotNull
     @DateTimeFormat(pattern ="yyyy-MM-dd")
