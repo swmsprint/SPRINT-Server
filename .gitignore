@@ -40,4 +40,4 @@ out/
 .DS_Store
 
 ### Docker ###
-*.properties
+src/main/resources/*.properties
