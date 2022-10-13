@@ -6,7 +6,6 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 import sprint.server.domain.member.Gender;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.time.LocalDate;
@@ -17,11 +16,6 @@ public class CreateMemberRequest {
     @ApiParam(value = "닉네임")
     @ApiModelProperty(example = "nickname", required = true)
     private String nickname;
-
-    @NotNull @Email
-    @ApiParam(value = "이메일")
-    @ApiModelProperty(example = "email@email.com", required = true)
-    private String email;
 
     @NotNull
     @ApiParam(value = "성별(MALE/FEMALE/X)")

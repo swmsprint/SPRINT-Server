@@ -20,8 +20,6 @@ public class Member extends BaseEntity {
     @NotNull
     @Enumerated(EnumType.STRING)
     private Gender gender;
-    @NotNull
-    private String email;
     private LocalDate birthday;
     @NotNull
     private float height;
@@ -37,10 +35,9 @@ public class Member extends BaseEntity {
     protected Member() {
     }
 
-    public Member(String nickname, Gender gender, String email, LocalDate birthday, float height, float weight, String picture) {
+    public Member(String nickname, Gender gender, LocalDate birthday, float height, float weight, String picture) {
         this.nickname = nickname;
         this.gender = gender;
-        this.email = email;
         this.birthday = birthday;
         this.height = height;
         this.weight = weight;
@@ -48,10 +45,9 @@ public class Member extends BaseEntity {
         this.tierId = 0;
     }
 
-    public void changeMemberInfo(String nickname, Gender gender, String email, LocalDate birthDay, float height, float weight, String picture){
+    public void changeMemberInfo(String nickname, Gender gender,  LocalDate birthDay, float height, float weight, String picture){
         this.nickname = nickname;
         this.gender = gender;
-        this.email = email;
         this.birthday = birthDay;
         this.height = height;
         this.weight = weight;

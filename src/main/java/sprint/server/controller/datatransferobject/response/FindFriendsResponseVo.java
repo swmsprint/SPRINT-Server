@@ -9,7 +9,6 @@ import java.util.Comparator;
 public class FindFriendsResponseVo {
     private Long userId;
     private String nickname;
-    private String email;
     private float height;
     private float weight;
     private int tierId;
@@ -18,7 +17,6 @@ public class FindFriendsResponseVo {
     public FindFriendsResponseVo(Member member){
         this.userId = member.getId();
         this.nickname = member.getNickname();
-        this.email = member.getEmail();
         this.height = member.getHeight();
         this.weight = member.getWeight();
         this.tierId = member.getTierId();
