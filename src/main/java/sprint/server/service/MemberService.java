@@ -7,6 +7,7 @@ import sprint.server.controller.datatransferobject.request.ModifyMembersRequest;
 import sprint.server.controller.exception.ApiException;
 import sprint.server.controller.exception.ExceptionEnum;
 import sprint.server.domain.member.Member;
+import sprint.server.domain.member.ProviderPK;
 import sprint.server.repository.MemberRepository;
 
 import java.util.List;
@@ -21,26 +22,28 @@ public class MemberService {
 
     @Transactional // readOnly = false
     public Long join(Member member){
-        if (existsByNickname(member.getNickname())){
-            throw new ApiException(ExceptionEnum.MEMBER_DUPLICATE_NICKNAME);
-        } else if (existsByEmail(member.getEmail())){
-            throw new ApiException(ExceptionEnum.MEMBER_DUPLICATE_EMAIL);
-        } else {
-            memberRepository.save(member);
-            return member.getId();
-        }
+        if (existsByProviderPK(member.getProviderPK())) throw new ApiException(ExceptionEnum.MEMBER_ALREADY_SIGNUP);
+        if (existsByNickname(member.getNickname())) throw new ApiException(ExceptionEnum.MEMBER_DUPLICATE_NICKNAME);
+        memberRepository.save(member);
+        return member.getId();
     }
 
     @Transactional
     public Boolean modifyMembers(Member member, ModifyMembersRequest request) {
-        member.changeMemberInfo(request.getNickname(), request.getGender(), request.getEmail(), request.getBirthday(), request.getHeight(), request.getWeight(), request.getPicture());
+        member.changeMemberInfo(request.getNickname(), request.getGender(), request.getBirthday(), request.getHeight(), request.getWeight(), request.getPicture());
         return true;
     }
 
     @Transactional
     public Boolean disableMember(Member member) {
         member.disable();
-        return !member.getDisableDay().equals(null);
+        return !(member.getDisableDay()==null);
+    }
+
+    @Transactional
+    public Boolean activateMember(Member member){
+        member.enable();
+        return member.getDisableDay()==null;
     }
 
     public Member findById(Long id){
@@ -61,7 +64,13 @@ public class MemberService {
         return memberRepository.existsByNicknameAndDisableDayIsNull(nickname);
     }
 
-    public boolean existsByEmail(String email) {
-        return memberRepository.existsByEmailAndDisableDayIsNull(email);
+    public boolean existsByProviderPK(ProviderPK providerPK) {
+        return memberRepository.existsByProviderPK(providerPK);
+    }
+
+    public Member findByProviderPK(ProviderPK providerPK) {
+        Member member = memberRepository.findByProviderPK(providerPK)
+                .orElse(null);
+        return member;
     }
 }

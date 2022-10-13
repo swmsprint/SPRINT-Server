@@ -22,6 +22,7 @@ public enum ExceptionEnum {
     MEMBER_DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "M0003", "이미 가입된 이메일입니다." ),
     MEMBER_NOT_DISABLED(HttpStatus.BAD_REQUEST, "M0004", "이미 활성화된 계정입니다." ),
     MEMBER_ALREADY_DISABLED(HttpStatus.BAD_REQUEST, "M0005", "이미 비활성화된 계정입니다."),
+    MEMBER_ALREADY_SIGNUP(HttpStatus.BAD_REQUEST, "M0006", "이미 가입된 계정입니다."  ),
     GROUP_NAME_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "G0001", "이미 존재하는 그룹 이름입니다."),
     GROUP_NOT_FOUND(HttpStatus.BAD_REQUEST, "G0002", "해당 그룹이 존재하지 않습니다." ),
     GROUP_REQUEST_NOT_FOUND(HttpStatus.BAD_REQUEST, "G0003", "해당 그룹 가입 요청이 존재하지 않습니다."),
@@ -33,7 +34,12 @@ public enum ExceptionEnum {
     GROUP_DELETED(HttpStatus.BAD_REQUEST,"G0009", "삭제된 그룹입니다."),
     GROUP_ALREADY_REQUESTED(HttpStatus.BAD_REQUEST, "G0010", "이미 전송된 그룹 가입 요청입니다."),
     GROUP_ALREADY_LEADER(HttpStatus.BAD_REQUEST, "G0011", "이미 그룹장입니다."),
-    GROUP_PERSONNEL_FULL(HttpStatus.BAD_REQUEST, "G0012", "그룹원 한도를 초과했습니다" );
+    GROUP_PERSONNEL_FULL(HttpStatus.BAD_REQUEST, "G0012", "그룹원 한도를 초과했습니다" ),
+    TOKEN_NONE_PERMISSION(HttpStatus.UNAUTHORIZED, "T0001","권한 정보가 없는 토큰입니다."),
+    TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "T0002", "만료된 토큰입니다."),
+    TOKEN_SIGNITURE_ERROR(HttpStatus.UNAUTHORIZED, "T0003", "JWT 서명의 형식이 잘못되었습니다."),
+    TOKEN_NOT_SUPPORT(HttpStatus.UNAUTHORIZED, "T0004", "지원하지 않는 JWT 입니다."),
+    TOKEN_ILLEGAL_JWT(HttpStatus.UNAUTHORIZED,"T0005", "잘못된 JWT 입니다.");
 
     private final HttpStatus status;
     private final String code;

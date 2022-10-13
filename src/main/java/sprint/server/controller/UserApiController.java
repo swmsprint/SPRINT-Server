@@ -18,8 +18,8 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/user-management/users")
-public class MemberApiController {
+@RequestMapping("/api/user-management/user")
+public class UserApiController {
     private final MemberService memberService;
     private final FriendService friendService;
 
@@ -31,7 +31,7 @@ public class MemberApiController {
     })
     @PostMapping("")
     public CreateMemberResponse saveMember(@RequestBody @Valid CreateMemberRequest request){
-        Member member = new Member(request.getNickname(), request.getGender(), request.getEmail(), request.getBirthday(), request.getHeight(), request.getWeight(), request.getPicture());
+        Member member = new Member(request.getNickname(), request.getGender(), request.getBirthday(), request.getHeight(), request.getWeight(), request.getPicture());
         Long id = memberService.join(member);
         return new CreateMemberResponse(id);
     }
@@ -66,7 +66,7 @@ public class MemberApiController {
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
-    @PutMapping("/{userId}/disable")
+    @DeleteMapping("/{userId}/disable")
     public BooleanResponse disableMember(@PathVariable Long userId) {
         Member member = memberService.findById(userId);
         return new BooleanResponse(memberService.disableMember(member));
@@ -90,19 +90,9 @@ public class MemberApiController {
             @ApiResponse(code = 400, message = "요청 에러"),
             @ApiResponse(code = 500, message = "서버 에러")
     })
+
     @GetMapping ("/validation-duplicate-name")
     public BooleanResponse validationDuplicateNickname(@RequestParam String target) {
         return new BooleanResponse(!memberService.existsByNickname(target));
-    }
-
-    @ApiOperation(value="중복 이메일 확인")
-    @ApiResponses({
-            @ApiResponse(code = 200, message = "정상 작동"),
-            @ApiResponse(code = 400, message = "요청 에러"),
-            @ApiResponse(code = 500, message = "서버 에러")
-    })
-    @GetMapping ("/validation-duplicate-email")
-    public BooleanResponse validationDuplicateEmail(@RequestParam String target) {
-        return new BooleanResponse(!memberService.existsByEmail(target));
     }
 }

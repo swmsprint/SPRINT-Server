@@ -12,7 +12,7 @@ public class ExceptionDto {
     private final String errorMessage;
 
     @Builder
-    public ExceptionDto(HttpStatus status, String errorCode, String errorMessage) {
+    public ExceptionDto(String errorCode, String errorMessage) {
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
     }

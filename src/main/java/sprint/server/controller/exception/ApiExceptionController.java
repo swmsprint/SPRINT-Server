@@ -6,7 +6,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,13 +13,13 @@ import java.util.Map;
 public class ApiExceptionController {
 
     @ExceptionHandler({ApiException.class})
-    public ResponseEntity<ExceptionDto> exceptionHandler(HttpServletRequest request, final ApiException e){
-        return ResponseEntity
-                .status(e.getError().getStatus())
-                .body(ExceptionDto.builder()
-                        .errorCode(e.getErrorCode())
-                        .errorMessage(e.getMessage())
-                        .build());
+    public ResponseEntity<ExceptionDto> exceptionHandler(final ApiException e){
+        return new ResponseEntity(
+                ExceptionDto.builder()
+                .errorCode(e.getErrorCode())
+                .errorMessage(e.getMessage())
+                        .build()
+        , e.getError().getStatus());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

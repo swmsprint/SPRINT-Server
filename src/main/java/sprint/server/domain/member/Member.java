@@ -15,32 +15,33 @@ public class Member extends BaseEntity {
     @NotNull
     @Column(name = "member_id")
     private Long id;
-    @NotNull
     private String nickname;
-    @NotNull
     @Enumerated(EnumType.STRING)
     private Gender gender;
-    @NotNull
-    private String email;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private Authority authority;
     private LocalDate birthday;
-    @NotNull
     private float height;
-    @NotNull
     private float weight;
     private int mainGroupId;
-    @NotNull
     private int tierId;
     private String picture;
 
     private LocalDate disableDay;
 
+    @Embedded
+    @Column(unique = true)
+    @NotNull
+    private ProviderPK providerPK;
+
     protected Member() {
     }
 
-    public Member(String nickname, Gender gender, String email, LocalDate birthday, float height, float weight, String picture) {
+    public Member(String nickname, Gender gender, LocalDate birthday, float height, float weight, String picture) {
         this.nickname = nickname;
         this.gender = gender;
-        this.email = email;
         this.birthday = birthday;
         this.height = height;
         this.weight = weight;
@@ -48,16 +49,20 @@ public class Member extends BaseEntity {
         this.tierId = 0;
     }
 
-    public void changeMemberInfo(String nickname, Gender gender, String email, LocalDate birthDay, float height, float weight, String picture){
+    public Member(String picture, ProviderPK providerPK) {
+        this.picture = picture;
+        this.providerPK = providerPK;
+        this.authority = Authority.ROLE_USER;
+    }
+
+    public void changeMemberInfo(String nickname, Gender gender, LocalDate birthDay, float height, float weight, String picture){
         this.nickname = nickname;
         this.gender = gender;
-        this.email = email;
         this.birthday = birthDay;
         this.height = height;
         this.weight = weight;
         this.picture = picture;
     }
-
     public void disable(){ this.disableDay = LocalDate.now(); }
     public void enable() { this.disableDay = null; }
 

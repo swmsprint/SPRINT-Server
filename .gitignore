@@ -40,5 +40,4 @@ out/
 .DS_Store
 
 ### Docker ###
-jdbc.properties
-application.properties
+*.properties
