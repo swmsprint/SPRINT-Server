@@ -9,8 +9,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableJpaAuditing
 @EnableScheduling
-@PropertySource(value = {"classpath:jdbc.properties"})
-@PropertySource(value = {"classpath:oauth2.properties"})
 public class ServerApplication {
 
     public static void main(String[] args) {

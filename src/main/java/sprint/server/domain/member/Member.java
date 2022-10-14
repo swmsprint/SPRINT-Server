@@ -69,7 +69,7 @@ public class Member extends BaseEntity {
     public void changeMainGroupId(int mainGroupId) {
         this.mainGroupId = mainGroupId;
     }
-
+    public void setNickname(String nickname){ this.nickname = nickname;}
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {

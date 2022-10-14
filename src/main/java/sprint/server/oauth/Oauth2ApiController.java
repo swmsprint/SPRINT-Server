@@ -24,9 +24,9 @@ public class Oauth2ApiController {
     private final OauthService oauthService;
     private final MemberService memberService;
 
-    @Value("${spring.security.oauth2.client.registration.kakao.client-id}")
+    @Value("${kakao.client-id}")
     private String kakaoClientId;
-    @Value("${spring.security.oauth2.client.registration.kakao.redirect-uri}")
+    @Value("${kakao.redirect-uri}")
     private String kakaoURI;
     @GetMapping("/kakao")
     public void kakaoLogin(HttpServletResponse httpServletResponse) throws IOException {

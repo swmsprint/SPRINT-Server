@@ -45,6 +45,9 @@ configurations {
   }
 }
 
+jar {
+    enabled = false
+}
 
 tasks.named('test') {
     useJUnitPlatform()

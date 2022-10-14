@@ -41,3 +41,6 @@ out/
 
 ### Docker ###
 src/main/resources/*.properties
+src/main/resources/*.yml
+src/test/**/*.properties
+src/test/**/*.yml

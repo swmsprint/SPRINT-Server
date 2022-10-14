@@ -27,9 +27,9 @@ public class OauthService {
     private final SecurityService securityService;
     private final JwtProvider jwtProvider;
 
-    @Value("${spring.security.oauth2.client.registration.kakao.redirect-uri}")
+    @Value("${kakao.redirect-uri}")
     private String kakaoRedirectUri;
-    @Value("${spring.security.oauth2.client.registration.kakao.client-id}")
+    @Value("${kakao.client-id}")
     private String kakaoClientId;
 
     public ResponseEntity<LoginResponseDto> firebaseLogin(Provider provider, String UID) {
