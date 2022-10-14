@@ -33,6 +33,8 @@ deploy:
     acl: private               # zip 파일 공개 여부
     local_dir: deploy
     wait-until-deployed: true
+    on:
+      all_branches: true
 
 notification:  # 이메일 알림
   email:
