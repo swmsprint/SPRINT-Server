@@ -14,7 +14,7 @@ import sprint.server.service.UserMatchService;
 public class statisticsScheduler {
 
     private final StatisticsService statisticsService;
-    private final UserMatchService userMatchService;
+
 
 //    매주 월요일 새벽 3시 에 전주 통계 저장
     @Scheduled(cron = "0 0 3 ? * MON", zone = "GMT+9:00")
@@ -42,18 +42,4 @@ public class statisticsScheduler {
         log.info("===Insert statistics Yearly finish===");
     }
 
-    //매주 리그 매칭
-    @Scheduled(cron = "0 0 4 ? * WED", zone = "GMT+9:00")
-    public void matchingUser(){
-        userMatchService.matchingApplyUser();
-        log.info("===Matching League===");
-    }
-
-
-    //매주 리그 매칭
-    @Scheduled(cron = "0 0 4 ? * WED", zone = "GMT+9:00")
-    public void finishLeague(){
-        userMatchService.matchingApplyUser();
-        log.info("===Matching League===");
-    }
 }

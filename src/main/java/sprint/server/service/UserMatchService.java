@@ -70,7 +70,6 @@ public class UserMatchService {
     @Transactional
     public void finishLeague(Timestamp startTime){
 
-
         List<UserMatch> findAllByMatchTimeAfter = userMatchRepository.findAllByMatchTimeAfterOrderByMatchIdDesc(startTime);
 
         Integer maxTeamNumber = findAllByMatchTimeAfter.get(0).getTeamNumber();
