@@ -38,11 +38,10 @@ public class JwtProvider {
         key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
     }
     private Key key;
-    private final RedisService redisService;
     private static final String AUTHORITIES_KEY = "auth";
     private static final String BEARER_TYPE = "bearer";
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000L * 60 * 30; //access 30분
-    private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000L * 60 * 60 * 24 * 7; //refresh 7일
+    private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000L * 60 * 24 * 7; //* 60 * 24 * 7; //refresh 7일
     /* ---------------------- 토큰 발급 수정 메서드 ------------------------- */
 
     public TokenDto generateTokenDto(Member member) {
@@ -55,7 +54,8 @@ public class JwtProvider {
         Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
         String accessToken = Jwts.builder()
                 .setHeaderParam("typ", "JWT")
-                .setSubject(String.valueOf(member.getId())) //payload "sub" : "name"
+                .setAudience(String.valueOf(member.getId())) //payload "aud" : "pk"
+                .setSubject("ACCESS") //payload "sub" : "ACCESS"
                 .claim(AUTHORITIES_KEY, Authority.ROLE_USER) //payload "auth" : "ROLE_USER"
                 .setExpiration(new Date(date.getTime() + ACCESS_TOKEN_EXPIRE_TIME)) //payload "exp" : 1234567890 (10자리)
                 .signWith(key, SignatureAlgorithm.HS512) //header "alg" : HS512 (해싱 알고리즘 HS512)
@@ -66,12 +66,12 @@ public class JwtProvider {
         log.info("4-2-2. Refresh Token 생성");
         String refreshToken = Jwts.builder()
                 .setHeaderParam("typ", "JWT")
+                .setAudience(String.valueOf(member.getId())) //payload "aud" : "pk"
+                .setSubject("REFRESH") //payload "sub" : "REFRESH"
                 .setExpiration(new Date(date.getTime() + REFRESH_TOKEN_EXPIRE_TIME))
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
 
-        log.info("4-2-3. Refresh Token redis 저장");
-        redisService.setValues(Long.toString(member.getId()), refreshToken, Duration.ofMillis(REFRESH_TOKEN_EXPIRE_TIME));
         return TokenDto.builder()
                 .grantType(BEARER_TYPE)
                 .accessToken(accessToken)
@@ -89,7 +89,6 @@ public class JwtProvider {
         if (claims.get(AUTHORITIES_KEY) == null) {
             return null;
         }
-        System.out.println("test = ");
         // 클레임으로 권한 정보 가져오기
         Collection<? extends GrantedAuthority> authorities =
                 Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
@@ -150,11 +149,25 @@ public class JwtProvider {
         return Long.valueOf(claims.getSubject());
     }
 
+
     public void checkRefreshToken(String memberId, String refreshToken) {
-        String redisRT = redisService.getValues(memberId);
-        if (!refreshToken.equals(redisRT)) {
+        log.info("토큰 복호화");
+        Claims claims = parseClaims(refreshToken);
+        log.info("claims = {}", claims.getSubject());
+        log.info("expiretime= {}", claims.getExpiration());
+        String tokenType = claims.getSubject();
+        if(!tokenType.equals("REFRESH")) {
+            throw new ApiException(ExceptionEnum.TOKEN_REQUIRE_REFRESHTOKEN);
+        }
+
+        String tokenInId = claims.getAudience();
+        if (!tokenInId.equals(memberId)){
+            throw new ApiException(ExceptionEnum.TOKEN_NOT_OWNER);
+        }
+
+        Date expiration = claims.getExpiration();
+        if (expiration.before(new Date())) {
             throw new ApiException(ExceptionEnum.TOKEN_EXPIRED);
         }
-        redisService.deleteValues(memberId);
     }
 }

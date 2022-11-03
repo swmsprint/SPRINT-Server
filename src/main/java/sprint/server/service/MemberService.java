@@ -23,7 +23,6 @@ public class MemberService {
     @Transactional // readOnly = false
     public Long join(Member member){
         if (existsByProviderPK(member.getProviderPK())) throw new ApiException(ExceptionEnum.MEMBER_ALREADY_SIGNUP);
-        if (existsByNickname(member.getNickname())) throw new ApiException(ExceptionEnum.MEMBER_DUPLICATE_NICKNAME);
         memberRepository.save(member);
         return member.getId();
     }
@@ -61,7 +60,7 @@ public class MemberService {
         return memberRepository.findByNicknameContainingAndDisableDayIsNull(nickname);
     }
     public boolean existsByNickname(String nickname) {
-        return memberRepository.existsByNicknameAndDisableDayIsNull(nickname);
+        return memberRepository.existsByNickname(nickname);
     }
 
     public boolean existsByProviderPK(ProviderPK providerPK) {

@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sprint.server.domain.member.Member;
+import sprint.server.domain.member.Provider;
 import sprint.server.oauth.dto.member.LoginResponseDto;
 import sprint.server.oauth.dto.token.TokenDto;
 import sprint.server.service.MemberService;
@@ -37,22 +38,19 @@ public class Oauth2ApiController {
     @GetMapping("/callback/kakao")
     public ResponseEntity<LoginResponseDto> kakaoSign(@RequestParam String code) throws JsonProcessingException {
         log.info("카카오 로그인 시도 ");
-//        SocialUserInfoDto = oauthService.kakaoLogin(code);
-//        System.out.println("code = " + code);
-//        System.out.println("error_description = " + error_description);
-//        System.out.println("socialUserInfoDto = " + socialUserInfoDto.toString());
         return oauthService.kakaoLogin(code);
     }
 
     @GetMapping("/firebase")
-    public ResponseEntity<LoginResponseDto> firebaseSign(@RequestBody @Valid FirebaseSignRequest request) {
+    public ResponseEntity<LoginResponseDto> firebaseSign(@RequestParam("provider") Provider provider, @RequestParam("uid") String uid) {
         log.info("firebase 로그인 시도");
-        log.info("Provider : {}", request.getProvider());
-        return oauthService.firebaseLogin(request.getProvider(), request.getUID());
+        log.info("Provider : {}", provider);
+        return oauthService.firebaseLogin(provider, uid);
     }
 
     @GetMapping("/re-issue")
     public ResponseEntity<TokenDto> reIssue(@RequestParam("userId") Long userId, @RequestParam("refreshToken") String refreshToken) {
+        log.info("토큰 복호화");
         Member member = memberService.findById(userId);
         TokenDto tokenDto = oauthService.reIssueAccessToken(member, refreshToken);
         return new ResponseEntity<>(tokenDto, HttpStatus.OK);

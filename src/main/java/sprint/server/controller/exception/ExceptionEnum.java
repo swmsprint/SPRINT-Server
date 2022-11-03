@@ -39,7 +39,9 @@ public enum ExceptionEnum {
     TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "T0002", "만료된 토큰입니다."),
     TOKEN_SIGNITURE_ERROR(HttpStatus.UNAUTHORIZED, "T0003", "JWT 서명의 형식이 잘못되었습니다."),
     TOKEN_NOT_SUPPORT(HttpStatus.UNAUTHORIZED, "T0004", "지원하지 않는 JWT 입니다."),
-    TOKEN_ILLEGAL_JWT(HttpStatus.UNAUTHORIZED,"T0005", "잘못된 JWT 입니다.");
+    TOKEN_ILLEGAL_JWT(HttpStatus.UNAUTHORIZED,"T0005", "잘못된 JWT 입니다."),
+    TOKEN_NOT_OWNER(HttpStatus.UNAUTHORIZED, "T0006", "JWT와 요청한 유저가 일치하지 않습니다." ),
+    TOKEN_REQUIRE_REFRESHTOKEN(HttpStatus.UNAUTHORIZED, "T0007", "Refresh Token이 아닙니다.");
 
     private final HttpStatus status;
     private final String code;

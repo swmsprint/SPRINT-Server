@@ -41,10 +41,10 @@ public class OauthService {
         if(firebaseMember == null) {
             log.info("2-1. 회원정보 없음 : 신규가입");
             firebaseMember = registerUserIfNeed(provider, UID);
-            loginResponseDto.setAlraedySignIn(false);
+            loginResponseDto.setAlreadySignIn(false);
         }else {
             log.info("2-2 회원정보 화인 : 기존회원");
-            loginResponseDto.setAlraedySignIn(true);
+            loginResponseDto.setAlreadySignIn(true);
             log.info("3. 비활성화 여부 확인");
             if (firebaseMember.getDisableDay() == null){
                 log.info("3-1. 활성화 계정");
@@ -83,11 +83,11 @@ public class OauthService {
         if(kakaoMember == null) {
             log.info("3-1. 회원정보 없음 : 신규가입");
             kakaoMember = registerUserIfNeed(Provider.KAKAO, kakaoUserInfo.getUid());
-            loginResponseDto.setAlraedySignIn(false);
+            loginResponseDto.setAlreadySignIn(false);
         }else {
             log.info("3-2. 회원정보 확인 : 기존회원");
             log.info("3-3. 비활성화 여부 확인");
-            loginResponseDto.setAlraedySignIn(true);
+            loginResponseDto.setAlreadySignIn(true);
             if (kakaoMember.getDisableDay() == null){
                 log.info("3-3-1. 활성화 계정");
             } else {
@@ -169,7 +169,7 @@ public class OauthService {
 //     3. 회원가입 처리
     private Member registerUserIfNeed(Provider provider, String UID) {
         ProviderPK providerPK = new ProviderPK(provider, UID);
-        String profile = "https://ossack.s3.ap-northeast-2.amazonaws.com/basicprofile.png";
+        String profile = "https://sprint-images.s3.ap-northeast-2.amazonaws.com/default.jpeg";
         log.info("새 계정 생성");
         Member kakaoUser = new Member(profile, providerPK);
         log.info("새 계정 저장");

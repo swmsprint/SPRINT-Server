@@ -10,7 +10,7 @@ import sprint.server.domain.member.Member;
 @NoArgsConstructor
 public class LoginResponseDto {
 
-    private boolean alraedySignIn;
+    private boolean alreadySignIn;
     private Long memberId;
     private String accessToken;
     private String refreshToken;

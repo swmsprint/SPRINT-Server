@@ -28,7 +28,8 @@ public class TestApiController {
     public String test1() {
         return "test";
     }
-
+    @GetMapping("/api/test")
+    public String test3() {return "test3";}
     @GetMapping("/admin/test")
     public String test2() {
         return "test2";

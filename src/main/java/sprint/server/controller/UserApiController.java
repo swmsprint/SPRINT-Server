@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import sprint.server.controller.datatransferobject.request.*;
 import sprint.server.controller.datatransferobject.response.*;
+import sprint.server.controller.exception.ApiException;
+import sprint.server.controller.exception.ExceptionEnum;
 import sprint.server.domain.friend.FriendState;
 import sprint.server.domain.member.Member;
 import sprint.server.service.FriendService;
@@ -81,6 +83,7 @@ public class UserApiController {
     @PutMapping("/{userId}")
     public BooleanResponse modifyMembers(@PathVariable Long userId, @RequestBody @Valid ModifyMembersRequest request) {
         Member member = memberService.findById(userId);
+        if (memberService.existsByNickname(request.getNickname())) throw new ApiException(ExceptionEnum.MEMBER_DUPLICATE_NICKNAME);
         return new BooleanResponse(memberService.modifyMembers(member, request));
     }
 
