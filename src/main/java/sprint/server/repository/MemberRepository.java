@@ -10,11 +10,8 @@ import java.util.Optional;
 @Repository
 public interface MemberRepository extends JpaRepository<Member,Long> {
 
-    List<Member> findByNickname(String Nickname);
-    List<Member> findByNicknameContaining(String Nickname);
-    List<Member> findByNicknameContainingAndDisableDayIsNull(String Nickname);
+    List<Member> findByNicknameContainingAndDisableDayIsNull(String nickName);
     Optional<Member> findByIdAndDisableDayIsNull(Long id);
-    Boolean existsByNicknameAndDisableDayIsNull(String Nickname);
-    Boolean existsByEmailAndDisableDayIsNull(String email);
-    Boolean existsByIdAndDisableDayIsNull(Long id);
+    boolean existsByNicknameAndDisableDayIsNull(String nickName);
+    boolean existsByIdAndDisableDayIsNull(Long id);
 }

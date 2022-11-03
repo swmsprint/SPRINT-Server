@@ -9,24 +9,28 @@ import sprint.server.domain.Groups;
 import sprint.server.domain.groupmember.GroupMember;
 import sprint.server.domain.groupmember.GroupMemberId;
 import sprint.server.domain.groupmember.GroupMemberState;
+import sprint.server.domain.member.Member;
 import sprint.server.repository.GroupMemberRepository;
 
+import javax.persistence.EntityManager;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-public class GroupServiceTest {
+class GroupServiceTest {
     @Autowired GroupService groupService;
     @Autowired MemberService memberService;
     @Autowired GroupMemberRepository groupMemberRepository;
+
+    @Autowired EntityManager em;
 
     /**
      * 그룹 만들기 테스트
      */
     @Test
-    public void makeGroupTest(){
+    void makeGroupTest(){
         /* 정상적인 요청 */
         Groups groups = new Groups("groups1", 2L, "Description", "picture");
         groupService.join(groups);
@@ -46,26 +50,27 @@ public class GroupServiceTest {
      * 그룹 가입 요청 테스트
      */
     @Test
-    public void requestGroupJoinTest(){
+    void requestGroupJoinTest(){
         /* 정상적인 요청 */
-        Groups groups = new Groups("groups1", 1L, "Description", "picture");
-        groupService.join(groups);
-        GroupMember groupMember = new GroupMember(new GroupMemberId(groups.getId(), 2L));
-        Boolean result = groupService.requestJoinGroupMember(groupMember);
+        Groups group = new Groups("groups1", 1L, "Description", "picture");
+        groupService.join(group);
+        Member member = memberService.findById(2L);
+        Boolean result = groupService.requestJoinGroupMember(group, member);
 
+        GroupMember groupMember = new GroupMember(group, member);
         assertEquals(true, result);
         assertEquals(true, groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember.getGroupMemberId(), GroupMemberState.REQUEST));
 
         /* 이미 해당 그룹에 가입해 있을 때 (그룹장일때) */
-        GroupMember groupMember2 = new GroupMember(new GroupMemberId(groups.getId(),1L));
-        ApiException thrown = assertThrows(ApiException.class, () -> groupService.requestJoinGroupMember(groupMember2));
+        Member member2 = memberService.findById(1L);
+        ApiException thrown = assertThrows(ApiException.class, () -> groupService.requestJoinGroupMember(group, member2));
         assertEquals("G0004", thrown.getErrorCode());
 
         /* 이미 해당 그룹에 가입해 있을 때 (일반 그룹원) */
-        Boolean result2 = groupService.answerGroupMember(groupMember.getGroupMemberId(), true);
+        Boolean result2 = groupService.answerGroupMember(group, member, GroupMemberState.ACCEPT);
 
         assertEquals(true, result2);
-        ApiException thrown2 = assertThrows(ApiException.class, () -> groupService.requestJoinGroupMember(groupMember2));
+        ApiException thrown2 = assertThrows(ApiException.class, () -> groupService.requestJoinGroupMember(group, member));
         assertEquals("G0004", thrown2.getErrorCode());
     }
 
@@ -73,63 +78,74 @@ public class GroupServiceTest {
      * 그룹 가입 요청 승인 테스트
      */
     @Test
-    public void answerGroupMemberTest() {
-        Groups groups = new Groups("groups1", 1L, "Description", "picture");
-        groupService.join(groups);
-        GroupMember groupMember = new GroupMember(new GroupMemberId(groups.getId(), 2L));
-        GroupMember groupMember2 = new GroupMember(new GroupMemberId(groups.getId(), 3L));
-        groupService.requestJoinGroupMember(groupMember);
-        groupService.requestJoinGroupMember(groupMember2);
+    void acceptGroupMemberTest() {
+        Groups group = new Groups("groups1", 1L, "Description", "picture");
+        groupService.join(group);
+        Member member2 = memberService.findById(2L);
+        Member member3 = memberService.findById(3L);
+        Member member4 = memberService.findById(4L);
+        groupService.requestJoinGroupMember(group, member2);
+        groupService.requestJoinGroupMember(group, member3);
+        groupService.requestJoinGroupMember(group, member4);
 
         /* ACCEPT TEST */
         /* 정상적인 요청 */
-        Boolean result = groupService.answerGroupMember(groupMember.getGroupMemberId(), true);
+        Boolean result = groupService.answerGroupMember(group, member2, GroupMemberState.ACCEPT);
         assertEquals(true, result);
+
+        GroupMember groupMember = new GroupMember(group, member2);
         assertEquals(true, groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember.getGroupMemberId(), GroupMemberState.ACCEPT));
 
         /* REJECT TEST */
         /*정상적인 요청 */
-        Boolean result2 = groupService.answerGroupMember(groupMember2.getGroupMemberId(), false);
+        Boolean result2 = groupService.answerGroupMember(group, member3, GroupMemberState.REJECT);
         assertEquals(true, result2);
+
+        GroupMember groupMember2 = new GroupMember(group, member3);
         assertEquals(true, groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember2.getGroupMemberId(), GroupMemberState.REJECT));
 
-        /* 해당 그룹이 없을 때 */
-        ApiException thrown = assertThrows(ApiException.class,() -> groupService.answerGroupMember(new GroupMemberId(-1, 2L), true));
-        assertEquals("G0002", thrown.getErrorCode());
+        /* CANCEL TEST */
+        Boolean result3 = groupService.answerGroupMember(group, member4, GroupMemberState.CANCEL);
+        assertEquals(true, result3);
 
-        /* 해당 멤버가 없을 때*/
-        ApiException thrown2 = assertThrows(ApiException.class, () -> groupService.answerGroupMember(new GroupMemberId(groups.getId(), -1L), true));
-        assertEquals("M0001", thrown2.getErrorCode());
+        GroupMember groupMember3 = new GroupMember(group, member4);
+        assertEquals(true, groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember3.getGroupMemberId(), GroupMemberState.CANCEL));
 
         /* 수락/거절할 요청이 존재하지 않을 때 */
-        ApiException thrown3 = assertThrows(ApiException.class, () -> groupService.answerGroupMember(new GroupMemberId(groups.getId(),  3L), true));
+        ApiException thrown3 = assertThrows(ApiException.class, () -> groupService.answerGroupMember(group, member3, GroupMemberState.ACCEPT));
+        ApiException thrown4 = assertThrows(ApiException.class, () -> groupService.answerGroupMember(group, member3, GroupMemberState.REJECT));
+        ApiException thrown5 = assertThrows(ApiException.class, () -> groupService.answerGroupMember(group, member3, GroupMemberState.CANCEL));
         assertEquals("G0003", thrown3.getErrorCode());
+        assertEquals("G0003", thrown4.getErrorCode());
+        assertEquals("G0003", thrown5.getErrorCode());
     }
 
     /**
      * 그룹 탈퇴 테스트
      */
     @Test
-    public void leaveGroupMemberTest(){
-        Groups groups = new Groups("groups1", 1L, "Description", "picture");
-        groupService.join(groups);
-        GroupMemberId groupMemberId = new GroupMemberId(groups.getId(), 2L);
-        GroupMember groupMember = new GroupMember(groupMemberId);
-        groupService.requestJoinGroupMember(groupMember);
+    void leaveGroupMemberTest(){
+        Groups group = new Groups("groups1", 1L, "Description", "picture");
+        groupService.join(group);
+        Member member1 = memberService.findById(1L);
+        Member member2 = memberService.findById(2L);
+        groupService.requestJoinGroupMember(group, member2);
 
 
         /* 해당 그룹 멤버가 아닐 때 */
-        ApiException thrown1 = assertThrows(ApiException.class, () -> groupService.leaveGroupMember(groupMemberId));
+        ApiException thrown1 = assertThrows(ApiException.class, () -> groupService.leaveGroupMember(group, member2));
         assertEquals("G0006", thrown1.getErrorCode());
 
-        groupService.answerGroupMember(groupMemberId, true);
+        groupService.answerGroupMember(group, member2, GroupMemberState.ACCEPT);
+
         /* 정상적인 요청 */
-        Boolean result = groupService.leaveGroupMember(groupMemberId);
+        GroupMember groupMember = groupService.findJoinedGroupMemberByGroupAndMember(group, member2);
+        Boolean result = groupService.leaveGroupMember(group, member2);
         assertEquals(true, result);
-        assertEquals(true, groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMemberId, GroupMemberState.LEAVE));
+        assertEquals(true, groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember.getGroupMemberId(), GroupMemberState.LEAVE));
 
         /* 해당 그룹 리더가 요청할 때*/
-        ApiException thrown3 = assertThrows(ApiException.class, () -> groupService.leaveGroupMember(new GroupMemberId(groups.getId(),  1L)));
+        ApiException thrown3 = assertThrows(ApiException.class, () -> groupService.leaveGroupMember(group, member1));
         assertEquals("G0005", thrown3.getErrorCode());
     }
 
@@ -137,73 +153,80 @@ public class GroupServiceTest {
      * 그룹장 변경 테스트
      */
     @Test
-    public void changeGroupLeaderTest() {
-        Groups groups = new Groups("groups1", 1L, "Description", "picture");
-        groupService.join(groups);
-        GroupMemberId groupMemberId = new GroupMemberId(groups.getId(), 2L);
-        GroupMember groupMember = new GroupMember(groupMemberId);
-        groupService.requestJoinGroupMember(groupMember);
-        groupService.answerGroupMember(groupMemberId, true);
+    void changeGroupLeaderTest() {
+        Groups group = new Groups("groups1", 1L, "Description", "picture");
+        groupService.join(group);
+        Member member1 = memberService.findById(1L);
+        Member member2 = memberService.findById(2L);
+        GroupMemberId groupMemberId = new GroupMemberId(group.getId(), 2L);
+        groupService.requestJoinGroupMember(group, member2);
+        groupService.answerGroupMember(group, member2, GroupMemberState.ACCEPT);
 
         /* 정상적인 요청 */
-        Boolean result = groupService.changeGroupLeaderByGroupIdAndMemberID(groups.getId(), 2L);
-        GroupMember newLeader = groupService.getGroupLeader(groups.getId());
+        Boolean result = groupService.changeGroupLeaderByGroupAndMember(group, member2);
+        Member newLeader = groupService.findGroupLeader(group);
+
+        GroupMember groupMember1 = groupService.findJoinedGroupMemberByGroupAndMember(group, member1);
+        GroupMember groupMember2 = groupService.findJoinedGroupMemberByGroupAndMember(group, member2);
+
         assertEquals(true, result);
-        assertEquals(memberService.findById(2L).getId(), newLeader.getGroupMemberId().getMemberId());
-        assertEquals(groups.getId(), newLeader.getGroupMemberId().getGroupId());
-        assertEquals(GroupMemberState.LEADER, newLeader.getGroupMemberState());
+        assertEquals(2L, newLeader.getId());
+        assertEquals(GroupMemberState.ACCEPT, groupMember1.getGroupMemberState());
+        assertEquals(GroupMemberState.LEADER, groupMember2.getGroupMemberState());
     }
 
     /**
      * 그룹장 조회 테스트
      */
     @Test
-    public void findGroupLeaderByGroupIdTest(){
-        Groups groups = new Groups("groups1", 1L, "Description", "picture");
-        groupService.join(groups);
-        GroupMember groupMember = groupService.getGroupLeader(groups.getId());
-        assertEquals(1L, groupMember.getGroupMemberId().getMemberId());
-        assertEquals(groups.getId(), groupMember.getGroupMemberId().getGroupId());
+    void findGroupLeaderByGroupIdTest(){
+        Groups group = new Groups("groups1", 1L, "Description", "picture");
+        Member member1 = memberService.findById(1L);
+        groupService.join(group);
+
+        /* 정상적인 요청 */
+        Member leader = groupService.findGroupLeader(group);
+        GroupMember groupMember = groupService.findJoinedGroupMemberByGroupAndMember(group, member1);
+
+        assertEquals(1L, leader.getId());
+        assertEquals(group.getId(), groupMember.getGroupId());
         assertEquals(GroupMemberState.LEADER, groupMember.getGroupMemberState());
 
         /* 그룹장 변경 후 테스트 */
         // 새로운 멤버 가입
-        GroupMemberId groupMemberId = new GroupMemberId(groups.getId(), 2L);
-        GroupMember groupMember2 = new GroupMember(groupMemberId);
-        groupService.requestJoinGroupMember(groupMember2);
-        groupService.answerGroupMember(groupMemberId, true);
+        Member member2 = memberService.findById(2L);
+        groupService.requestJoinGroupMember(group, member2);
+        groupService.answerGroupMember(group, member2, GroupMemberState.ACCEPT);
+
         // 그룹장 변경
-        Boolean result = groupService.changeGroupLeaderByGroupIdAndMemberID(groups.getId(), 2L);
-        GroupMember newLeader = groupService.getGroupLeader(groups.getId());
+        Boolean result = groupService.changeGroupLeaderByGroupAndMember(group, member2);
+        Member newLeader = groupService.findGroupLeader(group);
+        GroupMember groupMember2 = groupService.findJoinedGroupMemberByGroupAndMember(group, member2);
+
         assertEquals(true, result);
-        assertEquals(2L, newLeader.getGroupMemberId().getMemberId());
-        assertEquals(groups.getId(), newLeader.getGroupMemberId().getGroupId());
-        assertEquals(GroupMemberState.LEADER, newLeader.getGroupMemberState());
+        assertEquals(2L, newLeader.getId());
+        assertEquals(group.getId(), groupMember2.getGroupId());
+        assertEquals(GroupMemberState.LEADER, groupMember2.getGroupMemberState());
     }
 
     /**
      * 그룹 삭제 테스트
      */
     @Test
-    public void deleteGroupTest() {
+    void deleteGroupTest() {
         /* 그룹 만든 후 그룹원 가입 */
-        Groups groups = new Groups("groups1", 1L, "Description", "picture");
-        groupService.join(groups);
+        Groups group = new Groups("groups1", 1L, "Description", "picture");
+        groupService.join(group);
         for (Long i = 2L; i < 5L; i++) {
-            GroupMemberId groupMemberId = new GroupMemberId(groups.getId(), i);
-            GroupMember groupMember = new GroupMember(groupMemberId);
-            groupService.requestJoinGroupMember(groupMember);
-            groupService.answerGroupMember(groupMemberId, true);
+            Member member = memberService.findById(i);
+            groupService.requestJoinGroupMember(group, member);
+            groupService.answerGroupMember(group, member, GroupMemberState.ACCEPT);
         }
 
-        /* 해당 그룹이 존재하지 않을 때 */
-        ApiException thrown = assertThrows(ApiException.class, () -> groupService.deleteGroup(2));
-        assertEquals("G0002", thrown.getErrorCode());
-
         /* 정상적인 요청 */
-        Boolean result = groupService.deleteGroup(groups.getId());
-        ApiException thrown2 = assertThrows(ApiException.class , () -> groupService.getGroupLeader(groups.getId()));
-        List<GroupMember> groupMemberList = groupMemberRepository.findGroupMemberByGroupId(1);
+        Boolean result = groupService.deleteGroup(group);
+        ApiException thrown2 = assertThrows(ApiException.class , () -> groupService.findGroupByGroupId(group.getId()));
+        List<GroupMember> groupMemberList = groupMemberRepository.findAllMemberByGroupId(1);
         assertEquals(true, result);
         assertEquals("G0009", thrown2.getErrorCode());
         assertEquals(0, groupMemberList.size());

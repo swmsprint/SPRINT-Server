@@ -1,6 +1,8 @@
 package sprint.server.domain.groupmember;
 
 import lombok.Data;
+import sprint.server.domain.Groups;
+import sprint.server.domain.member.Member;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -18,6 +20,11 @@ public class GroupMemberId implements Serializable {
     public GroupMemberId(Integer groupId, Long memberId) {
         this.groupId = groupId;
         this.memberId = memberId;
+    }
+
+    public GroupMemberId(Groups group, Member member) {
+        this.groupId = group.getId();
+        this.memberId = member.getId();
     }
 
     @Override

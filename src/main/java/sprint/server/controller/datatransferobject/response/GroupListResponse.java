@@ -7,5 +7,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class GroupListResponse<T> {
     private int count;
-    private T GroupList;
+    private T groupList;
 }

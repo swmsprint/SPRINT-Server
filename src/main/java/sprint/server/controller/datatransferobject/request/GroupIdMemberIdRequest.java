@@ -7,13 +7,13 @@ import lombok.Data;
 import javax.validation.constraints.NotNull;
 
 @Data
-public class CreateFriendsRequest {
+public class GroupIdMemberIdRequest {
     @NotNull
-    @ApiParam(value = "요청하는 회원 ID")
+    @ApiParam(value = "그룹 ID")
     @ApiModelProperty(example = "3", required = true)
-    private Long sourceUserId;
+    private Integer groupId;
     @NotNull
-    @ApiParam(value = "API 요청 대상 회원 ID")
-    @ApiModelProperty(example = "5", required = true)
-    private Long targetUserId;
+    @ApiParam(value = "회원 ID")
+    @ApiModelProperty(example = "2", required = true)
+    private Long userId;
 }
