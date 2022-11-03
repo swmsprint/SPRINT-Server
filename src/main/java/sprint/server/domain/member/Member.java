@@ -23,17 +23,16 @@ public class Member extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Authority authority;
     private LocalDate birthday;
-    private float height;
-    private float weight;
-    private int mainGroupId;
-    private int tierId;
+    private Float height;
+    private Float weight;
+    private Integer mainGroupId;
+    private Integer tierId;
     private String picture;
 
     private LocalDate disableDay;
 
     @Embedded
     @Column(unique = true)
-    @NotNull
     private ProviderPK providerPK;
 
     protected Member() {
@@ -63,6 +62,19 @@ public class Member extends BaseEntity {
         this.weight = weight;
         this.picture = picture;
     }
+
+    public void deleteMemberInfo() {
+        this.birthday = null;
+        this.gender = null;
+        this.height = null;
+        this.mainGroupId = null;
+        this.nickname = "DELETE_"+this.id;
+        this.picture = "https://sprint-images.s3.ap-northeast-2.amazonaws.com/default.jpeg";
+        this.providerPK = null;
+        this.tierId = null;
+        this.weight = null;
+    }
+
     public void disable(){ this.disableDay = LocalDate.now(); }
     public void enable() { this.disableDay = null; }
 

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import sprint.server.controller.datatransferobject.request.ModifyMembersRequest;
+import sprint.server.controller.datatransferobject.request.MemberInfoDto;
 import sprint.server.controller.exception.ApiException;
 import sprint.server.domain.member.Gender;
 import sprint.server.domain.member.Member;
@@ -14,7 +14,6 @@ import sprint.server.repository.MemberRepository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -55,14 +54,14 @@ class MemberServiceTest {
     void modifyMembersTest(){
         Member member = memberService.findById(1L);
         /* 정상적인 요청 */
-        ModifyMembersRequest modifyMembersRequest = new ModifyMembersRequest();
-        modifyMembersRequest.setNickname("Modify1");
-        modifyMembersRequest.setGender(Gender.MALE);
-        modifyMembersRequest.setBirthday(LocalDate.of(2022, 3, 11));
-        modifyMembersRequest.setHeight(166.7F);
-        modifyMembersRequest.setWeight(70F);
-        modifyMembersRequest.setPicture("modify@mtest.com");
-        Boolean result = memberService.modifyMembers(member, modifyMembersRequest);
+        MemberInfoDto memberInfoDto = new MemberInfoDto();
+        memberInfoDto.setNickname("Modify1");
+        memberInfoDto.setGender(Gender.MALE);
+        memberInfoDto.setBirthday(LocalDate.of(2022, 3, 11));
+        memberInfoDto.setHeight(166.7F);
+        memberInfoDto.setWeight(70F);
+        memberInfoDto.setPicture("modify@mtest.com");
+        Boolean result = memberService.modifyMembers(member, memberInfoDto);
         assertEquals(true, result);
         assertEquals(1L, member.getId());
         assertEquals("Modify1", member.getNickname());

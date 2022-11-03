@@ -40,8 +40,8 @@ public class JwtProvider {
     private Key key;
     private static final String AUTHORITIES_KEY = "auth";
     private static final String BEARER_TYPE = "bearer";
-    private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000L * 60 * 30; //access 30분
-    private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000L * 60 * 24 * 7; //* 60 * 24 * 7; //refresh 7일
+    private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000L * 60 * 30; // access token 30분
+    private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000L * 60 * 24 * 7; // refresh token 7일
     /* ---------------------- 토큰 발급 수정 메서드 ------------------------- */
 
     public TokenDto generateTokenDto(Member member) {

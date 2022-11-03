@@ -5,6 +5,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -33,5 +34,9 @@ public class TestApiController {
     @GetMapping("/admin/test")
     public String test2() {
         return "test2";
+    }
+
+    @GetMapping("/now")
+    public String time() { return LocalDateTime.now().toString();
     }
 }

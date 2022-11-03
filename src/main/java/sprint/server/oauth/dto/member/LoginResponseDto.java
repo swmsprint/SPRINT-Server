@@ -11,7 +11,7 @@ import sprint.server.domain.member.Member;
 public class LoginResponseDto {
 
     private boolean alreadySignIn;
-    private Long memberId;
+    private Long userId;
     private String accessToken;
     private String refreshToken;
 }

@@ -1,6 +1,7 @@
 package sprint.server.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.member.ProviderPK;
@@ -20,4 +21,7 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
     boolean existsByIdAndDisableDayIsNull(Long id);
 
     boolean existsByProviderPK(ProviderPK providerPK);
+
+    @Query(value = "select * from Member where DATE(disable_day) < DATE_SUB(NOW(), INTERVAL 60 DAY)", nativeQuery = true)
+    List<Member> findDisableMembers();
 }

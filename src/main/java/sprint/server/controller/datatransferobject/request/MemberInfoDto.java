@@ -3,13 +3,14 @@ package sprint.server.controller.datatransferobject.request;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 import sprint.server.domain.member.Gender;
+import sprint.server.domain.member.Member;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.time.LocalDate;
 
 @Data
-public class ModifyMembersRequest {
+public class MemberInfoDto {
     @NotNull
     private String nickname;
     @NotNull
@@ -23,4 +24,13 @@ public class ModifyMembersRequest {
     private float weight;
     @NotNull
     private String picture;
+    public MemberInfoDto(){}
+    public MemberInfoDto(Member member) {
+        this.nickname = member.getNickname();
+        this.gender = member.getGender();
+        this.birthday = member.getBirthday();
+        this.height = member.getHeight();
+        this.weight = member.getWeight();
+        this.picture = member.getPicture();
+    }
 }

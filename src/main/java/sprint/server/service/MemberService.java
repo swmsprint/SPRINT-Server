@@ -3,7 +3,7 @@ package sprint.server.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sprint.server.controller.datatransferobject.request.ModifyMembersRequest;
+import sprint.server.controller.datatransferobject.request.MemberInfoDto;
 import sprint.server.controller.exception.ApiException;
 import sprint.server.controller.exception.ExceptionEnum;
 import sprint.server.domain.member.Member;
@@ -28,7 +28,7 @@ public class MemberService {
     }
 
     @Transactional
-    public Boolean modifyMembers(Member member, ModifyMembersRequest request) {
+    public Boolean modifyMembers(Member member, MemberInfoDto request) {
         member.changeMemberInfo(request.getNickname(), request.getGender(), request.getBirthday(), request.getHeight(), request.getWeight(), request.getPicture());
         return true;
     }
@@ -71,5 +71,9 @@ public class MemberService {
         Member member = memberRepository.findByProviderPK(providerPK)
                 .orElse(null);
         return member;
+    }
+
+    public void deleteMember(Member member) {
+        member.deleteMemberInfo();
     }
 }

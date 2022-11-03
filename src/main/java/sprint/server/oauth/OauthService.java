@@ -59,7 +59,7 @@ public class OauthService {
             TokenDto tokenDto = securityService.login(firebaseMember.getId());
             loginResponseDto.setAccessToken(tokenDto.getAccessToken());
             loginResponseDto.setRefreshToken(tokenDto.getRefreshToken());
-            loginResponseDto.setMemberId(firebaseMember.getId());
+            loginResponseDto.setUserId(firebaseMember.getId());
             return ResponseEntity.ok().body(loginResponseDto);
         } catch (CEmailLoginFailedException e) {
             log.info("5. 에러 발생");
@@ -86,8 +86,8 @@ public class OauthService {
             loginResponseDto.setAlreadySignIn(false);
         }else {
             log.info("3-2. 회원정보 확인 : 기존회원");
-            log.info("3-3. 비활성화 여부 확인");
             loginResponseDto.setAlreadySignIn(true);
+            log.info("3-3. 비활성화 여부 확인");
             if (kakaoMember.getDisableDay() == null){
                 log.info("3-3-1. 활성화 계정");
             } else {
@@ -101,7 +101,7 @@ public class OauthService {
             TokenDto tokenDto = securityService.login(kakaoMember.getId());
             loginResponseDto.setAccessToken(tokenDto.getAccessToken());
             loginResponseDto.setRefreshToken(tokenDto.getRefreshToken());
-            loginResponseDto.setMemberId(kakaoMember.getId());
+            loginResponseDto.setUserId(kakaoMember.getId());
             return ResponseEntity.ok().body(loginResponseDto);
         } catch (CEmailLoginFailedException e) {
             log.info("5. 에러 발생");
