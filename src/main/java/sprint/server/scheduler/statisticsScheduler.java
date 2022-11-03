@@ -6,6 +6,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import sprint.server.domain.statistics.StatisticsType;
 import sprint.server.service.StatisticsService;
+import sprint.server.service.UserMatchService;
 
 @Slf4j
 @Component
@@ -13,13 +14,14 @@ import sprint.server.service.StatisticsService;
 public class statisticsScheduler {
 
     private final StatisticsService statisticsService;
+    private final UserMatchService userMatchService;
 
 //    매주 월요일 새벽 3시 에 전주 통계 저장
     @Scheduled(cron = "0 0 3 ? * MON", zone = "GMT+9:00")
 //    @Scheduled(cron = "*/20 * * * * *")
     public void savePreviousWeekStatistics(){
         statisticsService.savePreviousStatistics(StatisticsType.Weekly);
-        log.info("Insert statistics Weekly finish");
+        log.info("===Insert statistics Weekly finish===");
     }
 
 
@@ -29,7 +31,7 @@ public class statisticsScheduler {
     @Scheduled(cron = "0 0 4 1 1/1 ?", zone = "GMT+9:00")
     public void savePreviousMonthStatistics(){
         statisticsService.savePreviousStatistics(StatisticsType.Monthly);
-        log.info("Insert statistics Monthly finish");
+        log.info("===Insert statistics Monthly finish===");
     }
 
 
@@ -37,8 +39,21 @@ public class statisticsScheduler {
     @Scheduled(cron = "0 0 5 1 1 ?")
     public void savePreviousYearStatistics(){
         statisticsService.savePreviousStatistics(StatisticsType.Yearly);
-        log.info("Insert statistics Yearly finish");
+        log.info("===Insert statistics Yearly finish===");
+    }
+
+    //매주 리그 매칭
+    @Scheduled(cron = "0 0 4 ? * WED", zone = "GMT+9:00")
+    public void matchingUser(){
+        userMatchService.matchingApplyUser();
+        log.info("===Matching League===");
     }
 
 
+    //매주 리그 매칭
+    @Scheduled(cron = "0 0 4 ? * WED", zone = "GMT+9:00")
+    public void finishLeague(){
+        userMatchService.matchingApplyUser();
+        log.info("===Matching League===");
+    }
 }

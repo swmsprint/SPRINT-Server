@@ -109,6 +109,7 @@ public class StatisticsService {
         double distance =dailyStatistics.stream().mapToDouble(Statistics::getDistance).sum();
         double energy =dailyStatistics.stream().mapToDouble(Statistics::getEnergy).sum();
         double totalSeconds = dailyStatistics.stream().mapToDouble(Statistics::getTotalSeconds).sum();
+        int totalCount = dailyStatistics.stream().mapToInt(Statistics::getCount).sum();
 
         return StatisticsInfoVO.builder()
                 .distance(distance)
@@ -247,7 +248,7 @@ public class StatisticsService {
      * @param statisticsType 설정하기 원하는 시간 타입(일/주/월)
      * @return 종료시간을 String 형식으로 반환
      */
-    private Calendar getCalendarEnd(Timestamp timestamp, StatisticsType statisticsType) {
+    public Calendar getCalendarEnd(Timestamp timestamp, StatisticsType statisticsType) {
 
         Calendar calendarEnd = Calendar.getInstance();
         calendarEnd.setTime(timestamp);
@@ -282,7 +283,7 @@ public class StatisticsService {
      * @param statisticsType 설정하기 원하는 시간 타입(일/주/월)
      * @return 시작작간을 String형식으로 반환
      */
-    private Calendar getCalendarStart(Timestamp timestamp, StatisticsType statisticsType) {
+    public Calendar getCalendarStart(Timestamp timestamp, StatisticsType statisticsType) {
 
         Calendar calendarStart = Calendar.getInstance();
         calendarStart.setTime(timestamp);

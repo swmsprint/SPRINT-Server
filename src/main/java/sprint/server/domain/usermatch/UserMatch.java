@@ -1,5 +1,7 @@
 package sprint.server.domain.usermatch;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,5 +25,9 @@ public class UserMatch {
 
     private Integer ranking;
     private Integer totalScore;
+    private Double totalDistance;
+    private Integer totalCount;
+
+
 
 }
