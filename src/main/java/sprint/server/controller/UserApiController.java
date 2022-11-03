@@ -83,17 +83,17 @@ public class UserApiController {
     @PutMapping("/{userId}")
     public BooleanResponse modifyMembers(@PathVariable Long userId, @RequestBody @Valid MemberInfoDto request) {
         Member member = memberService.findById(userId);
-        if (member.getNickname() != request.getNickname() && memberService.existsByNickname(request.getNickname())) throw new ApiException(ExceptionEnum.MEMBER_DUPLICATE_NICKNAME);
+        if (!member.getNickname().equals(request.getNickname()) && memberService.existsByNickname(request.getNickname())) throw new ApiException(ExceptionEnum.MEMBER_DUPLICATE_NICKNAME);
         return new BooleanResponse(memberService.modifyMembers(member, request));
     }
-    @ApiOperation(value="멤버 정보", notes="Example: http://localhost:8080/user-management/users?target=test")
+    @ApiOperation(value="멤버 정보")
     @GetMapping("/{userId}")
     public MemberInfoDto getMemberInfo(@PathVariable Long userId) {
         Member member = memberService.findById(userId);
         return new MemberInfoDto(member);
     }
 
-    @ApiOperation(value="중복 닉네임 확인", notes="Example: http://localhost:8080/user-management/users?target=test")
+    @ApiOperation(value="중복 닉네임 확인")
     @ApiResponses({
             @ApiResponse(code = 200, message = "정상 작동"),
             @ApiResponse(code = 400, message = "요청 에러"),
