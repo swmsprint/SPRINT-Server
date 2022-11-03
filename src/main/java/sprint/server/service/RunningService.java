@@ -73,15 +73,26 @@ public class RunningService {
     }
 
 
-    public Page<Running> fetchPersonalRunningPages(Integer pageNumber, Long memberId){
-        Member loginMember = memberRepository.findById(memberId).get();
+    /**
+     * 개인 러닝 기록을 가져오는 메소드
+     * @param pageNumber
+     * @param loginMember
+     * @return
+     */
+    public Page<Running> fetchPersonalRunningPages(Integer pageNumber, Member loginMember){
         List<Member> allMembers = new ArrayList<>(Arrays.asList(loginMember));
         return fetchRunningPages(pageNumber,allMembers,3);
     }
-    public Page<Running> fetchPublicRunningPages(Integer pageNumber, Long memberId){
-        Member loginMember = memberRepository.findById(memberId).get();
-        List<Member> allMembers = findFriendsAndLoginMemberList(memberId,loginMember);
-        return fetchRunningPages(pageNumber,allMembers,6);
+
+
+    /**
+     * 친구 및 회원의 러닝 기록을 가져오는 메소드
+     * @param pageNumber
+     * @param allMembers
+     * @return
+     */
+    public Page<Running> fetchPublicRunningPages(Integer pageNumber, List<Member> allMembers){
+        return fetchRunningPages(pageNumber,allMembers,3);
     }
 
     public Page<Running> fetchRunningPages(Integer pageNumber, List<Member> allMembers,int size) {
@@ -89,14 +100,6 @@ public class RunningService {
         return runningRepository.findByMemberInOrderByIdDesc(allMembers, pageRequest);
     }
 
-    public List<Member> findFriendsAndLoginMemberList(Long memberId, Member loginMember) {
-        List<Member> allMembers = memberRepository.findAllById(friendRepository.findBySourceMemberIdAndEstablishState(memberId, FriendState.ACCEPT)
-                .stream()
-                .map(friends -> friends.getTargetMemberId())
-                .collect(java.util.stream.Collectors.toList()));
-        allMembers.add(loginMember);
-        return allMembers;
-    }
     /**
      *
      * @param rowData 경도, 위도, 고도, 시간 등의 데이터가 저장되어있음

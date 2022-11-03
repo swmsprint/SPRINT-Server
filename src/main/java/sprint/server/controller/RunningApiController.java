@@ -9,8 +9,10 @@ import sprint.server.controller.datatransferobject.response.*;
 import sprint.server.controller.datatransferobject.request.CreateRunningRequest;
 import sprint.server.controller.datatransferobject.request.FinishRunningRequest;
 import sprint.server.domain.Running;
+import sprint.server.domain.friend.FriendState;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.statistics.StatisticsType;
+import sprint.server.service.FriendService;
 import sprint.server.service.MemberService;
 import sprint.server.service.RunningService;
 import sprint.server.service.StatisticsService;
@@ -29,6 +31,7 @@ public class RunningApiController {
     private final RunningService runningService;
     private final MemberService memberService;
     private final StatisticsService statisticsService;
+    private final FriendService friendService;
 
 
     @ApiOperation(value="개발자용/러닝 시작", notes = "성공시 저장된 runningId를 반환합니다")
@@ -86,18 +89,22 @@ public class RunningApiController {
     public List<PersonalRunningInfoDTO> viewPersonalRecentRunningList(@RequestParam(value="userId")Long memberId,
                                                                       @RequestParam(value="pageNumber") Integer pageNumber){
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        return runningService.fetchPersonalRunningPages(pageNumber,memberId).toList().stream()
+        Member member = memberService.findById(memberId);
+        return runningService.fetchPersonalRunningPages(pageNumber,member).toList().stream()
                 .map(running -> new PersonalRunningInfoDTO(running.getId(),running.getDuration(),running.getDistance(),dateFormat.format(running.getStartTime()),running.getEnergy()))
                 .collect(java.util.stream.Collectors.toList());
     }
 
 
-    @ApiOperation(value="유저 및 친구의 최근 러닝 6개 리스트 반환", notes = "성공시 저장된 3개의 running 정보를 반환합니다")
+    @ApiOperation(value="유저 및 친구의 최근 러닝 3개 리스트 반환", notes = "성공시 저장된 3개의 running 정보를 반환합니다")
     @GetMapping("public")
     public List<PublicRunningInfoDTO> viewPublicRecentRunningList(@RequestParam(value="userId")Long memberId,
                                                       @RequestParam(value="pageNumber") Integer pageNumber){
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        return runningService.fetchPublicRunningPages(pageNumber,memberId).toList().stream()
+        Member member = memberService.findById(memberId);
+        List<Member> relationMembers = friendService.findFriendsByMemberId(member, FriendState.ACCEPT);
+        relationMembers.add(member);
+        return runningService.fetchPublicRunningPages(pageNumber,relationMembers).toList().stream()
                 .map(running -> new PublicRunningInfoDTO(running.getId(),running.getMember().getId(),running.getDuration(),running.getDistance(),dateFormat.format(running.getStartTime()),running.getEnergy()))
                 .collect(java.util.stream.Collectors.toList());
     }
