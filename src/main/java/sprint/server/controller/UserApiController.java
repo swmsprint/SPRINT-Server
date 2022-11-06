@@ -82,8 +82,9 @@ public class UserApiController {
     })
     @PutMapping("/{userId}")
     public BooleanResponse modifyMembers(@PathVariable Long userId, @RequestBody @Valid MemberInfoDto request) {
+
         Member member = memberService.findById(userId);
-        if (!member.getNickname().equals(request.getNickname()) && memberService.existsByNickname(request.getNickname())) throw new ApiException(ExceptionEnum.MEMBER_DUPLICATE_NICKNAME);
+        if (member.getNickname() != null && !member.getNickname().equals(request.getNickname()) && memberService.existsByNickname(request.getNickname())) throw new ApiException(ExceptionEnum.MEMBER_DUPLICATE_NICKNAME);
         return new BooleanResponse(memberService.modifyMembers(member, request));
     }
     @ApiOperation(value="멤버 정보")
