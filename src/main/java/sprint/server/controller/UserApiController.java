@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import sprint.server.controller.datatransferobject.request.*;
 import sprint.server.controller.datatransferobject.response.*;
@@ -18,6 +19,7 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/user-management/user")
@@ -38,7 +40,7 @@ public class UserApiController {
         return new CreateMemberResponse(id);
     }
 
-    @ApiOperation(value="회원 목록 검색", notes="닉네임 기준, LIKE 연산\nExample: http://localhost:8080/user-management/userId=1&target=test")
+    @ApiOperation(value="회원 목록 검색", notes="닉네임 기준, LIKE 연산")
     @ApiResponses({
             @ApiResponse(code = 200, message = "정상 작동"),
             @ApiResponse(code = 400, message = "요청 에러"),
@@ -46,19 +48,33 @@ public class UserApiController {
     })
     @GetMapping("")
     public FindMembersResponseDto<FindMembersResponseVo> findMembersByNickname(@RequestParam Long userId, @RequestParam String target){
+        log.info("전체멤버 검색");
+        log.info("멤버 존재 여부 확인 :");
         Member member = memberService.findById(userId);
+        log.info("멤버 존재 여부 확인 완료");
+        log.info("해당 멤버 친구 목록 불러오기");
         List<Long> friendsIdList = friendService.findFriendsByMemberId(member, FriendState.ACCEPT).stream()
                 .map(Member::getId).collect(Collectors.toList());
+
+        log.info("해당 멤버 친구요청 발신목록 불러오기");
         List<Long> requestIdList = friendService.findBySourceMemberIdAndFriendState(member, FriendState.REQUEST).stream()
                 .map(Member::getId).collect(Collectors.toList());
+
+        log.info("해당 멤버 친구요청 수신목록 불러오기");
         List<Long> receiveIdList = friendService.findByTargetMemberIdAndFriendState(member, FriendState.REQUEST).stream()
                 .map(Member::getId).collect(Collectors.toList());
+
+        log.info("요청 닉네임 기준 멤버 검색");
         List<Member> members = memberService.findByNicknameContaining(target);
+
+        log.info("정보 DTO에 맞게 가공");
         List<FindMembersResponseVo> result = members.stream()
                 .map(m -> new FindMembersResponseVo(m, friendsIdList, requestIdList, receiveIdList))
                 .filter(m -> !m.getUserId().equals(userId))
                 .sorted(FindMembersResponseVo.COMPARE_BY_NICKNAME)
                 .collect(Collectors.toList());
+
+        log.info("회원 목록 검색 완료");
         return new FindMembersResponseDto(result.size(), result);
     }
 
@@ -82,8 +98,8 @@ public class UserApiController {
     })
     @PutMapping("/{userId}")
     public BooleanResponse modifyMembers(@PathVariable Long userId, @RequestBody @Valid MemberInfoDto request) {
-
-        Member member = memberService.findById(userId);
+        Member member = memberService.findByIdWhetherDisable(userId);
+        memberService.activateMember(member);
         if (member.getNickname() != null && !member.getNickname().equals(request.getNickname()) && memberService.existsByNickname(request.getNickname())) throw new ApiException(ExceptionEnum.MEMBER_DUPLICATE_NICKNAME);
         return new BooleanResponse(memberService.modifyMembers(member, request));
     }

@@ -52,6 +52,7 @@ public class Member extends BaseEntity {
         this.picture = picture;
         this.providerPK = providerPK;
         this.authority = Authority.ROLE_USER;
+        this.tierId = 1;
     }
 
     public void changeMemberInfo(String nickname, Gender gender, LocalDate birthDay, float height, float weight, String picture){

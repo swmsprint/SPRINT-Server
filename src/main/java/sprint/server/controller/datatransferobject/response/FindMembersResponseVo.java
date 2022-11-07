@@ -11,9 +11,9 @@ import java.util.List;
 public class FindMembersResponseVo {
     private Long userId;
     private String nickname;
-    private float height;
-    private float weight;
-    private int tierId;
+    private Float height;
+    private Float weight;
+    private Integer tierId;
     private String picture;
     private FriendState isFriend;
 

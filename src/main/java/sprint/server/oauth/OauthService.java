@@ -54,9 +54,14 @@ public class OauthService {
             }
         }
 
+        if (firebaseMember.getNickname() == null) {
+            memberService.disableMember(firebaseMember);
+            loginResponseDto.setAlreadySignIn(false);
+        }
+
         try {
             log.info("4. 해당 계정으로 토큰 발급 시작");
-            TokenDto tokenDto = securityService.login(firebaseMember.getId());
+            TokenDto tokenDto = securityService.login(firebaseMember);
             loginResponseDto.setAccessToken(tokenDto.getAccessToken());
             loginResponseDto.setRefreshToken(tokenDto.getRefreshToken());
             loginResponseDto.setUserId(firebaseMember.getId());
@@ -96,9 +101,14 @@ public class OauthService {
             }
         }
 
+        if (kakaoMember.getNickname() == null) {
+            memberService.disableMember(kakaoMember);
+            loginResponseDto.setAlreadySignIn(false);
+        }
+
         try {
             log.info("4. 해당 계정으로 토큰 발급 시작");
-            TokenDto tokenDto = securityService.login(kakaoMember.getId());
+            TokenDto tokenDto = securityService.login(kakaoMember);
             loginResponseDto.setAccessToken(tokenDto.getAccessToken());
             loginResponseDto.setRefreshToken(tokenDto.getRefreshToken());
             loginResponseDto.setUserId(kakaoMember.getId());
@@ -171,10 +181,10 @@ public class OauthService {
         ProviderPK providerPK = new ProviderPK(provider, UID);
         String profile = "https://sprint-images.s3.ap-northeast-2.amazonaws.com/default.jpeg";
         log.info("새 계정 생성");
-        Member kakaoUser = new Member(profile, providerPK);
+        Member newUser = new Member(profile, providerPK);
         log.info("새 계정 저장");
-        memberService.join(kakaoUser);
-        return kakaoUser;
+        memberService.join(newUser);
+        return newUser;
     }
 
     public TokenDto reIssueAccessToken(Member member, String refreshToken) {

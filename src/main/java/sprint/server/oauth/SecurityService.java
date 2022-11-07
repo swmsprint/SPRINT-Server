@@ -27,8 +27,7 @@ public class SecurityService {
     }
 
     /* 로그인 된 사용자에게 토큰 발급 : refresh token 은 DB 에 저장 */
-    public TokenDto login(Long memberId) {
-        Member member = memberService.findById(memberId);
+    public TokenDto login(Member member) {
         log.info("4-1. SecurityService-login: 계정을 찾았습니다.");
         log.info("4-2. 토큰 발행 시작");
         // 토큰 발행

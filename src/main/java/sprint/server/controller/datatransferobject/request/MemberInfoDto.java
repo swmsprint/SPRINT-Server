@@ -19,9 +19,9 @@ public class MemberInfoDto {
     @DateTimeFormat(pattern ="yyyy-MM-dd")
     private LocalDate birthday;
     @Positive
-    private float height;
+    private Float height;
     @Positive
-    private float weight;
+    private Float weight;
     @NotNull
     private String picture;
     public MemberInfoDto(){}

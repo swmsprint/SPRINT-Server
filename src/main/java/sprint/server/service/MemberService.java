@@ -53,6 +53,16 @@ public class MemberService {
             throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
         }
     }
+
+    // Scan whether disabled or not.
+    public Member findByIdWhetherDisable(Long id) {
+        Optional<Member> member = memberRepository.findById(id);
+        if (member.isPresent()) {
+            return member.get();
+        } else {
+            throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
+        }
+    }
     public boolean existById(Long memberId) {
         return memberRepository.existsByIdAndDisableDayIsNull(memberId);
     }
