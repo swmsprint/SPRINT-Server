@@ -3,7 +3,6 @@ package sprint.server.controller.exception;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
-import org.springframework.http.HttpStatus;
 
 @Getter
 @ToString

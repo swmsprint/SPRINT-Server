@@ -2,5 +2,8 @@ FROM adoptopenjdk/openjdk11:alpine-jre
 
 ARG JAR_FILE=build/libs/*.jar
 COPY ${JAR_FILE} app.jar
-ENV TZ="Asia/Seoul"
+
+RUN apk add -U tzdata
+ENV TZ=Asia/Seoul
+
 ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=release_login8081", "/app.jar"]

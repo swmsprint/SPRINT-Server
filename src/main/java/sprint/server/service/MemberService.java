@@ -36,7 +36,7 @@ public class MemberService {
     @Transactional
     public Boolean disableMember(Member member) {
         member.disable();
-        return !(member.getDisableDay()==null);
+        return member.getDisableDay() != null;
     }
 
     @Transactional
@@ -78,9 +78,8 @@ public class MemberService {
     }
 
     public Member findByProviderPK(ProviderPK providerPK) {
-        Member member = memberRepository.findByProviderPK(providerPK)
+        return memberRepository.findByProviderPK(providerPK)
                 .orElse(null);
-        return member;
     }
 
     public void deleteMember(Member member) {

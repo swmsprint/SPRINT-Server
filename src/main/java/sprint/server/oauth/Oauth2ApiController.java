@@ -14,7 +14,6 @@ import sprint.server.oauth.dto.token.TokenDto;
 import sprint.server.service.MemberService;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 import java.io.IOException;
 
 @RestController

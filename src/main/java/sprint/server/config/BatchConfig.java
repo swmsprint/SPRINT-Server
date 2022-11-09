@@ -40,7 +40,7 @@ public class BatchConfig {
                 .tasklet((contribution, chunkContext) -> {
                     log.info("===== 삭제 배치 시작 =====");
                     List<Member> disabledMembers = memberRepository.findDisableMembers();
-                    if (disabledMembers.size() > 0 && disabledMembers != null) {
+                    if (!disabledMembers.isEmpty() && disabledMembers != null) {
                         log.info("delete member size : " + disabledMembers.size());
                         for (Member member : disabledMembers) {
                             memberService.deleteMember(member);
