@@ -22,6 +22,6 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
 
     boolean existsByProviderPK(ProviderPK providerPK);
 
-    @Query(value = "select * from Member where DATE(disable_day) < DATE_SUB(NOW(), INTERVAL 60 DAY)", nativeQuery = true)
+    @Query(value = "select * from member where DATE(disable_day) < DATE_SUB(NOW(), INTERVAL 60 DAY)", nativeQuery = true)
     List<Member> findDisableMembers();
 }
