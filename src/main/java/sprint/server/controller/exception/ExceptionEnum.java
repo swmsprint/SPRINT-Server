@@ -33,7 +33,9 @@ public enum ExceptionEnum {
     GROUP_DELETED(HttpStatus.BAD_REQUEST,"G0009", "삭제된 그룹입니다."),
     GROUP_ALREADY_REQUESTED(HttpStatus.BAD_REQUEST, "G0010", "이미 전송된 그룹 가입 요청입니다."),
     GROUP_ALREADY_LEADER(HttpStatus.BAD_REQUEST, "G0011", "이미 그룹장입니다."),
-    GROUP_PERSONNEL_FULL(HttpStatus.BAD_REQUEST, "G0012", "그룹원 한도를 초과했습니다" );
+    GROUP_PERSONNEL_FULL(HttpStatus.BAD_REQUEST, "G0012", "그룹원 한도를 초과했습니다" ),
+    REPORT_ONCE_A_DAY(HttpStatus.BAD_REQUEST, "R0001", "유저 신고는 하루에 한번만 할 수 있습니다."),
+    REPORT_SELF(HttpStatus.BAD_REQUEST, "R0002", "자신을 신고할 수 없습니다." );
 
     private final HttpStatus status;
     private final String code;

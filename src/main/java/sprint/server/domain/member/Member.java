@@ -77,4 +77,12 @@ public class Member extends BaseEntity {
     public int hashCode() {
         return id.intValue();
     }
+
+    public boolean isDisable() {
+        return this.disableDay != null;
+    }
+
+    public boolean isEnable() {
+        return this.disableDay == null;
+    }
 }
