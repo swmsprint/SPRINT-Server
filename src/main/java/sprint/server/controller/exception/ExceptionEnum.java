@@ -35,7 +35,10 @@ public enum ExceptionEnum {
     GROUP_ALREADY_LEADER(HttpStatus.BAD_REQUEST, "G0011", "이미 그룹장입니다."),
     GROUP_PERSONNEL_FULL(HttpStatus.BAD_REQUEST, "G0012", "그룹원 한도를 초과했습니다" ),
     REPORT_ONCE_A_DAY(HttpStatus.BAD_REQUEST, "R0001", "유저 신고는 하루에 한번만 할 수 있습니다."),
-    REPORT_SELF(HttpStatus.BAD_REQUEST, "R0002", "자신을 신고할 수 없습니다." );
+    REPORT_SELF(HttpStatus.BAD_REQUEST, "R0002", "자신을 신고할 수 없습니다." ),
+    BLOCK_SELF(HttpStatus.BAD_REQUEST, "B0003", "자신을 차단/해제 할 수 없습니다." ),
+    BLOCK_NOT_FOUND(HttpStatus.BAD_REQUEST, "B0004", "차단 내용을 찾을 수 없습니다." ),
+    BLOCK_ALREADY(HttpStatus.BAD_REQUEST, "B0005", "이미 차단된 유저입니다.");
 
     private final HttpStatus status;
     private final String code;

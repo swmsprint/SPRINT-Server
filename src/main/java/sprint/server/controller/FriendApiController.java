@@ -33,7 +33,7 @@ public class FriendApiController {
             @ApiResponse(code = 500, message = "서버 에러")
     })
     @PostMapping("")
-    public BooleanResponse createFriends(@RequestBody @Valid FriendsRequest request) {
+    public BooleanResponse createFriends(@RequestBody @Valid TwoMemberRequest request) {
         Member sourceMember = memberService.findById(request.getSourceUserId());
         Member targetMember = memberService.findById(request.getTargetUserId());
         return new BooleanResponse(friendService.requestFriends(sourceMember, targetMember));
@@ -64,7 +64,7 @@ public class FriendApiController {
 
     @ApiOperation(value = "친구 제거")
     @DeleteMapping("")
-    public BooleanResponse deleteFriends(@RequestBody @Valid FriendsRequest request) {
+    public BooleanResponse deleteFriends(@RequestBody @Valid TwoMemberRequest request) {
         Member sourceMember = memberService.findById(request.getSourceUserId());
         Member targetMember = memberService.findById(request.getTargetUserId());
         return new BooleanResponse(friendService.deleteFriends(sourceMember, targetMember));
