@@ -9,6 +9,7 @@ import sprint.server.controller.datatransferobject.request.*;
 import sprint.server.controller.datatransferobject.response.*;
 import sprint.server.domain.friend.FriendState;
 import sprint.server.domain.member.Member;
+import sprint.server.service.BlockService;
 import sprint.server.service.FriendService;
 import sprint.server.service.MemberService;
 
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 public class UserApiController {
     private final MemberService memberService;
     private final FriendService friendService;
+    private final BlockService blockService;
 
     @ApiOperation(value="회원가입")
     @ApiResponses({
@@ -52,7 +54,9 @@ public class UserApiController {
         List<Long> receiveIdList = friendService.findByTargetMemberIdAndFriendState(member, FriendState.REQUEST).stream()
                 .map(Member::getId).collect(Collectors.toList());
         List<Member> members = memberService.findByNicknameContaining(target);
+        List<Member> blockList = blockService.findBlockedMember(member);
         List<FindMembersResponseVo> result = members.stream()
+                .filter(m -> !blockList.contains(m))
                 .map(m -> new FindMembersResponseVo(m, friendsIdList, requestIdList, receiveIdList))
                 .filter(m -> !m.getUserId().equals(userId))
                 .sorted(FindMembersResponseVo.COMPARE_BY_NICKNAME)

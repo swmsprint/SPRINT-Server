@@ -24,7 +24,7 @@ public class Block extends BaseEntity {
     @NotNull
     private Long targetMemberId;
 
-    public Long getSourceMemberId() {
-        return sourceMemberId;
+    public Long getTargetMemberId() {
+        return targetMemberId;
     }
 }

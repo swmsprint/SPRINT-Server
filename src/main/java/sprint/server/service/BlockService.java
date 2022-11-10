@@ -14,8 +14,11 @@ import sprint.server.domain.member.Member;
 import sprint.server.repository.BlockRepository;
 import sprint.server.repository.FriendRepository;
 import sprint.server.repository.GlobalBlockRepository;
+import sprint.server.repository.MemberRepository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +27,7 @@ public class BlockService {
     private final BlockRepository blockRepository;
     private final GlobalBlockRepository globalBlockRepository;
     private final FriendRepository friendRepository;
+    private final MemberRepository memberRepository;
 
     @Transactional
     public void globalBlockMemberJoin(Member member) {
@@ -44,6 +48,9 @@ public class BlockService {
         Optional<Block> block = blockRepository.findBlockBySourceMemberIdAndAndTargetMemberId(sourceMemberId, targetMemberId);
         if (block.isPresent()) throw new ApiException(ExceptionEnum.BLOCK_ALREADY);
 
+        // 만약 친구 관계가 존재한다면 삭제
+        Optional<Friend> friend = friendRepository.findFriendByTwoMemberId(sourceMemberId, targetMemberId);
+        friend.ifPresent(friendRepository::delete);
 
         Block newBlock = new Block(sourceMemberId, targetMemberId);
         blockRepository.save(newBlock);
@@ -60,10 +67,6 @@ public class BlockService {
         Optional<Block> block = blockRepository.findBlockBySourceMemberIdAndAndTargetMemberId(sourceMemberId, targetMemberId);
         if (block.isEmpty()) throw new ApiException(ExceptionEnum.BLOCK_NOT_FOUND);
 
-        // 만약 친구 관계가 존재한다면 삭제
-        Optional<Friend> friend = friendRepository.findFriendByTwoMemberId(sourceMemberId, targetMemberId);
-        friend.ifPresent(friendRepository::delete);
-
         blockRepository.delete(block.get());
         return true;
     }
@@ -71,5 +74,14 @@ public class BlockService {
     public boolean alreadyBlockCheck(Long sourceUserId, Long targetUserId) {
         Optional<Block> block = blockRepository.findBlockBySourceMemberIdAndAndTargetMemberId(sourceUserId, targetUserId);
         return block.isPresent();
+    }
+
+    public List<Member> findBlockedMember(Member member) {
+        List<Block> blockList = blockRepository.findBlockBySourceMemberId(member.getId());
+        List<Member> blockMemberList = blockList.stream().map(block -> memberRepository.findById(block.getTargetMemberId()))
+                .filter(block -> block.isPresent())
+                .map(block -> block.get())
+                .collect(Collectors.toList());
+        return blockMemberList;
     }
 }

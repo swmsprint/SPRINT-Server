@@ -5,14 +5,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import sprint.server.controller.datatransferobject.request.TwoMemberRequest;
 import sprint.server.controller.datatransferobject.response.BooleanResponse;
-import sprint.server.controller.exception.ApiException;
-import sprint.server.controller.exception.ExceptionEnum;
-import sprint.server.domain.block.Block;
+import sprint.server.controller.datatransferobject.response.FindBlockResponseVo;
+import sprint.server.controller.datatransferobject.response.FindMembersResponseDto;
 import sprint.server.domain.member.Member;
 import sprint.server.service.BlockService;
 import sprint.server.service.MemberService;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,5 +36,16 @@ public class BlockApiController {
         Member sourceMember = memberService.findById(request.getSourceUserId());
         Member targetMember = memberService.findById(request.getTargetUserId());
         return new BooleanResponse(blockService.requestUnblock(sourceMember, targetMember));
+    }
+
+    @ApiOperation(value = "차단 목록 확인")
+    @GetMapping("/{userId}")
+    public FindMembersResponseDto<FindBlockResponseVo> findBlockList(@PathVariable Long userId) {
+        Member member = memberService.findById(userId);
+        List<Member> blockedMember = blockService.findBlockedMember(member);
+        List<FindBlockResponseVo> result = blockedMember.stream()
+                .map(FindBlockResponseVo::new)
+                .collect(Collectors.toList());
+        return new FindMembersResponseDto(result.size(), result);
     }
 }

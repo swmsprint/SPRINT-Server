@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import sprint.server.domain.block.Block;
 import sprint.server.domain.block.BlockId;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface BlockRepository extends JpaRepository<Block, BlockId> {
@@ -13,4 +14,6 @@ public interface BlockRepository extends JpaRepository<Block, BlockId> {
             "(b.sourceMemberId =:targetMemberId and b.targetMemberId =:sourceMemberId)")
     Optional<Block> findBlockByTwoMemberId(@Param("targetMemberId") Long targetMemberId,@Param("sourceMemberId") Long sourceMemberId);
     Optional<Block> findBlockBySourceMemberIdAndAndTargetMemberId(Long sourceMemberId, Long targetMemberId);
+
+    List<Block> findBlockBySourceMemberId(Long id);
 }
