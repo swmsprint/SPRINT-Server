@@ -16,7 +16,10 @@ import sprint.server.repository.FriendRepository;
 import sprint.server.repository.MemberRepository;
 import sprint.server.repository.RunningRepository;
 
+import javax.xml.crypto.Data;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -32,10 +35,23 @@ public class RunningService {
         return runningRepository.findById(runningId);
     }
     @Transactional
-    public Long addRun(Member member, String startTime){
+    public Long addRun(Member member, String startTime) {
+        SimpleDateFormat simpleFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
+        Date data = null;
+        try {
+           data = simpleFormat.parse(new StringTokenizer(startTime,"Z").nextToken());
+
+        } catch (ParseException e){
+            e.printStackTrace();
+        }
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(data);
+        calendar.add(Calendar.HOUR_OF_DAY,9);
 
         Running running = createRunning(member);
-        running.setStartTime(Timestamp.valueOf(new StringTokenizer(startTime,"Z").nextToken()));
+
+        running.setStartTime(new Timestamp(calendar.getTimeInMillis()));
         runningRepository.save(running);
 
         return running.getId();
@@ -44,7 +60,7 @@ public class RunningService {
 
 
     @Transactional
-    public Running finishRunning(FinishRunningRequest request) throws JsonProcessingException {
+    public Running finishRunning(FinishRunningRequest request)  {
 
         Running running = runningRepository.findById(request.getRunningId()).get();
         Member member = memberRepository.findById(request.getUserId()).get();
