@@ -33,7 +33,7 @@ class RunningServiceTest {
         Member member = memberRepository.findById(1L).orElse(null);
         //When
         long id = runningService.addRun(member,"2021-07-02 07:48:26.382");
-        Running running = runningRepository.findByMember_IdAndAndStartTime(member.getId(), Timestamp.valueOf("2021-07-02 07:48:26.382"));
+        Running running = runningRepository.findByMember_IdAndAndStartTime(member.getId(), Timestamp.valueOf("2021-07-02 16:48:26.382"));
 
         //Then
         assertEquals(running.getId(), id);
@@ -44,7 +44,7 @@ class RunningServiceTest {
         //Given
         Member member = memberRepository.findById(1L).orElse(null);
         long id = runningService.addRun(member,"2021-07-02 07:48:26.382");
-        Running running = runningRepository.findByMember_IdAndAndStartTime(member.getId(), Timestamp.valueOf("2021-07-02 07:48:26.382"));
+        Running running = runningRepository.findByMember_IdAndAndStartTime(member.getId(), Timestamp.valueOf("2021-07-02 16:48:26.382"));
         List<RunningRawData> runningRawData = new ArrayList<>();
         runningRawData.add(new RunningRawData(running,37.33028771,-122.02810514,4.05,"2022-08-02 07:48:26.382Z"));
         runningRawData.add(new RunningRawData(running,37.33028771,-122.02810514,4.05,"2022-08-02 07:48:26.382Z"));
