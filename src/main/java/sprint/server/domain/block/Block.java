@@ -13,8 +13,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(indexes = {
-        @Index(name = "source_member_index", columnList = "sourceMemberId"),
-        @Index(name = "target_member_index", columnList = "targetMemberId")
+        @Index(name = "source_member_index", columnList = "sourceMemberId")
 })
 public class Block extends BaseEntity {
     @Id

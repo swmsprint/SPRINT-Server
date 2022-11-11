@@ -1,6 +1,7 @@
 package sprint.server.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sprint.server.controller.datatransferobject.request.ModifyGroupInfoRequest;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class GroupService {
@@ -34,13 +36,18 @@ public class GroupService {
      */
     @Transactional
     public Integer join(Groups group) {
-        if (groupRepository.existsByGroupName(group.getGroupName())) throw new ApiException(ExceptionEnum.GROUP_NAME_ALREADY_EXISTS);
-        if (!memberService.existById(group.getGroupLeaderId())) throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
+        log.info("Group ID : {}, 그룹 생성 요청", group.getId());
+        if (groupRepository.existsByGroupName(group.getGroupName())) {
+            log.error("Group ID : {}, 중복 이름 그룹 존재", group.getGroupName());
+            throw new ApiException(ExceptionEnum.GROUP_NAME_ALREADY_EXISTS);
+        }
+
         Member leader = memberService.findById(group.getGroupLeaderId());
         groupRepository.save(group);
         GroupMember groupMember = new GroupMember(group, leader);
         groupMember.setGroupMemberState(GroupMemberState.LEADER);
         groupMemberRepository.save(groupMember);
+        log.info("Group ID : {}, 그룹 만들기 성공", group.getId());
         return group.getId();
     }
 
@@ -52,14 +59,20 @@ public class GroupService {
      */
     @Transactional
     public boolean requestJoinGroupMember(Groups group, Member member) {
+        log.info("ID : {}, Group ID : {}, 그룹 가입 요청", member.getId(), group.getId());
         GroupMember groupMember = new GroupMember(group, member);
         if (groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember.getGroupMemberId(), GroupMemberState.LEADER) ||
-                groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember.getGroupMemberId(), GroupMemberState.ACCEPT))
+                groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember.getGroupMemberId(), GroupMemberState.ACCEPT)) {
+            log.error("이미 가입된 그룹입니다.");
             throw new ApiException(ExceptionEnum.GROUP_ALREADY_JOINED);
+        }
         if (groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember.getGroupMemberId(), GroupMemberState.REQUEST)) {
+            log.error("이미 전송된 요청입니다.");
             throw new ApiException(ExceptionEnum.GROUP_ALREADY_REQUESTED);
         }
         groupMemberRepository.save(groupMember);
+
+        log.info("ID : {}, Group ID : {}, 그룹 가입 요청 완료", member.getId(), group.getId());
         return groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember.getGroupMemberId(), GroupMemberState.REQUEST);
     }
 
@@ -72,16 +85,20 @@ public class GroupService {
      */
     @Transactional
     public Boolean answerGroupMember(Groups group, Member member, GroupMemberState groupMemberState) {
+        log.info("ID : {}, Group ID : {}, 요청 응답: {}, 그룹 가입 응답 요청", member.getId(), group.getId(), groupMemberState);
         GroupMember groupMember = findJoinRequestByGroupAndMember(group, member);
         groupMember.setGroupMemberState(groupMemberState);
 
         if (groupMemberState.equals(GroupMemberState.ACCEPT)) {
             if(group.getGroupMaxPersonnel() > group.getGroupPersonnel()){
+                log.info("그룹 가입 승인 완료");
                 group.addMember();
             } else {
+                log.error("그룹원 초과로 인한 그룹 가입 승인 실패");
                 throw new ApiException(ExceptionEnum.GROUP_PERSONNEL_FULL);
             }
         }
+        log.info("ID : {}, Group ID : {}, 요청 응답: {}, 그룹 가입 응답 완료", member.getId(), group.getId(), groupMemberState);
         return groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember.getGroupMemberId(), groupMemberState);
     }
 
@@ -93,14 +110,20 @@ public class GroupService {
      */
     @Transactional
     public Boolean leaveGroupMember(Groups group, Member member) {
+        log.info("요청 유저 : {}, 요청 그룹 : {} 그룹 탈퇴 요청", member.getId(), group.getId());
         GroupMember groupMember = findJoinedGroupMemberByGroupAndMember(group, member);
-        if (groupMember.getGroupMemberState().equals(GroupMemberState.LEADER))
+        if (groupMember.getGroupMemberState().equals(GroupMemberState.LEADER)) {
+            log.error("그룹 리더는 탈퇴할 수 없습니다.");
             throw new ApiException(ExceptionEnum.GROUP_LEADER_CANT_LEAVE);
-        if (!groupMember.getGroupMemberState().equals(GroupMemberState.ACCEPT))
+        }
+        if (!groupMember.getGroupMemberState().equals(GroupMemberState.ACCEPT)) {
+            log.error("요청 유저({})가 요청 그룹({})에 존재하지 않습니다.", member.getId(), group.getId());
             throw new ApiException(ExceptionEnum.GROUP_MEMBER_NOT_FOUND);
+        }
 
         groupMember.setGroupMemberState(GroupMemberState.LEAVE);
         group.leaveMember();
+        log.info("ID : {}, Group ID : {}, 그룹 탈퇴 완료", member.getId(), group.getId());
         return groupMemberRepository.existsByGroupMemberIdAndGroupMemberState(groupMember.getGroupMemberId(), GroupMemberState.LEAVE);
     }
 
@@ -111,6 +134,7 @@ public class GroupService {
      */
     @Transactional
     public Boolean deleteGroup(Groups group) {
+        log.info("Group ID : {}, 그룹 삭제 요청", group.getId());
         Integer groupId = group.getId();
         List<GroupMember> groupMemberList = groupMemberRepository.findAllMemberByGroupId(groupId);
         List<GroupMember> requestGroupMemberList = groupMemberRepository.findRequestGroupMemberByGroupId(groupId);
@@ -118,6 +142,7 @@ public class GroupService {
         groupMemberList.forEach(groupMember -> groupMember.setGroupMemberState(GroupMemberState.LEAVE));
         requestGroupMemberList.forEach(groupMember -> groupMember.setGroupMemberState(GroupMemberState.REJECT));
         group.delete();
+        log.info("Group ID : {}, 그룹 삭제 완료", groupId);
         return group.getIsDeleted().equals(true) && groupMemberRepository.findAllMemberByGroupId(groupId).isEmpty();
     }
 
@@ -129,6 +154,7 @@ public class GroupService {
      */
     @Transactional
     public Boolean changeGroupLeaderByGroupAndMember(Groups group, Member newLeader) {
+        log.info("Group ID : {}, 새로운 그룹장 : {}, 모든 그룹원 위임 요청", group.getId(), newLeader.getId());
         Member existLeader = findGroupLeader(group);
         if (existLeader.equals(newLeader)) {
             throw new ApiException(ExceptionEnum.GROUP_ALREADY_LEADER);
@@ -138,6 +164,7 @@ public class GroupService {
         existLeaderMember.setGroupMemberState(GroupMemberState.ACCEPT);
         newLeaderMember.setGroupMemberState(GroupMemberState.LEADER);
         group.changeGroupLeader(newLeader.getId());
+        log.info("Group ID : {}, 새로운 그룹장 : {}, 모든 그룹원 위임 완료", group.getId(), newLeader.getId());
         return findGroupLeader(group).equals(newLeader)
                 && existLeaderMember.getGroupMemberState().equals(GroupMemberState.ACCEPT);
     }
@@ -150,7 +177,9 @@ public class GroupService {
      */
     @Transactional
     public Boolean modifyGroupInfo(Groups group, ModifyGroupInfoRequest request) {
+        log.info("Group ID : {}, 그룹 정보 변경 요청", group.getId());
         group.changeDescriptionAndPicture(request.getGroupDescription(), request.getGroupPicture());
+        log.info("Group ID : {}, 그룹 정보 변경 성공", group.getId());
         return group.getGroupDescription().equals(request.getGroupDescription()) &&
                 group.getGroupPicture().equals(request.getGroupPicture());
     }
@@ -161,9 +190,15 @@ public class GroupService {
      * @return GroupMember
      */
     public Member findGroupLeader(Groups group) {
+        log.info("Group ID : {}, 그룹 리더 조회", group.getId());
         Optional<GroupMember> leader = groupMemberRepository.findGroupLeaderByGroupId(group.getId());
-        if (leader.isEmpty()) throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
-        return memberService.findById(leader.get().getMemberId());
+        if (leader.isEmpty()) {
+            log.error("Group ID : {}, 그룹 리더 조회 실패", group.getId());
+            throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
+        }
+        Member mLeader = memberService.findById(leader.get().getMemberId());
+        log.info("요청 그룹 : {}, 그룹 리더 조회 완료 : {}", group.getId(), mLeader.getId());
+        return mLeader;
     }
 
     /**
@@ -236,6 +271,7 @@ public class GroupService {
      * @return
      */
     public List<Member> findAllMemberByGroup(Groups group) {
+        log.info("Group ID : {}, 모든 그룹원 정보 요청", group.getId());
         return groupMemberRepository.findAllMemberByGroupId(group.getId())
                 .stream()
                 .map(gm -> memberService.findById(gm.getMemberId()))
@@ -248,9 +284,17 @@ public class GroupService {
      * @return
      */
     public Groups findGroupByGroupId(Integer groupId) {
+        log.info("Group ID : {}, 그룹 검색", groupId);
         Optional<Groups> group = groupRepository.findById(groupId);
-        if (group.isEmpty()) throw new ApiException(ExceptionEnum.GROUP_NOT_FOUND);
-        if (group.get().getIsDeleted().equals(true)) throw new ApiException(ExceptionEnum.GROUP_DELETED);
+        if (group.isEmpty()) {
+            log.error("Group ID : {}, 그룹 검색 실패", groupId);
+            throw new ApiException(ExceptionEnum.GROUP_NOT_FOUND);
+        }
+        if (group.get().getIsDeleted().equals(true)) {
+            log.error("Group ID : {}, 그룹 검색 실패", groupId);
+            throw new ApiException(ExceptionEnum.GROUP_DELETED);
+        }
+        log.info("Group ID : {}, 그룹 검색 완료", groupId);
         return group.get();
     }
 

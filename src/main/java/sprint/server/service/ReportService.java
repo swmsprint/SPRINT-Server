@@ -20,10 +20,18 @@ public class ReportService {
 
     @Transactional
     public Long join(Member sourceMember, Member targetMember, String message) {
+        log.info("{} -> {} 회원 신고 등록 요청", sourceMember.getId(), targetMember.getId());
         Report report = new Report(sourceMember.getId(), targetMember.getId(), message);
-        if (sourceMember.equals(targetMember)) throw new ApiException(ExceptionEnum.REPORT_SELF);
-        if (!validationNewReport(report)) throw new ApiException(ExceptionEnum.REPORT_ONCE_A_DAY);
+        if (sourceMember.equals(targetMember)) {
+            log.error("{} -> {} 본인 신고 등록 불가", sourceMember.getId(), targetMember.getId());
+            throw new ApiException(ExceptionEnum.REPORT_SELF);
+        }
+        if (!validationNewReport(report)) {
+            log.error("{} -> {} 특정 유저에 대한 신고는 하루에 한번 가능", sourceMember.getId(), targetMember.getId());
+            throw new ApiException(ExceptionEnum.REPORT_ONCE_A_DAY);
+        }
         reportRepository.save(report);
+        log.info("{} -> {} 회원 신고 등록 요청 완료", sourceMember.getId(), targetMember.getId());
         return report.getId();
     }
 
@@ -36,6 +44,8 @@ public class ReportService {
     }
 
     public Long countLast10minReport(Member member) {
-        return reportRepository.countReportByTargetMemberIdLast10min(member.getId());
+        Long count = reportRepository.countReportByTargetMemberIdLast10min(member.getId());
+        log.info("ID : {}, 회원 최근 10분 신고정보 요청 : {}개", member.getId(), count);
+        return count;
     }
 }
