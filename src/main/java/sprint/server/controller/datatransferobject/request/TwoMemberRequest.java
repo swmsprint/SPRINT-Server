@@ -7,7 +7,7 @@ import lombok.Data;
 import javax.validation.constraints.NotNull;
 
 @Data
-public class FriendsRequest {
+public class TwoMemberRequest {
     @NotNull
     @ApiParam(value = "요청하는 회원 ID")
     @ApiModelProperty(example = "3", required = true)
