@@ -1,6 +1,8 @@
 package sprint.server.controller;
 
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -181,5 +183,12 @@ public class GroupsApiController {
         log.info("Group ID : {}, 그룹 정보 변경 요청", groupId);
         Groups groups = groupService.findGroupByGroupId(groupId);
         return new BooleanResponse(groupService.modifyGroupInfo(groups, request));
+    }
+
+    @ApiOperation(value="중복 그룹명 확인")
+    @GetMapping ("/validation-duplicate-name")
+    public BooleanResponse validationDuplicateNickname(@RequestParam String target) {
+        log.info("중복 그룹 이름 확인");
+        return new BooleanResponse(!groupService.existsByNickname(target));
     }
 }

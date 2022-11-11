@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 public class LoginResponseDto {
 
     private boolean alreadySignIn;
+    private boolean globalBlock;
     private Long userId;
     private String accessToken;
     private String refreshToken;

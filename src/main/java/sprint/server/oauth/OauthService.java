@@ -17,6 +17,7 @@ import sprint.server.domain.member.Provider;
 import sprint.server.domain.member.ProviderPK;
 import sprint.server.oauth.dto.member.LoginResponseDto;
 import sprint.server.oauth.dto.token.TokenDto;
+import sprint.server.repository.GlobalBlockRepository;
 import sprint.server.service.MemberService;
 
 @Service
@@ -26,6 +27,7 @@ public class OauthService {
     private final MemberService memberService;
     private final SecurityService securityService;
     private final JwtProvider jwtProvider;
+    private final GlobalBlockRepository globalBlockRepository;
 
     @Value("${kakao.redirect-uri}")
     private String kakaoRedirectUri;
@@ -49,8 +51,15 @@ public class OauthService {
             if (firebaseMember.getDisableDay() == null){
                 log.info("3-1. 활성화 계정");
             } else {
-                log.info("3-2. 비활성화 계정 : 재활성화");
-                memberService.activateMember(firebaseMember);
+                log.info("3-1-1. 정지 계정 확인");
+                if (globalBlockRepository.existsById(firebaseMember.getId())){
+                    log.info("3-1-2. 정지 계정");
+                    loginResponseDto.setGlobalBlock(true);
+                    return ResponseEntity.ok().body(loginResponseDto);
+                } else {
+                    log.info("3-1-2. 비활성화 계정 : 재활성화");
+                    memberService.activateMember(firebaseMember);
+                }
             }
         }
 
@@ -76,6 +85,7 @@ public class OauthService {
         LoginResponseDto loginResponseDto = new LoginResponseDto();
         log.info("Provider : KAKAO");
         log.info("1. 인가 코드로 카카오 access token 요청");
+
         String accessToken = getAccessToken(code);
         log.info("accessToken = {}", accessToken);
 
@@ -96,8 +106,15 @@ public class OauthService {
             if (kakaoMember.getDisableDay() == null){
                 log.info("3-3-1. 활성화 계정");
             } else {
-                log.info("3-3-1. 비활성화 계정 : 재활성화");
-                 memberService.activateMember(kakaoMember);
+                log.info("3-1-1. 정지 계정 확인");
+                if (globalBlockRepository.existsById(kakaoMember.getId())){
+                    log.info("3-1-2. 정지 계정");
+                    loginResponseDto.setGlobalBlock(true);
+                    return ResponseEntity.ok().body(loginResponseDto);
+                } else {
+                    log.info("3-1-2. 비활성화 계정 : 재활성화");
+                    memberService.activateMember(kakaoMember);
+                }
             }
         }
 
@@ -179,7 +196,7 @@ public class OauthService {
 //     3. 회원가입 처리
     private Member registerUserIfNeed(Provider provider, String UID) {
         ProviderPK providerPK = new ProviderPK(provider, UID);
-        String profile = "https://sprint-images.s3.ap-northeast-2.amazonaws.com/default.jpeg";
+        String profile = "https://sprint-images.s3.ap-northeast-2.amazonaws.com/users/default.jpeg";
         log.info("새 계정 생성");
         Member newUser = new Member(profile, providerPK);
         log.info("새 계정 저장");

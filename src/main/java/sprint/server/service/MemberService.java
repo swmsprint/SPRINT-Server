@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sprint.server.controller.datatransferobject.request.MemberInfoDto;
+import sprint.server.controller.datatransferobject.response.BooleanResponse;
 import sprint.server.controller.exception.ApiException;
 import sprint.server.controller.exception.ExceptionEnum;
 import sprint.server.domain.member.Member;
@@ -31,6 +32,10 @@ public class MemberService {
 
     @Transactional
     public Boolean modifyMembers(Member member, MemberInfoDto request) {
+        if(existsByNickname(request.getNickname())) {
+            log.error("동일 이름 회원이 존재합니다.");
+            throw new ApiException(ExceptionEnum.MEMBER_DUPLICATE_NICKNAME);
+        }
         member.changeMemberInfo(request.getNickname(), request.getGender(), request.getBirthday(), request.getHeight(), request.getWeight(), request.getPicture());
         return true;
     }
@@ -77,6 +82,7 @@ public class MemberService {
         return memberRepository.findByNicknameContainingAndDisableDayIsNull(nickname);
     }
     public boolean existsByNickname(String nickname) {
+        if(nickname.equals("default")) return true;
         return memberRepository.existsByNickname(nickname);
     }
 

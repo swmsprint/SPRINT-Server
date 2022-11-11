@@ -37,8 +37,8 @@ public class GroupService {
     @Transactional
     public Integer join(Groups group) {
         log.info("Group ID : {}, 그룹 생성 요청", group.getId());
-        if (groupRepository.existsByGroupName(group.getGroupName())) {
-            log.error("Group ID : {}, 중복 이름 그룹 존재", group.getGroupName());
+        if (existsByNickname(group.getGroupName())) {
+            log.error("동일 이름 그룹이 존재합니다.");
             throw new ApiException(ExceptionEnum.GROUP_NAME_ALREADY_EXISTS);
         }
 
@@ -303,5 +303,10 @@ public class GroupService {
                 .stream()
                 .filter(groups -> groups.getIsDeleted().equals(false))
                 .collect(Collectors.toList());
+    }
+
+    public boolean existsByNickname(String nickname) {
+        if(nickname.equals("default")) return true;
+        return groupRepository.existsByGroupName(nickname);
     }
 }

@@ -41,7 +41,7 @@ public enum ExceptionEnum {
     TOKEN_NOT_SUPPORT(HttpStatus.UNAUTHORIZED, "T0004", "지원하지 않는 JWT 입니다."),
     TOKEN_ILLEGAL_JWT(HttpStatus.UNAUTHORIZED,"T0005", "잘못된 JWT 입니다."),
     TOKEN_NOT_OWNER(HttpStatus.UNAUTHORIZED, "T0006", "JWT와 요청한 유저가 일치하지 않습니다." ),
-    TOKEN_REQUIRE_REFRESHTOKEN(HttpStatus.UNAUTHORIZED, "T0007", "Refresh Token이 아닙니다.");
+    TOKEN_REQUIRE_REFRESHTOKEN(HttpStatus.UNAUTHORIZED, "T0007", "Refresh Token이 아닙니다."),
     REPORT_ONCE_A_DAY(HttpStatus.BAD_REQUEST, "R0001", "유저 신고는 하루에 한번만 할 수 있습니다."),
     REPORT_SELF(HttpStatus.BAD_REQUEST, "R0002", "자신을 신고할 수 없습니다." ),
     BLOCK_SELF(HttpStatus.BAD_REQUEST, "B0003", "자신을 차단/해제 할 수 없습니다." ),

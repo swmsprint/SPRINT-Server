@@ -92,7 +92,7 @@ public class UserApiController {
             @ApiResponse(code = 500, message = "서버 에러")
     })
     @PutMapping("/{userId}")
-    public BooleanResponse modifyMembers(@PathVariable Long userId, @RequestBody @Valid ModifyMembersRequest request) {
+    public BooleanResponse modifyMembers(@PathVariable Long userId, @RequestBody @Valid MemberInfoDto request) {
         log.info("회원 정보 변경");
         Member member = memberService.findById(userId);
         log.info("ID: {}, 회원 정보 변경 요청", member.getId());
