@@ -38,3 +38,9 @@ out/
 
 ### MacOS ###
 .DS_Store
+
+### Git ###
+src/main/resources/*.properties
+src/main/resources/*.yml
+src/test/**/*.properties
+src/test/**/*.yml
