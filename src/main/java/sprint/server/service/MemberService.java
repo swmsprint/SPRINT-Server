@@ -1,20 +1,23 @@
 package sprint.server.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sprint.server.controller.datatransferobject.request.ModifyMembersRequest;
+import sprint.server.controller.datatransferobject.request.MemberInfoDto;
+import sprint.server.controller.datatransferobject.response.BooleanResponse;
 import sprint.server.controller.exception.ApiException;
 import sprint.server.controller.exception.ExceptionEnum;
 import sprint.server.domain.member.Member;
+import sprint.server.domain.member.ProviderPK;
 import sprint.server.repository.MemberRepository;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @Transactional(readOnly = true)
 public class MemberService {
 
@@ -22,71 +25,73 @@ public class MemberService {
 
     @Transactional // readOnly = false
     public Long join(Member member){
-        if (existsByNickname(member.getNickname())){
-            throw new ApiException(ExceptionEnum.MEMBER_DUPLICATE_NICKNAME);
-        } else if (existsByEmail(member.getEmail())){
-            throw new ApiException(ExceptionEnum.MEMBER_DUPLICATE_EMAIL);
-        } else {
-            memberRepository.save(member);
-            return member.getId();
-        }
+        if (existsByProviderPK(member.getProviderPK())) throw new ApiException(ExceptionEnum.MEMBER_ALREADY_SIGNUP);
+        memberRepository.save(member);
+        return member.getId();
     }
 
     @Transactional
-    public Boolean modifyMembers(ModifyMembersRequest request) {
-        Optional<Member> member = memberRepository.findByIdAndDisableDayIsNull(request.getId());
-        if (member.isEmpty()) {
-            throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
-        }
-        member.get().changeMemberInfo(request.getNickname(), request.getGender(), request.getEmail(), request.getBirthDay(), request.getHeight(), request.getWeight(), request.getPicture());
+    public Boolean modifyMembers(Member member, MemberInfoDto request) {
+        member.changeMemberInfo(request.getNickname(), request.getGender(), request.getBirthday(), request.getHeight(), request.getWeight(), request.getPicture());
         return true;
     }
 
     @Transactional
-    public Boolean disableMember(Long memberId) {
-        Optional<Member> member = memberRepository.findById(memberId);
-        if (member.isEmpty()) {
-            throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
-        } else if (member.get().getDisableDay() != null) {
-            throw new ApiException(ExceptionEnum.MEMBER_ALREADY_DISABLED);
-        } else {
-            member.get().setDisableDay(LocalDate.now());
-            return true;
-        }
+    public Boolean disableMember(Member member) {
+        log.info("ID : {}, 비활성화 요청", member.getId());
+        member.disable();
+        log.info("ID : {}, 비활성화 완료", member.getId());
+        return member.getDisableDay() != null;
     }
 
     @Transactional
-    public Boolean enableMember(Long memberId) {
-        Optional<Member> member = memberRepository.findById(memberId);
-        if (member.isEmpty()) {
-            throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
-        } else if (member.get().getDisableDay() == null){
-            throw new ApiException(ExceptionEnum.MEMBER_NOT_DISABLED);
-        } else {
-            member.get().setDisableDay(null);
-            return true;
-        }
+    public Boolean activateMember(Member member){
+        member.enable();
+        return member.getDisableDay()==null;
     }
 
     public Member findById(Long id){
+        log.info("ID : {}, 유저 검색", id);
         Optional<Member> member = memberRepository.findByIdAndDisableDayIsNull(id);
+        if (member.isPresent()) {
+            log.info("ID : {}, 유저 검색 완료", id);
+            return member.get();
+        } else {
+            log.error("ID : {}, 유저 검색 실패", id);
+            throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
+        }
+    }
+
+    // Scan whether disabled or not.
+    public Member findByIdWhetherDisable(Long id) {
+        Optional<Member> member = memberRepository.findById(id);
         if (member.isPresent()) {
             return member.get();
         } else {
             throw new ApiException(ExceptionEnum.MEMBER_NOT_FOUND);
         }
     }
-    public Boolean existById(Long sourceMemberId) {
-        return memberRepository.existsByIdAndDisableDayIsNull(sourceMemberId);
+    public boolean existById(Long memberId) {
+        return memberRepository.existsByIdAndDisableDayIsNull(memberId);
     }
     public List<Member> findByNicknameContaining(String nickname) {
         return memberRepository.findByNicknameContainingAndDisableDayIsNull(nickname);
     }
-    public Boolean existsByNickname(String nickname) {
-        return memberRepository.existsByNicknameAndDisableDayIsNull(nickname);
+    public boolean existsByNickname(String nickname) {
+        if(nickname.equals("default")) return true;
+        return memberRepository.existsByNickname(nickname);
     }
 
-    public boolean existsByEmail(String email) {
-        return memberRepository.existsByEmailAndDisableDayIsNull(email);
+    public boolean existsByProviderPK(ProviderPK providerPK) {
+        return memberRepository.existsByProviderPK(providerPK);
+    }
+
+    public Member findByProviderPK(ProviderPK providerPK) {
+        return memberRepository.findByProviderPK(providerPK)
+                .orElse(null);
+    }
+
+    public void deleteMember(Member member) {
+        member.deleteMemberInfo();
     }
 }

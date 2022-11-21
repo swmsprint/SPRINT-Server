@@ -15,5 +15,7 @@ public interface StatisticsRepository extends JpaRepository<Statistics,Long> {
     List<Statistics> findAllByStatisticsTypeAndMemberId(StatisticsType statisticsType, long memberId);
     List<Statistics> findAllByStatisticsTypeAndMemberIdAndTimeBetween(StatisticsType statisticsType, long memberId, Timestamp startTime, Timestamp endTime);
     Statistics findByStatisticsTypeAndMemberIdAndTimeBetween(StatisticsType statisticsType, long id, Timestamp startTime, Timestamp endTime);
+
+    List<Statistics> findByStatisticsTypeAndMemberId(StatisticsType totally, Long memberID);
 }
 

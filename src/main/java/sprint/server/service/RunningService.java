@@ -8,15 +8,18 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sprint.server.controller.datatransferobject.request.FinishRunningRequest;
-import sprint.server.domain.friends.FriendState;
+import sprint.server.domain.friend.FriendState;
 import sprint.server.domain.member.Member;
 import sprint.server.domain.Running;
 import sprint.server.domain.RunningRawData;
-import sprint.server.repository.FriendsRepository;
+import sprint.server.repository.FriendRepository;
 import sprint.server.repository.MemberRepository;
 import sprint.server.repository.RunningRepository;
 
+import javax.xml.crypto.Data;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -25,17 +28,29 @@ public class RunningService {
 
     private final MemberRepository memberRepository;
     private final RunningRepository runningRepository;
-    private final FriendsRepository friendsRepository;
 
 
     public Optional<Running> findOne(Long runningId){
         return runningRepository.findById(runningId);
     }
     @Transactional
-    public Long addRun(Member member, String startTime){
+    public Long addRun(Member member, String startTime) {
+        SimpleDateFormat simpleFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
+        Date data = null;
+        try {
+           data = simpleFormat.parse(new StringTokenizer(startTime,"Z").nextToken());
+
+        } catch (ParseException e){
+            e.printStackTrace();
+        }
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(data);
+        calendar.add(Calendar.HOUR_OF_DAY,9);
 
         Running running = createRunning(member);
-        running.setStartTime(Timestamp.valueOf(new StringTokenizer(startTime,"Z").nextToken()));
+
+        running.setStartTime(new Timestamp(calendar.getTimeInMillis()));
         runningRepository.save(running);
 
         return running.getId();
@@ -44,27 +59,24 @@ public class RunningService {
 
 
     @Transactional
-    public Running finishRunning(FinishRunningRequest request) throws JsonProcessingException {
+    public Running finishRunning(FinishRunningRequest request)  {
 
         Running running = runningRepository.findById(request.getRunningId()).get();
         Member member = memberRepository.findById(request.getUserId()).get();
 
         double distance = calculateTotalDistance(request.getRunningData());
         float weight = member.getWeight();
-        double energy = calculateEnergy(weight, request.getDuration(), distance);
-        ObjectMapper mapper = new ObjectMapper();
+        double energy = calculateEnergy(weight, request.getDuration(), request.getDistance());
 
         running.setEnergy(energy);
         running.setWeight(weight);
         running.setDuration(request.getDuration());
-        running.setDistance(distance);
+        running.setDistance(request.getDistance());
         running.setRunningRawDataList(request.getRunningData());
 
         for(RunningRawData data : request.getRunningData()){
             data.setRunning(running);
         }
-//        running.setRawData(mapper.writeValueAsString(request.getRunningData()));
-
         return running;
     }
 
@@ -75,15 +87,26 @@ public class RunningService {
     }
 
 
-    public Page<Running> fetchPersonalRunningPages(Integer pageNumber, Long memberId){
-        Member loginMember = memberRepository.findById(memberId).get();
+    /**
+     * 개인 러닝 기록을 가져오는 메소드
+     * @param pageNumber
+     * @param loginMember
+     * @return
+     */
+    public Page<Running> fetchPersonalRunningPages(Integer pageNumber, Member loginMember){
         List<Member> allMembers = new ArrayList<>(Arrays.asList(loginMember));
         return fetchRunningPages(pageNumber,allMembers,3);
     }
-    public Page<Running> fetchPublicRunningPages(Integer pageNumber, Long memberId){
-        Member loginMember = memberRepository.findById(memberId).get();
-        List<Member> allMembers = findFriendsAndLoginMemberList(memberId,loginMember);
-        return fetchRunningPages(pageNumber,allMembers,6);
+
+
+    /**
+     * 친구 및 회원의 러닝 기록을 가져오는 메소드
+     * @param pageNumber
+     * @param allMembers
+     * @return
+     */
+    public Page<Running> fetchPublicRunningPages(Integer pageNumber, List<Member> allMembers){
+        return fetchRunningPages(pageNumber,allMembers,3);
     }
 
     public Page<Running> fetchRunningPages(Integer pageNumber, List<Member> allMembers,int size) {
@@ -91,14 +114,6 @@ public class RunningService {
         return runningRepository.findByMemberInOrderByIdDesc(allMembers, pageRequest);
     }
 
-    public List<Member> findFriendsAndLoginMemberList(Long memberId, Member loginMember) {
-        List<Member> allMembers = memberRepository.findAllById(friendsRepository.findBySourceMemberIdAndEstablishState(memberId, FriendState.ACCEPT)
-                .stream()
-                .map(friends -> friends.getTargetMemberId())
-                .collect(java.util.stream.Collectors.toList()));
-        allMembers.add(loginMember);
-        return allMembers;
-    }
     /**
      *
      * @param rowData 경도, 위도, 고도, 시간 등의 데이터가 저장되어있음

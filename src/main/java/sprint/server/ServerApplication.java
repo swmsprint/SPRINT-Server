@@ -1,19 +1,24 @@
 package sprint.server;
 
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import sprint.server.domain.Running;
 
-import java.sql.Timestamp;
-import java.util.StringTokenizer;
+import javax.annotation.PostConstruct;
+import java.util.TimeZone;
 
-@SpringBootApplication
 @EnableScheduling
+@EnableBatchProcessing
+@SpringBootApplication
+@EnableJpaAuditing
 public class ServerApplication {
-
+    @PostConstruct
+    public void started() {
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
+    }
     public static void main(String[] args) {
         SpringApplication.run(ServerApplication.class, args);
     }
-
 }
