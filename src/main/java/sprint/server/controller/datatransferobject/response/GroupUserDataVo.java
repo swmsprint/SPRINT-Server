@@ -3,6 +3,8 @@ package sprint.server.controller.datatransferobject.response;
 import lombok.Data;
 import sprint.server.domain.member.Member;
 
+import java.util.Comparator;
+
 @Data
 public class GroupUserDataVo {
     private Long id;
@@ -22,4 +24,6 @@ public class GroupUserDataVo {
         this.totalSeconds = statisticsInfoVO.getTotalSeconds();
         this.energy = statisticsInfoVO.getEnergy();
     }
+
+    public static final Comparator<GroupUserDataVo> COMPARE_BY_NICKNAME = Comparator.comparing(o -> o.distance, Comparator.reverseOrder());
 }

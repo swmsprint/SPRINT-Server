@@ -13,6 +13,7 @@ import sprint.server.domain.groupmember.GroupMemberState;
 import sprint.server.domain.member.Member;
 import sprint.server.repository.GroupMemberRepository;
 import sprint.server.repository.GroupRepository;
+import sprint.server.repository.MemberRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,7 @@ public class GroupService {
     private final MemberService memberService;
     private final GroupRepository groupRepository;
     private final GroupMemberRepository groupMemberRepository;
+    private final MemberRepository memberRepository;
 
     /**
      * 그룹 만들기
@@ -202,6 +204,18 @@ public class GroupService {
     }
 
     /**
+     * 요청받은 그룹 가입 목록 검색
+     * @param group
+     * @return
+     */
+    public List<Member> findRequestMemberByGroup(Groups group) {
+        List<GroupMember> groupMemberList = groupMemberRepository.findGroupRequestByGroupId(group.getId());
+        return groupMemberList.stream().map(gm -> memberRepository.findById(gm.getMemberId()).get())
+                        .filter(gm->gm.getDisableDay() == null)
+                                .collect(Collectors.toList());
+    }
+
+    /**
      * 그룹원 조회 (group, member)
      * @param group : group
      * @param member : member
@@ -224,7 +238,9 @@ public class GroupService {
      * @return
      */
     public List<GroupMember> findJoinedGroupMemberByMember(Member member) {
-        return groupMemberRepository.findJoinedGroupByMemberId(member.getId());
+        return groupMemberRepository.findJoinedGroupByMemberId(member.getId())
+                .stream().filter(groupMember -> groupRepository.findById(groupMember.getGroupId()).get().getIsDeleted().equals(false))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -249,18 +265,20 @@ public class GroupService {
     public List<Groups> findAllJoinedGroupByMember(Member member) {
         List<GroupMember> groupMemberList = findJoinedGroupMemberByMember(member);
         return groupMemberList.stream()
+                .filter(groupMember -> groupRepository.findById(groupMember.getGroupId()).get().getIsDeleted().equals(false))
                 .map(groupMember->findGroupByGroupId(groupMember.getGroupMemberId().getGroupId()))
                 .collect(Collectors.toList());
     }
 
     /**
-     * 요청 보낸 모든 GroupMember 조회
+     * 요청 보낸 모든 Group 조회
      * @param member : member
      * @return
      */
     public List<Groups> findRequestGroupMemberByMember(Member member) {
         List<GroupMember> groupMemberList = groupMemberRepository.findByMemberIdAndState(member.getId(), GroupMemberState.REQUEST);
         return groupMemberList.stream()
+                .filter(groupMember -> groupRepository.findById(groupMember.getGroupId()).get().getIsDeleted().equals(false))
                 .map(groupMember -> findGroupByGroupId(groupMember.getGroupId()))
                 .collect(Collectors.toList());
     }
@@ -274,6 +292,7 @@ public class GroupService {
         log.info("Group ID : {}, 모든 그룹원 정보 요청", group.getId());
         return groupMemberRepository.findAllMemberByGroupId(group.getId())
                 .stream()
+                .filter(groupMember -> memberRepository.findById(groupMember.getMemberId()).get().getDisableDay() == null)
                 .map(gm -> memberService.findById(gm.getMemberId()))
                 .collect(Collectors.toList());
     }

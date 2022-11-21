@@ -57,6 +57,31 @@ public class GroupsApiController {
         return new GroupListResponse(result.size(), result);
     }
 
+    @ApiOperation(value="내가 요청한 그룹 목록 검색")
+    @GetMapping("/list/{userId}/request")
+    public GroupListResponse<MyGroupInfoVo> findGroupsRequestByUserId(@PathVariable Long userId) {
+        log.info("ID : {}, 가입 요청한 그룹 목록 검색", userId);
+        Member member = memberService.findById(userId);
+        List<MyGroupInfoVo> result = groupService.findRequestGroupMemberByMember(member)
+                .stream()
+                .map(groups -> new MyGroupInfoVo(
+                        groupService.findGroupByGroupId(groups.getId()), GroupMemberState.REQUEST))
+                .sorted(MyGroupInfoVo.COMPARE_BY_ISLEADER)
+                .collect(Collectors.toList());
+        log.info("ID : {}, 가입 요청한 그룹 목록 검색 완료, 결과 : {}개 발견", userId, result.size());
+        return new GroupListResponse(result.size(), result);
+    }
+
+    @ApiOperation(value="요청받은 그룹 가입 목록 검색")
+    @GetMapping("/list/{groupId}/requested")
+    public FindMembersResponseDto<FindFriendsResponseVo> findRequestMemberByGroup(@PathVariable Integer groupId) {
+        log.info("Group ID : {}, 가입 요청한 회원 목록 검색", groupId);
+        Groups group = groupService.findGroupByGroupId(groupId);
+        List<Member> memberList = groupService.findRequestMemberByGroup(group);
+        List<FindFriendsResponseVo> result = memberList.stream().map(FindFriendsResponseVo::new).collect(Collectors.toList());
+        return new FindMembersResponseDto(result.size(), result);
+    }
+
     @ApiOperation(value="전체 그룹 목록 검색", notes="그룹 이름 기준, LIKE연산\nstate는 \"LEADER\", \"MEMBER\", \"NOT_MEMBER\", \"REQUEST\" 중 하나로 응답.")
     @GetMapping("/list")
     public GroupListResponse<GroupInfoVo> findGroupsByGroupName(@RequestParam Long userId, @RequestParam String target) {
@@ -147,7 +172,8 @@ public class GroupsApiController {
         Groups group = groupService.findGroupByGroupId(groupId);
         List<Member> memberList = groupService.findAllMemberByGroup(group);
         List<GroupUserDataVo> groupUserDataVoList = memberList.stream()
-                .map(m -> new GroupUserDataVo(m, statisticsService.findDailyStatistics(m.getId(), Calendar.getInstance())))
+                .map(m -> new GroupUserDataVo(m, statisticsService.findWeeklyStatistics(m.getId(), Calendar.getInstance())))
+                .sorted(GroupUserDataVo.COMPARE_BY_NICKNAME)
                 .collect(Collectors.toList());
         log.info("Group ID : {}, 모든 그룹원 정보 불러오기 완료", groupId);
         return new FindMembersResponseDto(groupUserDataVoList.size(), groupUserDataVoList);

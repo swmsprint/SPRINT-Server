@@ -28,7 +28,6 @@ public class RunningService {
 
     private final MemberRepository memberRepository;
     private final RunningRepository runningRepository;
-    private final FriendRepository friendRepository;
 
 
     public Optional<Running> findOne(Long runningId){

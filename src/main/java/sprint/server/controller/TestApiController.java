@@ -17,7 +17,7 @@ public class TestApiController {
     @GetMapping("/")
     public String getEnv() {
         List<String> profile = Arrays.asList(env.getActiveProfiles());
-        List<String> realProfiles = Arrays.asList("dev","dev_release_login", "release", "release_login8081", "release_login8082");
+        List<String> realProfiles = Arrays.asList("dev","dev_release_login", "release", "release_login8081", "release_loginecs8081");
         String defaultProfile = profile.isEmpty() ? "default" : profile.get(0);
 
         return profile.stream()
@@ -25,7 +25,7 @@ public class TestApiController {
                 .findAny()
                 .orElse(defaultProfile);
     }
-    @GetMapping("/user/test")
+    @GetMapping("/user/test6")
     public String test1() {
         return "test";
     }

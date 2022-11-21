@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import sprint.server.controller.datatransferobject.request.*;
 import sprint.server.controller.datatransferobject.response.*;
+import sprint.server.controller.exception.ApiException;
+import sprint.server.controller.exception.ExceptionEnum;
 import sprint.server.domain.friend.FriendState;
 import sprint.server.domain.member.Member;
 import sprint.server.service.BlockService;
@@ -94,9 +96,18 @@ public class UserApiController {
     @PutMapping("/{userId}")
     public BooleanResponse modifyMembers(@PathVariable Long userId, @RequestBody @Valid MemberInfoDto request) {
         log.info("회원 정보 변경");
-        Member member = memberService.findById(userId);
+        Member member = memberService.findByIdWhetherDisable(userId);
+        memberService.activateMember(member);
         log.info("ID: {}, 회원 정보 변경 요청", member.getId());
+        if (member.getNickname() != null && !member.getNickname().equals(request.getNickname()) && memberService.existsByNickname(request.getNickname())) throw new ApiException(ExceptionEnum.MEMBER_DUPLICATE_NICKNAME);
         return new BooleanResponse(memberService.modifyMembers(member, request));
+    }
+
+    @ApiOperation(value="멤버 정보")
+    @GetMapping("/{userId}")
+    public MemberInfoDto getMemberInfo(@PathVariable Long userId) {
+        Member member = memberService.findById(userId);
+        return new MemberInfoDto(member);
     }
 
     @ApiOperation(value="중복 닉네임 확인", notes="Example: http://localhost:8080/user-management/users?target=test")

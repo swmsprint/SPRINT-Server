@@ -32,10 +32,6 @@ public class MemberService {
 
     @Transactional
     public Boolean modifyMembers(Member member, MemberInfoDto request) {
-        if(existsByNickname(request.getNickname())) {
-            log.error("동일 이름 회원이 존재합니다.");
-            throw new ApiException(ExceptionEnum.MEMBER_DUPLICATE_NICKNAME);
-        }
         member.changeMemberInfo(request.getNickname(), request.getGender(), request.getBirthday(), request.getHeight(), request.getWeight(), request.getPicture());
         return true;
     }
