@@ -66,13 +66,12 @@ public class RunningService {
 
         double distance = calculateTotalDistance(request.getRunningData());
         float weight = member.getWeight();
-        double energy = calculateEnergy(weight, request.getDuration(), distance);
-        ObjectMapper mapper = new ObjectMapper();
+        double energy = calculateEnergy(weight, request.getDuration(), request.getDistance());
 
         running.setEnergy(energy);
         running.setWeight(weight);
         running.setDuration(request.getDuration());
-        running.setDistance(distance);
+        running.setDistance(request.getDistance());
         running.setRunningRawDataList(request.getRunningData());
 
         for(RunningRawData data : request.getRunningData()){
