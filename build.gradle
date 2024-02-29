@@ -39,6 +39,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
     implementation 'io.springfox:springfox-boot-starter:3.0.0'
+    implementation('io.netty:netty-resolver-dns-native-macos:4.1.72.Final:osx-aarch_64')
 }
 
 configurations {
